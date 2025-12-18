@@ -22,15 +22,14 @@ function Navbar() {
           <div className='hidden md:flex items-center space-x-4'>
             {session ? (
               <>
+              
                 <Link href='/' className='font-bold text-md text-white'>
                   Subjects
                 </Link>
+
                 <Link href='/dashboard' className='font-bold text-md text-white'>
                   Dashboard
                 </Link>
-                {/* <button onClick={handleSignout}>
-                  logout
-                </button> */}
 
                 <LogoutButton/>
                
