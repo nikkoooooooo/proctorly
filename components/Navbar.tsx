@@ -22,15 +22,17 @@ function Navbar() {
           <div className='hidden md:flex items-center space-x-4'>
             {session ? (
               <>
-
-                <Link href='/' className='font-bold text-md text-white'>
-                  Subjects
-                </Link>
-
                 <Link href='/dashboard' className='font-bold text-md text-white'>
                   Dashboard
                 </Link>
 
+                <Link 
+                href='/create-quiz' 
+                className={`bg-blue-500 text-background p-2 rounded-lg font-semibold`}>
+                  + Create Quiz
+                </Link>
+
+                
                 <LogoutButton/>
                
               </>

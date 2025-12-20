@@ -2,46 +2,76 @@
 
 import { headers } from "next/headers";
 import { auth } from "./auth";
-import { Session } from "better-auth";
+import { redirect } from "next/navigation";
 
 
 
+export async function getSession() {
+  const result = await auth.api.getSession({
+    headers: await headers()
+  })
+  
+  return result?.session ?? null;
+}
 
+export async function signIn() {
+   const result = await auth.api.signInSocial({
+    body: {
+      provider: "google",
+      callbackURL: "/dashboard"
+    }
+   })
+
+   if (result.url) {
+    redirect(result.url)
+   }
+
+  };
+
+
+
+export async function signOut() {
+  const result = await auth.api.signOut({
+    headers: await headers()
+  })
+
+  return result;
+}
 /**
  * Get the current session (can be null if not logged in)
  */
-export const getSession = async (): Promise<Session | null> => {
-  try {
-    const sessionData = await auth.api.getSession({
-      headers: await headers(),
-    });
+// export const getSessions = async (): Promise<Session | null> => {
+//   try {
+//     const sessionData = await auth.api.getSession({
+//       headers: await headers(),
+//     });
 
-    // sessionData?.session is the actual session object
-    return sessionData?.session ?? null;
-  } catch (err) {
-    console.error("Failed to get session:", err);
-    return null;
-  }
-};
+//     // sessionData?.session is the actual session object
+//     return sessionData?.session ?? null;
+//   } catch (err) {
+//     console.error("Failed to get session:", err);
+//     return null;
+//   }
+// };
 
 /**
  * Require a session (throw error if not logged in)
  * Useful for protected pages or API routes
  */
-export const requireSession = async (): Promise<Session> => {
-  const session = await getSession();
+// export const requireSession = async (): Promise<Session> => {
+//   const session = await getSession();
 
-  if (!session) {
-    throw new Error("Unauthorized: no active session found");
-  }
+//   if (!session) {
+//     throw new Error("Unauthorized: no active session found");
+//   }
 
-  return session;
-};
+//   return session;
+// };
 
 /**
  * Sign out the current session
  */
-export const signOut = async (): Promise<void> => {
+export const signOutt = async (): Promise<void> => {
   try {
     await auth.api.signOut({
       headers: await headers(),
