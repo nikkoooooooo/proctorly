@@ -13,7 +13,7 @@ function Navbar() {
 
 
   return (
-    <div className='w-full border-b border-slate-700 shadow-large bg-[#1e293b]'>
+    <div className='w-full border-b border-slate-700 shadow-large bg-secondary'>
       <div className='max-w-7xl mx-auto px-4'>
         <div className='flex items-center justify-between h-20'>
           {/* Logo */}
@@ -31,7 +31,7 @@ function Navbar() {
 
                 <Link 
                 href='/create-quiz' 
-                className={`bg-blue-500 text-background p-2 rounded-lg font-semibold`}>
+                className={`bg-blue-500 text-white p-2 rounded-lg font-semibold`}>
                   + Create Quiz
                 </Link>
 
@@ -95,7 +95,7 @@ function Navbar() {
 
                     <Link
                       href="/create-quiz"
-                      className="block bg-blue-500 text-background px-4 py-2 rounded-lg font-semibold"
+                      className="block bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold"
                       onClick={() => SetIsMenuOpen(false)}
                     >
                       + Create Quiz
