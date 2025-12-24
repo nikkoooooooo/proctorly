@@ -17,7 +17,7 @@ function Navbar() {
       <div className='max-w-7xl mx-auto px-4'>
         <div className='flex items-center justify-between h-20'>
           {/* Logo */}
-          <Link href='/' className='font-bold text-4xl text-blue-500'>
+          <Link href='/' className='font-bold text-4xl text- '>
             Proctorly
           </Link>
 
