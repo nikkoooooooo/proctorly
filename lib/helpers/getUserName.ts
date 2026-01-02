@@ -1,5 +1,5 @@
-import { db } from "./db";
-import { session, user } from "./schema";
+import { db } from "../db";
+import { session, user } from "../schema";
 import { eq } from "drizzle-orm/expressions";
 
 // sessionId could come from getSession() in Better Auth

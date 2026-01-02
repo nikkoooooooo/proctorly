@@ -28,8 +28,8 @@ function QuizPage() {
           
         </div>
          <QuizCard
-        title="Quiz of the century tuna"
-        choices="yes"
+        question="Quiz of the century tuna"
+        choices="I love building things"
         />
       </div>
     </div>

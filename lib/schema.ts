@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index , integer} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -72,6 +72,66 @@ export const verification = pgTable(
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+
+export const quiz = pgTable("quiz", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  joinCode: text("join_code").notNull().unique(),
+
+  creatorId: text("creator_id")
+    .notNull()
+    .references(() => user.id), // 👈 connects quiz → user
+
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+
+export const question = pgTable("question", {
+  id: text("id").primaryKey(),
+  quizId: text("quiz_id")
+    .notNull()
+    .references(() => quiz.id), // 👈 question belongs to quiz
+
+  text: text("text").notNull(),
+  type: text("type").notNull(), // "mcq" | "true-false" | "identification"
+});
+
+
+export const option = pgTable("option", {
+  id: text("id").primaryKey(),
+
+  questionId: text("question_id")
+    .notNull()
+    .references(() => question.id), // 👈 option belongs to question
+
+  text: text("text").notNull(),
+  isCorrect: boolean("is_correct").default(false),
+});
+
+
+export const attempt = pgTable("attempt", {
+  id: text("id").primaryKey(),
+
+  quizId: text("quiz_id")
+    .notNull()
+    .references(() => quiz.id), // 👈 attempted quiz
+
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id), // 👈 student who attempted
+
+  score: integer("score"),
+  startedAt: timestamp("started_at").defaultNow(),
+  submittedAt: timestamp("submitted_at"),
+});
+
+
+
+
+
+
+
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),

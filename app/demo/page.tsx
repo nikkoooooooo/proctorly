@@ -126,10 +126,8 @@ export default function CreateQuizPage() {
     if (!title) return alert("Quiz title cannot be empty");
     if (questions.length === 0) return alert("Add at least one question");
 
-    
-
     try {
-      const quizId = await createQuiz(userId, title, questions, );
+      const quizId = await createQuiz(userId, title, questions);
       alert(`Quiz created! ID: ${quizId}`);
       setTitle("");
       setQuestions([]);
@@ -285,7 +283,7 @@ export default function CreateQuizPage() {
         </button>
       </div>
 
-      <button className="w-full bg-primary p-3 font-semibold rounded-md" type="submit">Create Quiz</button>
+      <button className="w-full" type="submit">Create Quiz</button>
 
     </form>
     </div>
