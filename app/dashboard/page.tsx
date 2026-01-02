@@ -23,6 +23,8 @@ function dashboard() {
       const [userCreatedQuiz, setUserCreatedQuiz] = useState<any[]>([])
       const [quizCreatorName, setQuizCreatorName] = useState<string>("")
 
+      const totalQuizCreated = userCreatedQuiz.length
+
       useEffect(() => {
         const fetchUser = async () => {
             const session = await getSession()
@@ -111,7 +113,7 @@ function dashboard() {
             <div className="w-full flex justify-between flex-col lg:flex-row gap flex-wrap">
                     <QuizStatCard 
                         title={"My Quizzes"}
-                        value={6}
+                        value={totalQuizCreated}
                     />
 
                      <QuizStatCard 
