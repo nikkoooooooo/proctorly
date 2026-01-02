@@ -8,10 +8,10 @@ interface QuizStatCardProp {
 
 function QuizStatCard({title, value}: QuizStatCardProp) {
   return (
-    <div className='card mt-10 py-5 pl-4 pr-50 '>
-        <div className='flex flex-col gap-4'>
-            <h3 className='text-muted'>{title}</h3>
-            <p className='text-4xl font-semibold'>{value}</p>
+    <div className='card mt-5 py-1 pl-4 pr-50 w-full'>
+        <div className='flex gap-2 w-80'>
+            <h3 className='text-muted text-xl'>{title}:</h3>
+            <p className='text-xl font-semibold'>{value}</p>
         </div> 
     </div>
   )

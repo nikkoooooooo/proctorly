@@ -1,57 +1,69 @@
 "use client"
 
-import JoinQuizInput from "@/components/JoinQuizInput";
 import QuizStatCard from "@/components/QuizStatCard";
 import { getSession } from "@/lib/auth-actions"
-import { getUserName } from "@/lib/actions/getUserName";
-import { useState, useEffect, use} from "react"
+import { getUserName, getUserNameFromQuizAction } from "@/lib/actions/getUserName";
+import { getUserQuizAction } from "@/lib/actions/getUserQuizAction";
+import { useState, useEffect } from "react"
 import getQuizThroughCodeAction from "@/lib/actions/getQuizThroughCodeAction";
-import { Divide } from "lucide-react";
-
-
+import { deleteQuizAction } from "@/lib/actions/deleteQuizAction";
 interface Quiz{
     title: string,
     joinCode: string
+    
 }
+
+
 
 function dashboard() {
       const [userName, setUserName] = useState<string | null>("username")
       const [session, setSession] = useState<any>("")
       const [code, setCode] = useState<string>("")
-      const [quiz, setQuiz] = useState<Quiz | null>(null)
+      const [joinQuiz, setJoinQuiz] = useState<Quiz | null>(null)
+      const [userCreatedQuiz, setUserCreatedQuiz] = useState<any[]>([])
       const [quizCreatorName, setQuizCreatorName] = useState<string>("")
 
       useEffect(() => {
         const fetchUser = async () => {
             const session = await getSession()
             if (session) {
+                const userCreatedQuiz = await getUserQuizAction(session.userId)
                 setSession(session)
                 setUserName(await getUserName(session.id))
+                setUserCreatedQuiz(userCreatedQuiz)
                 
             }
         }
         fetchUser()
       },[])
 
-    // const session = await getSession()
-
-    // let userName: string | null = null;
-
-    // if (session) {
-    //     userName = await getUserNameFromSession(session.id);
-    // }
 
     const findQuizThroughCode = async () => {
         const quiz = await getQuizThroughCodeAction(code)
-        setQuiz(quiz)
+        const username = await getUserNameFromQuizAction(quiz.id)
+        setQuizCreatorName(username)
+        setJoinQuiz(quiz)
 
-        // if (quiz) {
-        //     setQuizCreatorName(await getUserName(quiz.creatorId))
-        // }
+    }
+
+    const deleteQuiz = async (quizId: string) => {
+        const confirmDelete = confirm("Are you sure you want to delete this quiz?");
+        if (!confirmDelete) return;
+
+
+        try {
+            await deleteQuizAction(quizId)
+
+            setUserCreatedQuiz(prev => prev.filter(q => q.id !== quizId))
+
+        } catch (err) {
+            console.error("Failed to delete quiz:", err);
+            alert("Failed to delete quiz");
+        }
     }
 
   return (
-    <div className="bg-background min-h-screen flex flex-col w-full  items-center">
+    <div className="bg-background min-h-screen flex flex-col w-full items-center space-y-6">
         <div className="max-w-7xl w-full px-4">
             <div className="mt-5 flex flex-col gap-2">
                 {session ? (<><p className="text-white">test, there is a session</p></>) : 
@@ -83,30 +95,18 @@ function dashboard() {
 
             {/* {error && <p className="text-red-500">{error}</p>} */}
 
-            {quiz && (
+            {joinQuiz && (
                 <div className="p-4 mt-4 border rounded flex justify-between">
                     <div>
-                        <h3 className="font-semibold">{quiz.title}</h3>
-                        <p>Code: {quiz.joinCode}</p>
-                        {/* <p>{quizCreatorName}</p> */}
-                        <p>By: Christian Tumamao</p>
+                        <h3 className="font-semibold">{joinQuiz.title}</h3>
+                        <p>Code: {joinQuiz.joinCode}</p>
+                        <p>By: {quizCreatorName}</p>
                     </div>
                 
                     <button className="bg-primary p-2 rounded-md">Join Quiz</button>
                 </div>
             )}
 
-
-            {/* {quiz ? ( <div className="p-4 mt-4 border rounded flex justify-between">
-                    <div>
-                        <h3 className="font-semibold">{quiz.title}</h3>
-                        <p>{quiz.joinCode}</p>
-                        {/* <p>{quizCreatorName}</p> */}
-                        {/* <p>hhh</p>
-                    </div>
-                
-                    <button className="bg-primary p-2 rounded-md">Join Quiz</button>
-                </div>) : <div><p>No Quiz Found</p></div>} */}
 
             <div className="w-full flex justify-between flex-col lg:flex-row gap flex-wrap">
                     <QuizStatCard 
@@ -123,8 +123,98 @@ function dashboard() {
                         title={"Total"}
                         value={12}
                     />
+            </div>
+
+            {/* Created by user Quizzes */}
+            <div className="w-full">
+                <div className="my-5 flex gap-2 items-center">
+                    <h2 className="text-2xl font-semibold text-white">My Quizzes</h2>
+                    <span 
+                        className="bg-[#3b82f630] text-primary p-2 font-semibold rounded-md">
+                        Creator
+                    </span>
+                </div>
+
+                {userCreatedQuiz.length > 0 ? (
+                    userCreatedQuiz.map((quiz, i) => (
+                    <div className="card w-full h-auto p-5 mb-4" key={i}>
+                        <div className="flex justify-between items-center gap-10">
+                            <div className="flex gap-2 items-center">
+                                <h3 
+                                className="text-white text-lg font-semibold p-0 m-0">
+                                    {quiz.title}
+                                </h3>
+
+                                <span 
+                                className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">
+                                    {quiz.joinCode}
+                                </span>
+                            </div>
+
+                            <div>
+                                <button 
+                                    onClick={() => deleteQuiz(quiz.id)}
+                                    className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
 
 
+                        <div className="mt-2">
+                            <p className="text-muted mb-2">
+                                This is quiz for module 4, About conditional loops in Prog 1
+                            </p>
+                            <p className="text-muted">📝3 Questions</p>
+                        </div>
+                    </div>
+                ))
+                ): (
+                    <p>no quizzes found</p>
+                )}
+
+            </div>
+
+
+            {/* JOINED QUIZZES CARD */}
+            <div className="w-full mb-10">
+                <div className="my-5 flex gap-2 items-center">
+                    <h2 className="text-2xl font-semibold text-white">Joined Quizzes</h2>
+                    <span 
+                        className="bg-gray-700 text-white p-2 font-semibold rounded-md">
+                        Participant
+                    </span>
+                </div>
+
+                <div className="card w-full h-auto p-5">
+                    <div className="flex justify-between items-center gap-10">
+                        <div className="flex flex-col gap-2 items-start flex-nowrap">
+                            <h3 
+                            className="text-white text-lg font-semibold p-0 m-0">
+                                Python Programming Fundamentals
+                            </h3>
+
+                            <span 
+                            className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">
+                                Q2D5T0
+                            </span>
+                        </div>
+
+                        <div className="flex gap-2 h-auto w-40">
+                            <button className="bg-primary p-1 w-40 rounded-md font-semibold cursor-pointer">Take Quiz</button>
+                            <button className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer">Leave</button>
+                        </div>
+                    </div>
+
+
+                    <div className="mt-2">
+                        <p className="text-muted mb-2">
+                            This is quiz for module 4, About conditional loops in Prog 1
+                        </p>
+                        <p className="text-muted">📝3 Questions</p>
+                    </div>
+                </div>
             </div>
 
             

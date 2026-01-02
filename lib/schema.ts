@@ -91,7 +91,7 @@ export const question = pgTable("question", {
   id: text("id").primaryKey(),
   quizId: text("quiz_id")
     .notNull()
-    .references(() => quiz.id), // 👈 question belongs to quiz
+    .references(() => quiz.id, { onDelete: "cascade" }), // 👈 question belongs to quiz
 
   text: text("text").notNull(),
   type: text("type").notNull(), // "mcq" | "true-false" | "identification"
@@ -103,7 +103,7 @@ export const option = pgTable("option", {
 
   questionId: text("question_id")
     .notNull()
-    .references(() => question.id), // 👈 option belongs to question
+    .references(() => question.id, { onDelete: "cascade" }), // 👈 option belongs to question
 
   text: text("text").notNull(),
   isCorrect: boolean("is_correct").default(false),
