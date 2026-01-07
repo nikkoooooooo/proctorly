@@ -7,9 +7,14 @@ import { getUserQuizAction } from "@/lib/actions/getUserQuizAction";
 import { useState, useEffect } from "react"
 import getQuizThroughCodeAction from "@/lib/actions/getQuizThroughCodeAction";
 import { deleteQuizAction } from "@/lib/actions/deleteQuizAction";
+import  { joinQuizAction }  from "@/lib/actions/joinQuizAction"
+import { getUserJoinedQuizAction } from "@/lib/actions/getUserJoinedQuizAction";
+import Link from "next/link";
+
 interface Quiz{
     title: string,
-    joinCode: string
+    joinCode: string,
+    id: string
     
 }
 
@@ -21,18 +26,23 @@ function dashboard() {
       const [code, setCode] = useState<string>("")
       const [joinQuiz, setJoinQuiz] = useState<Quiz | null>(null)
       const [userCreatedQuiz, setUserCreatedQuiz] = useState<any[]>([])
+      const [userJoinedQuiz, setUserJoinedQuiz] = useState<any[]>([])
       const [quizCreatorName, setQuizCreatorName] = useState<string>("")
 
       const totalQuizCreated = userCreatedQuiz.length
+      const totalQuizJoined = userJoinedQuiz.length
+      const totalQuizzes = totalQuizCreated + totalQuizJoined
 
       useEffect(() => {
         const fetchUser = async () => {
             const session = await getSession()
             if (session) {
-                const userCreatedQuiz = await getUserQuizAction(session.userId)
+                const userCreatedQuizzes = await getUserQuizAction(session.userId)
+                const userJoinedQuizzes = await getUserJoinedQuizAction(session.userId)
                 setSession(session)
                 setUserName(await getUserName(session.id))
-                setUserCreatedQuiz(userCreatedQuiz)
+                setUserCreatedQuiz(userCreatedQuizzes)
+                setUserJoinedQuiz(userJoinedQuizzes)
                 
             }
         }
@@ -64,6 +74,19 @@ function dashboard() {
         }
     }
 
+
+    const handleJoinQuiz = async () => {
+
+        if (joinQuiz) {
+            try {
+                await joinQuizAction(joinQuiz?.id, session.userId )
+                alert("successfully join")
+            } catch (error) {
+                alert("Cant Join Quiz")
+            }
+        } 
+    }   
+
   return (
     <div className="bg-background min-h-screen flex flex-col w-full items-center space-y-6">
         <div className="max-w-7xl w-full px-4">
@@ -89,7 +112,8 @@ function dashboard() {
                             className="bg-background rounded-md w-full py-2 px-2 text-xl"
                             placeholder='ABC123'
                             />
-                        <button className='bg-primary py-2 px-6 rounded-md font-semibold w-32' type="submit">Find Quiz</button>
+                        <button className='bg-primary py-2 px-6 rounded-md 
+                        font-semibold w-32 cursor-pointer hover:bg-blue-400' type="submit">Find Quiz</button>
                     </form>
 
                 </div>
@@ -104,8 +128,10 @@ function dashboard() {
                         <p>Code: {joinQuiz.joinCode}</p>
                         <p>By: {quizCreatorName}</p>
                     </div>
-                
-                    <button className="bg-primary p-2 rounded-md">Join Quiz</button>
+
+                    <form action={handleJoinQuiz}>
+                        <button className="bg-primary p-2 rounded-md" type="submit">Join Quiz</button>
+                    </form>
                 </div>
             )}
 
@@ -118,12 +144,12 @@ function dashboard() {
 
                      <QuizStatCard 
                         title={"Joined Quizzes"}
-                        value={6}
+                        value={totalQuizJoined}
                     />
 
                      <QuizStatCard 
                         title={"Total"}
-                        value={12}
+                        value={totalQuizzes}
                     />
             </div>
 
@@ -166,7 +192,7 @@ function dashboard() {
 
                         <div className="mt-2">
                             <p className="text-muted mb-2">
-                                This is quiz for module 4, About conditional loops in Prog 1
+                                {quiz.description}
                             </p>
                             <p className="text-muted">📝3 Questions</p>
                         </div>
@@ -189,34 +215,47 @@ function dashboard() {
                     </span>
                 </div>
 
-                <div className="card w-full h-auto p-5">
-                    <div className="flex justify-between items-center gap-10">
-                        <div className="flex flex-col gap-2 items-start flex-nowrap">
-                            <h3 
-                            className="text-white text-lg font-semibold p-0 m-0">
-                                Python Programming Fundamentals
-                            </h3>
+                {userJoinedQuiz.length > 0 ? (
+                    userJoinedQuiz.map((quiz, i) => (
+                        <div className="card w-full h-auto p-5 mb-4" key={i}>
+                            <div className="flex justify-between items-center gap-10">
+                                <div className="flex flex-col gap-2 items-start flex-nowrap">
+                                    <h3 
+                                    className="text-white text-lg font-semibold p-0 m-0">
+                                        {quiz.title}
+                                    </h3>
 
-                            <span 
-                            className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">
-                                Q2D5T0
-                            </span>
+                                    <span 
+                                    className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">
+                                        {quiz.joinCode}
+                                    </span>
+                                </div>
+
+                                <div className="flex gap-2 h-auto w-40">
+                                    <Link href={`/quiz/${quiz.id}`}
+                                        className="bg-primary flex justify-center w-40  rounded-md font-semibold cursor-pointer">
+                                        <button 
+                                        >Take Quiz
+                                        </button>
+                                    </Link>
+                                    
+                                    <button className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer">Leave</button>
+                                </div>
+                            </div>
+
+
+                            <div className="mt-2">
+                                <p className="text-muted mb-2">
+                                    {quiz.description}
+                                </p>
+                                <p className="text-muted">📝3 Questions</p>
+                            </div>
                         </div>
+                    ))
+                ) : (
+                    <p>no joined quizzes found</p>
+                )}
 
-                        <div className="flex gap-2 h-auto w-40">
-                            <button className="bg-primary p-1 w-40 rounded-md font-semibold cursor-pointer">Take Quiz</button>
-                            <button className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer">Leave</button>
-                        </div>
-                    </div>
-
-
-                    <div className="mt-2">
-                        <p className="text-muted mb-2">
-                            This is quiz for module 4, About conditional loops in Prog 1
-                        </p>
-                        <p className="text-muted">📝3 Questions</p>
-                    </div>
-                </div>
             </div>
 
             

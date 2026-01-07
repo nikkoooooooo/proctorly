@@ -22,6 +22,8 @@ interface Question {
   text: string
   type: QuestionType
   options: Option[]
+  description: string
+
 }
 
 // Main Create Quiz Page
@@ -51,6 +53,7 @@ export default function CreateQuizPage() {
     return {
       id: uuid(), // unique question ID
       text: "", // empty question text
+      description: "",
       type: "mcq", // default question type
       options: [
         { id: uuid(), text: "", isCorrect: true },
@@ -129,9 +132,10 @@ export default function CreateQuizPage() {
     
 
     try {
-      const quizId = await createQuiz(userId, title, questions, );
+      const quizId = await createQuiz(userId, title, questions, description);
       alert(`Quiz created! ID: ${quizId}`);
       setTitle("");
+      setDescription("");
       setQuestions([]);
     } catch (err) {
       console.error(err);

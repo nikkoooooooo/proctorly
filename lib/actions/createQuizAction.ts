@@ -13,9 +13,14 @@ export async function createQuizAction(
     type: "mcq" | "true-false" | "identification";
     options?: { text: string; isCorrect: boolean }[];
   }[], 
-  creatorId: string
+  creatorId: string,
+  description: string,
+
 ) {
   // Call helper to insert quiz + questions + options
-  const quizId = await createQuiz(creatorId, title, questions);
+  const quizId = await createQuiz(creatorId, title, questions, description );
   return quizId; // return ID for confirmation or redirect
 }
+
+
+

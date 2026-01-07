@@ -27,7 +27,9 @@ export async function createQuiz(
     text: string;
     type: "mcq" | "true-false" | "identification";
     options?: { text: string; isCorrect: boolean }[];
-  }[]
+  }[],
+  description: string,
+
 ) {
   // 1️⃣ Generate a unique ID for the quiz
   // this will create quiz id manually using the uuid
@@ -39,6 +41,7 @@ export async function createQuiz(
   await db.insert(quiz).values({
     id: quizId,
     title,
+    description,
     creatorId,
     joinCode
 

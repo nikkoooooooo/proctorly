@@ -74,36 +74,36 @@ export const verification = pgTable(
 );
 
 
-export const quiz = pgTable("quiz", {
-  id: text("id").primaryKey(),
-  title: text("title").notNull(),
-  joinCode: text("join_code").notNull().unique(),
-
-  creatorId: text("creator_id")
-    .notNull()
-    .references(() => user.id), // 👈 connects quiz → user
+export const quiz = pgTable("quiz", { // TABLE QUIZ
+  id: text("id").primaryKey(), // id for quiz for and this is the PK
+  title: text("title").notNull(), // title for quiz should not be null
+  description: text("description"), // description per quiz
+  joinCode: text("join_code").notNull().unique(), // joinCode for every quizzes should be unique and not null also
+  creatorId: text("creator_id") // creatorId field for the user who created the the quiz
+    .notNull()                  // should not be null so we can know who created the quiz
+    .references(() => user.id), // taking the user.id as a FK, so that we can know who specifically created the quiz
 
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 
-export const question = pgTable("question", {
-  id: text("id").primaryKey(),
-  quizId: text("quiz_id")
-    .notNull()
-    .references(() => quiz.id, { onDelete: "cascade" }), // 👈 question belongs to quiz
+export const question = pgTable("question", { // TABLE QUESTION
+  id: text("id").primaryKey(), // id for question and this is the PK
+  quizId: text("quiz_id") // connecting it to the QUIZ TABLE, so we could know where this question belongs to
+    .notNull()  // is should not be null
+    .references(() => quiz.id, { onDelete: "cascade" }), // refereing the QUIZ ID to connect it to this question / questions belongs to QUIZ
 
-  text: text("text").notNull(),
+  text: text("text").notNull(), // text on question
   type: text("type").notNull(), // "mcq" | "true-false" | "identification"
 });
 
 
 export const option = pgTable("option", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey(),  // id for option and its primary key also
 
-  questionId: text("question_id")
-    .notNull()
-    .references(() => question.id, { onDelete: "cascade" }), // 👈 option belongs to question
+  questionId: text("question_id") // connecting it to the question, since option belong to a question
+    .notNull()  // it should not be null, so that we can know what question this option belongs to
+    .references(() => question.id, { onDelete: "cascade" }), // taking the question ID for FK, so that we could connect this option in the question 
 
   text: text("text").notNull(),
   isCorrect: boolean("is_correct").default(false),
@@ -111,20 +111,42 @@ export const option = pgTable("option", {
 
 
 export const attempt = pgTable("attempt", {
-  id: text("id").primaryKey(),
+  id: text("id").primaryKey(), // per attempt to the quiz
 
-  quizId: text("quiz_id")
-    .notNull()
-    .references(() => quiz.id), // 👈 attempted quiz
+  quizId: text("quiz_id") // taking the id of the quiz that user attempted to answer
+    .notNull() // it should not be null, so that we could know what quiz did he answers
+    .references(() => quiz.id), // passing the id of the quiz the user take
 
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id), // 👈 student who attempted
+  userId: text("user_id")// taking th id of the user who take the quiz 
+    .notNull() // it should not be null, so that we could know who is the user take the quiz
+    .references(() => user.id), // passing the id of the user, that attempted to asnwer
 
-  score: integer("score"),
-  startedAt: timestamp("started_at").defaultNow(),
+  score: integer("score"), // score of the user
+  startedAt: timestamp("started_at").defaultNow(), 
   submittedAt: timestamp("submitted_at"),
 });
+
+
+export const quizEnrollment = pgTable( // table for tracking who joined in the quiz 
+  "quiz_enrollment",
+  {
+    id: text("id").primaryKey(), // id per row
+
+    quizId: text("quiz_id") // taking the quiz id to know what quiz did they joined/enroll
+      .notNull()
+      .references(() => quiz.id, { onDelete: "cascade" }),
+
+    userId: text("user_id") // to know who is the user joined in a quiz
+      .notNull() // should not be null/ so that we know who joined
+      .references(() => user.id, { onDelete: "cascade" }),
+
+    joinedAt: timestamp("joined_at").defaultNow(),
+  },
+  (table) => [
+    index("enrollment_user_quiz_idx").on(table.userId, table.quizId), // this is for fast querying making the db already know who is our target
+  ]
+);
+
 
 
 
