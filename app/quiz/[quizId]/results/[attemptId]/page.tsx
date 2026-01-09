@@ -33,7 +33,7 @@ export default async function ResultPage(props: ResultPageProps) {
       <p className="text-lg text-red-500">Tab Switches: {result.tabSwitchCount}</p>
 
       <div className="mt-6 w-full max-w-md text-center">
-        <p className="mb-10">🎉 Congratulations on completing the quiz!</p>
+        <p className="mb-8">🎉 Congratulations on completing the quiz!</p>
         <Link
             href={"/dashboard"}
             className="mt-10 bg-primary p-2 rounded-md text-white font-semibold"
