@@ -1,0 +1,46 @@
+// app/quiz/[quizId]/results/[attemptId]/page.tsx
+import { getFinalResultsAction } from "@/lib/actions/getFinalResultsAction"
+import Link from "next/link"
+
+interface ResultPageProps {
+  params: {
+    quizId: string
+    attemptId: string
+  }
+}
+
+export default async function ResultPage(props: ResultPageProps) {
+  // ✅ unwrap the params promise
+  const { quizId, attemptId } = await props.params
+
+  let result
+  try {
+    result = await getFinalResultsAction(attemptId)
+  } catch (err) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-xl font-bold text-red-600">Result not found</h2>
+        <p>{(err as Error).message}</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="p-8 flex flex-col items-center gap-4 text-center">
+      <h1 className="text-3xl font-bold">{result.quizTitle}</h1>
+      <p className="text-lg">Created By: {result.quizAuthor}</p>
+      <p className="text-2xl font-semibold">Score: {result.score}</p>
+      <p className="text-lg text-red-500">Tab Switches: {result.tabSwitchCount}</p>
+
+      <div className="mt-6 w-full max-w-md text-center">
+        <p className="mb-10">🎉 Congratulations on completing the quiz!</p>
+        <Link
+            href={"/dashboard"}
+            className="mt-10 bg-primary p-2 rounded-md text-white font-semibold"
+        >
+            Go Back to Dashboard
+        </Link>
+      </div>
+    </div>
+  )
+}

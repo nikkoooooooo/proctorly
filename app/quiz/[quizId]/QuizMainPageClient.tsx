@@ -1,29 +1,46 @@
 "use client"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import QuizCard from "@/components/QuizCard"
+import TimerCard from "@/components/TimerCard"
+import TabSwitchesCard from "@/components/TabSwitchesCard"
+
 import { getQuestionsByQuizIdAction } from "@/lib/actions/getQuestionsByQuizIdAction"
+import { getSession } from "@/lib/auth-actions"
+import { createAttemptAction } from "@/lib/actions/createAttemptAction"
+import { answerAttemptAction } from "@/lib/actions/answerAttemptAction"
+import { saveTabSwitchCountAction } from "@/lib/actions/saveTabSwitchCountAction"
+import { calculateScoreAction } from "@/lib/actions/calculateScoreAction"
+import { getAttemptProgressAction } from "@/lib/actions/getAttemptProgressAction"
 
 interface Option {
   id: string
   text: string
-  isCorrect: boolean | false
+  isCorrect: boolean
 }
 
-interface Questions {
+interface Question {
   id: string
   quizId: string
   text: string
   option: Option[]
+  timeLimit?: number
 }
 
 export default function QuizMainPageClient({ quizId }: { quizId: string }) {
-  const [questions, setQuestions] = useState<Questions[]>([])
-  const [modal, setModal] = useState(true)
-  const [timeLeft, setTimeLeft] = useState(300) // 5 minutes example
-  const [tabSwitches, setTabSwitches] = useState(0)
-  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const router = useRouter()
 
-  // Fetch questions
+  // Main states
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [currentQuestion, setCurrentQuestion] = useState(0)
+  const [selectedChoice, setSelectedChoice] = useState<Option | null>(null)
+  const [attemptId, setAttemptId] = useState("")
+  const [timeLeft, setTimeLeft] = useState(0)
+  const [modal, setModal] = useState(true)
+  const [tabSwitches, setTabSwitches] = useState(0)
+  const [blurScreen, setBlurScreen] = useState(false)
+
+  // 1️⃣ Fetch all questions
   useEffect(() => {
     const fetchQuestions = async () => {
       const data = await getQuestionsByQuizIdAction(quizId)
@@ -32,35 +49,124 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     fetchQuestions()
   }, [quizId])
 
-  // Timer
+  // 2️⃣ Reset timer & selection when question changes
   useEffect(() => {
-    if (modal) return // don't start until modal is closed
+    if (!questions[currentQuestion]) return
+    setTimeLeft(questions[currentQuestion].timeLimit || 30)
+    setSelectedChoice(null)
+  }, [currentQuestion, questions])
+
+  // 3️⃣ Timer countdown
+  useEffect(() => {
+    if (modal || timeLeft <= 0) return
     const timer = setInterval(() => {
-      setTimeLeft(prev => (prev > 0 ? prev - 1 : 0))
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          handleNext() // auto-next when timer ends
+          return 0
+        }
+        return prev - 1
+      })
     }, 1000)
     return () => clearInterval(timer)
-  }, [modal])
+  }, [timeLeft, modal])
 
-  // Tab switch detection
+  // 4️⃣ Track tab switches / blur
   useEffect(() => {
     if (modal) return
-    const handleVisibility = () => {
-      if (document.hidden) {
-        setTabSwitches(prev => prev + 1)
-      }
+
+    const handleLeave = () => {
+      setTabSwitches(prev => prev + 1)
+      setBlurScreen(true)
+      setTimeout(() => setBlurScreen(false), 1000)
     }
+
+    const handleVisibility = () => {
+      if (document.hidden) handleLeave()
+    }
+
+    window.addEventListener("blur", handleLeave)
     document.addEventListener("visibilitychange", handleVisibility)
-    return () => document.removeEventListener("visibilitychange", handleVisibility)
+
+    return () => {
+      window.removeEventListener("blur", handleLeave)
+      document.removeEventListener("visibilitychange", handleVisibility)
+    }
   }, [modal])
 
-  // Move to next question
-  const nextQuestion = () => {
-    setCurrentQuestion(prev => Math.min(prev + 1, questions.length - 1))
+  // 5️⃣ Start Quiz - create attempt and resume if exists
+  const handleStart = async () => {
+    const session = await getSession()
+    if (!session) return
+
+    try {
+      // 5a️⃣ Create or fetch attempt
+      const result = await createAttemptAction({
+        quizId,
+        userId: session.userId,
+      })
+      setAttemptId(result.attempt.id)
+
+      // 5b️⃣ Get progress: which questions were already answered
+      const progress = await getAttemptProgressAction(result.attempt.id)
+      if (progress.length > 0) {
+        const answeredIds = progress.map(p => p.questionId)
+        const nextIndex = questions.findIndex(q => !answeredIds.includes(q.id))
+        setCurrentQuestion(nextIndex === -1 ? 0 : nextIndex)
+      }
+
+      setModal(false)
+    } catch (err: any) {
+      console.error(err)
+    }
+  }
+
+  // 6️⃣ Submit current answer
+  const submitAnswer = async () => {
+    if (!selectedChoice || !attemptId) return
+    const q = questions[currentQuestion]
+
+    await answerAttemptAction({
+      attemptId,
+      questionId: q.id,
+      optionId: selectedChoice.id,
+      isCorrect: selectedChoice.isCorrect,
+    })
+  }
+
+  // 7️⃣ Next / Finish
+  const handleNext = async () => {
+    await submitAnswer()
+
+    if (currentQuestion < questions.length - 1) {
+      setCurrentQuestion(prev => prev + 1)
+    } else {
+      // ✅ Finish Quiz: calculate score & update tab switch count
+      await calculateScoreAction(attemptId)
+      await saveTabSwitchCountAction(attemptId, tabSwitches)
+
+      // ✅ Redirect to dynamic result page with attemptId
+      router.push(`/quiz/${quizId}/results/${attemptId}`)
+    }
+  }
+
+  // 8️⃣ Choice selection
+  const handleSelect = (choice: Option) => {
+    setSelectedChoice(choice)
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center p-4">
-      {/* Modal */}
+    <div className="relative min-h-screen bg-background flex flex-col items-center p-4">
+
+      {/* Blur overlay */}
+      {blurScreen && (
+        <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex justify-center items-center">
+          <p className="text-white font-semibold text-xl">You left the tab!</p>
+        </div>
+      )}
+
+      {/* Start Quiz Modal */}
       {modal && (
         <div className="w-full flex justify-center items-center mt-20">
           <div className="card w-96 p-4 max-w-sm text-center">
@@ -68,8 +174,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
               This quiz is being monitored.<br />
               Every tab change you make is counted.
             </p>
-            <button 
-              onClick={() => setModal(false)}
+            <button
+              onClick={handleStart}
               className="mt-4 bg-primary p-2 rounded-md font-semibold cursor-pointer"
             >
               Start Quiz
@@ -78,39 +184,31 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         </div>
       )}
 
-      {/* Quiz content */}
+      {/* Quiz Content */}
       {!modal && questions.length > 0 && (
         <div className="flex flex-col gap-6 w-full max-w-4xl mt-10">
-          {/* Timer and Tab */}
           <div className="flex justify-center gap-10">
-            <div className="w-32 p-4 flex flex-col items-center gap-2 bg-secondary rounded-md">
-              <span className="text-4xl">⏱️</span>
-              <span className="text-2xl font-semibold">{Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}</span>
-              <p className="text-muted">Time Left</p>
-            </div>
-
-            <div className="w-32 p-4 flex flex-col items-center gap-2 bg-secondary rounded-md">
-              <span className="text-4xl">🔄</span>
-              <span className="text-2xl font-semibold">{tabSwitches}</span>
-              <p className="text-muted">Tab Switches</p>
-            </div>
+            <TimerCard time={timeLeft} />
+            <TabSwitchesCard count={tabSwitches} />
           </div>
 
-          {/* Current Question */}
           <QuizCard
             question={questions[currentQuestion].text}
             choices={questions[currentQuestion].option}
+            onSelect={handleSelect}
           />
 
-          {/* Next Question */}
-          {currentQuestion < questions.length - 1 && (
-            <button
-              onClick={nextQuestion}
-              className="mt-4 bg-primary p-2 rounded-md font-semibold cursor-pointer"
-            >
-              Next Question
-            </button>
-          )}
+          {/* Next / Finish Button */}
+          <button
+            onClick={handleNext}
+            className={`mt-4 p-2 rounded-md font-semibold cursor-pointer ${
+              currentQuestion === questions.length - 1
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "bg-primary text-white hover:bg-primary/90"
+            }`}
+          >
+            {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}
+          </button>
         </div>
       )}
 

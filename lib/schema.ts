@@ -83,6 +83,12 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
     .notNull()                  // should not be null so we can know who created the quiz
     .references(() => user.id), // taking the user.id as a FK, so that we can know who specifically created the quiz
 
+
+  // Proctoring columns
+  blurQuestion: boolean("blur_question").default(false).notNull(),
+  disableCopyPaste: boolean("disable_copy_paste").default(false).notNull(),
+  tabMonitoring: boolean("tab_monitoring").default(false).notNull(),  
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -95,6 +101,7 @@ export const question = pgTable("question", { // TABLE QUESTION
 
   text: text("text").notNull(), // text on question
   type: text("type").notNull(), // "mcq" | "true-false" | "identification"
+  timerLimit: integer("time_limit").default(30).notNull() // timer per question
 });
 
 
@@ -122,9 +129,39 @@ export const attempt = pgTable("attempt", {
     .references(() => user.id), // passing the id of the user, that attempted to asnwer
 
   score: integer("score"), // score of the user
+
+  isCompleted: boolean("completed").default(false).notNull(),
+
+  tabSwitchCount: integer("tab_switch_count").default(0).notNull(),
+
   startedAt: timestamp("started_at").defaultNow(), 
+  updatedAt: timestamp("updated_at").defaultNow(),
   submittedAt: timestamp("submitted_at"),
 });
+
+
+export const attemptAnswer = pgTable("attempt_answer", {
+  id: text("id").primaryKey(),
+
+  attemptId: text("attempt_id")
+    .notNull()
+    .references(() => attempt.id, { onDelete: "cascade" }),
+
+  questionId: text("question_id")
+    .notNull()
+    
+    .references(() => question.id, { onDelete: "cascade" }),
+
+  optionId: text("option_id")  // nullable because identification questions don't use options
+    .references(() => option.id),
+
+  textAnswer: text("text_answer"), // for identification or open-ended answers
+
+  isCorrect: boolean("is_correct"), // store computed correctness for faster grading
+
+  answeredAt: timestamp("answered_at").defaultNow(),
+});
+
 
 
 export const quizEnrollment = pgTable( // table for tracking who joined in the quiz 
@@ -146,7 +183,6 @@ export const quizEnrollment = pgTable( // table for tracking who joined in the q
     index("enrollment_user_quiz_idx").on(table.userId, table.quizId), // this is for fast querying making the db already know who is our target
   ]
 );
-
 
 
 
