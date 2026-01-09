@@ -82,7 +82,7 @@ function dashboard() {
         if (joinQuiz) {
             try {
                 await joinQuizAction(joinQuiz?.id, session.userId )
-                alert("successfully join")
+                alert("successfully joined")
             } catch (error) {
                 alert("Cant Join Quiz")
             }
