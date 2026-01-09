@@ -24,7 +24,7 @@ export default async function Page({ params }: PageProps) {
     userId: session.userId 
   })
 
-  if (attemptCheck.exists) {
+  if (attemptCheck.attempt?.isCompleted) {
     return <AlreadyTakenPage quizId={quizId}/> // no return needed
   }
 

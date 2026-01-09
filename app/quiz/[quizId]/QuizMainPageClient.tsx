@@ -39,6 +39,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const [modal, setModal] = useState(true)
   const [tabSwitches, setTabSwitches] = useState(0)
   const [blurScreen, setBlurScreen] = useState(false)
+  const [progressLoaded, setProgressLoaded] = useState(false)
 
   // 1️⃣ Fetch all questions
   useEffect(() => {
@@ -63,7 +64,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer)
-          handleNext() // auto-next when timer ends
+          handleNext()
           return 0
         }
         return prev - 1
@@ -95,10 +96,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     }
   }, [modal])
 
-  // 5️⃣ Start Quiz - create attempt and resume if exists
+  // 5️⃣ Start Quiz - create attempt and restore progress
   const handleStart = async () => {
     const session = await getSession()
     if (!session) return
+    if (questions.length === 0) return // Wait for questions
 
     try {
       // 5a️⃣ Create or fetch attempt
@@ -113,10 +115,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       if (progress.length > 0) {
         const answeredIds = progress.map(p => p.questionId)
         const nextIndex = questions.findIndex(q => !answeredIds.includes(q.id))
-        setCurrentQuestion(nextIndex === -1 ? 0 : nextIndex)
+        setCurrentQuestion(nextIndex === -1 ? questions.length - 1 : nextIndex)
       }
 
       setModal(false)
+      setProgressLoaded(true)
     } catch (err: any) {
       console.error(err)
     }
@@ -142,11 +145,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1)
     } else {
-      // ✅ Finish Quiz: calculate score & update tab switch count
+      // Finish Quiz: calculate score & update tab switch count
       await calculateScoreAction(attemptId)
       await saveTabSwitchCountAction(attemptId, tabSwitches)
 
-      // ✅ Redirect to dynamic result page with attemptId
+      // Redirect to dynamic result page
       router.push(`/quiz/${quizId}/results/${attemptId}`)
     }
   }
@@ -156,17 +159,22 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     setSelectedChoice(choice)
   }
 
+  // 9️⃣ Restore progress after questions loaded
+  useEffect(() => {
+    if (attemptId && questions.length > 0 && !progressLoaded) {
+      handleStart()
+    }
+  }, [attemptId, questions, progressLoaded])
+
   return (
     <div className="relative min-h-screen bg-background flex flex-col items-center p-4">
 
-      {/* Blur overlay */}
       {blurScreen && (
         <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex justify-center items-center">
           <p className="text-white font-semibold text-xl">You left the tab!</p>
         </div>
       )}
 
-      {/* Start Quiz Modal */}
       {modal && (
         <div className="w-full flex justify-center items-center mt-20">
           <div className="card w-96 p-4 max-w-sm text-center">
@@ -184,7 +192,6 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         </div>
       )}
 
-      {/* Quiz Content */}
       {!modal && questions.length > 0 && (
         <div className="flex flex-col gap-6 w-full max-w-4xl mt-10">
           <div className="flex justify-center gap-10">
@@ -198,7 +205,6 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             onSelect={handleSelect}
           />
 
-          {/* Next / Finish Button */}
           <button
             onClick={handleNext}
             className={`mt-4 p-2 rounded-md font-semibold cursor-pointer ${

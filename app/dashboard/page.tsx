@@ -10,7 +10,7 @@ import { deleteQuizAction } from "@/lib/actions/deleteQuizAction";
 import  { joinQuizAction }  from "@/lib/actions/joinQuizAction"
 import { getUserJoinedQuizAction } from "@/lib/actions/getUserJoinedQuizAction";
 import Link from "next/link";
-
+// import { useRouter } from "next/router";
 interface Quiz{
     title: string,
     joinCode: string,
@@ -32,6 +32,8 @@ function dashboard() {
       const totalQuizCreated = userCreatedQuiz.length
       const totalQuizJoined = userJoinedQuiz.length
       const totalQuizzes = totalQuizCreated + totalQuizJoined
+
+    //   const router = useRouter()
 
       useEffect(() => {
         const fetchUser = async () => {
@@ -153,13 +155,13 @@ function dashboard() {
                     />
             </div>
 
-            {/* Created by user Quizzes */}
+           {/* Created by user Quizzes */}
             <div className="w-full">
                 <div className="my-5 flex gap-2 items-center">
                     <h2 className="text-2xl font-semibold text-white">My Quizzes</h2>
                     <span 
-                        className="bg-[#3b82f630] text-primary p-2 font-semibold rounded-md">
-                        Creator
+                    className="bg-[#3b82f630] text-primary p-2 font-semibold rounded-md">
+                    Creator
                     </span>
                 </div>
 
@@ -167,42 +169,58 @@ function dashboard() {
                     userCreatedQuiz.map((quiz, i) => (
                     <div className="card w-full h-auto p-5 mb-4" key={i}>
                         <div className="flex justify-between items-center gap-10">
-                            <div className="flex gap-2 items-center">
-                                <h3 
-                                className="text-white text-lg font-semibold p-0 m-0">
-                                    {quiz.title}
-                                </h3>
+                        <div className="flex gap-2 items-center">
+                            <h3 
+                            className="text-white text-lg font-semibold p-0 m-0">
+                            {quiz.title}
+                            </h3>
 
-                                <span 
-                                className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">
-                                    {quiz.joinCode}
-                                </span>
-                            </div>
-
-                            <div>
-                                <button 
-                                    onClick={() => deleteQuiz(quiz.id)}
-                                    className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer"
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                            <span 
+                            className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">
+                            {quiz.joinCode}
+                            </span>
                         </div>
 
+                        <div className="flex gap-2">
+                            {/* View Attempts Button */}
+                            {/* <button
+                            onClick={() => router.push(`/quiz/${quiz.id}/creator`)}
+                            className="bg-blue-600 p-2 rounded-md font-semibold cursor-pointer text-white hover:bg-blue-700"
+                            >
+                            View
+                            </button> */}
+
+                            <Link
+                                href={`/quiz/${quiz.id}/creator`}
+                                className="bg-blue-600 p-2 rounded-md font-semibold cursor-pointer text-white hover:bg-blue-700"
+
+                            >
+                                View
+                            </Link>
+
+                            {/* Delete Button */}
+                            <button 
+                            onClick={() => deleteQuiz(quiz.id)}
+                            className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer"
+                            >
+                            Delete
+                            </button>
+                        </div>
+                        </div>
 
                         <div className="mt-2">
-                            <p className="text-muted mb-2">
-                                {quiz.description}
-                            </p>
-                            <p className="text-muted">📝3 Questions</p>
+                        <p className="text-muted mb-2">
+                            {quiz.description}
+                        </p>
+                        <p className="text-muted">📝3 Questions</p>
                         </div>
                     </div>
-                ))
-                ): (
+                    ))
+                ) : (
                     <p>no quizzes found</p>
                 )}
+                </div>
 
-            </div>
 
 
             {/* JOINED QUIZZES CARD */}
