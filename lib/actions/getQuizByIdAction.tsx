@@ -1,20 +1,27 @@
-import { db } from "@/lib/db"
-import { quiz } from "@/lib/schema"
-import { eq } from "drizzle-orm"
+"use server";
 
-/**
- * Fetch a quiz by its ID (only the quiz info, no questions/options)
- */
+import { db } from "@/lib/db";
+import { quiz } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+
 export async function getQuizByIdAction(quizId: string) {
-  const [quizData] = await db
-    .select()
-    .from(quiz)
-    .where(eq(quiz.id, quizId))
-    .execute()
+  try {
+    const [quizData] = await db
+      .select()
+      .from(quiz)
+      .where(eq(quiz.id, quizId))
+      .execute();
 
-  if (!quizData) {
-    throw new Error("Quiz not found")
+    if (!quizData) {
+      return { success: false, error: "Quiz not found" };
+    }
+
+    return { success: true, quiz: quizData };
+  } catch (error) {
+    console.error("Failed to fetch quiz:", error);
+    return {
+      success: false,
+      error: "Could not fetch quiz. Please try again in a few seconds.",
+    };
   }
-
-  return quizData
 }

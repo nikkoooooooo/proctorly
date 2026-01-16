@@ -1,44 +1,40 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { attempt, attemptAnswer, question } from "@/lib/schema"
+import { attempt, attemptAnswer } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 
-/**
- * Calculate the final quiz score based on attempt answers
- */
 export async function calculateScoreAction(attemptId: string) {
-  // Get all answers for this attempt
-  const answers = await db
-    .select()
-    .from(attemptAnswer)
-    .where(eq(attemptAnswer.attemptId, attemptId))
-    .execute()
+  try {
+    // Get all answers
+    const answers = await db
+      .select()
+      .from(attemptAnswer)
+      .where(eq(attemptAnswer.attemptId, attemptId))
+      .execute()
 
-  if (!answers || answers.length === 0) {
-    throw new Error("No answers found for this attempt.")
-  }
+    if (!answers || answers.length === 0) {
+      return { success: false, error: "No answers found for this attempt." }
+    }
 
-  // Count correct = isCorrect === true
-  const totalCorrect = answers.filter(a => a.isCorrect === true).length
-  const totalQuestions = answers.length
+    const totalCorrect = answers.filter(a => a.isCorrect).length
+    const totalQuestions = answers.length
+    const score = totalCorrect
 
-  const score = totalCorrect
+    // Update attempt
+    await db
+      .update(attempt)
+      .set({
+        score,
+        isCompleted: true,
+        submittedAt: new Date(),
+      })
+      .where(eq(attempt.id, attemptId))
+      .execute()
 
-  // Update attempt score + set completed status
-  await db
-    .update(attempt)
-    .set({
-      score: score,
-      isCompleted: true,
-      submittedAt: new Date(),
-    })
-    .where(eq(attempt.id, attemptId))
-    .execute()
-
-  return {
-    totalCorrect,
-    totalQuestions,
-    score,
+    return { success: true, totalCorrect, totalQuestions, score }
+  } catch (error) {
+    console.error("Failed to calculate score:", error)
+    return { success: false, error: (error as Error).message }
   }
 }

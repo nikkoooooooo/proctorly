@@ -1,31 +1,33 @@
-// app/actions/createQuizAction.ts
-"use server"; // this code runs only on server
+"use server";
 
 import { createQuiz, QuestionInput } from "@/lib/helpers/createQuiz";
 
-/**
- * Server action callable from client component
- */
 export async function createQuizAction(
   title: string,
-  questions: QuestionInput[], // use the proper type
+  questions: QuestionInput[],
   creatorId: string,
   description: string,
   blurQuestion = false,
   disableCopyPaste = false,
   tabMonitoring = false
 ) {
-  // Call helper to insert quiz + questions + options + proctoring
-  const quiz = await createQuiz(
-    creatorId,
-    title,
-    questions,
-    description,
-    blurQuestion,
-    disableCopyPaste,
-    tabMonitoring
-  )
+  try {
+    const quiz = await createQuiz(
+      creatorId,
+      title,
+      questions,
+      description,
+      blurQuestion,
+      disableCopyPaste,
+      tabMonitoring
+    );
 
-  // Return the full quiz object for client use
-  return quiz
+    return { success: true, quiz };
+  } catch (error) {
+    console.error("Failed to create quiz:", error);
+    return {
+      success: false,
+      error: "Could not create quiz, please try again in a few seconds",
+    };
+  }
 }

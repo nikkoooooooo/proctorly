@@ -1,6 +1,9 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import toast from "react-hot-toast"
+import confetti from "canvas-confetti"
+
 import QuizCard from "@/components/QuizCard"
 import TimerCard from "@/components/TimerCard"
 import TabSwitchesCard from "@/components/TabSwitchesCard"
@@ -12,6 +15,7 @@ import { answerAttemptAction } from "@/lib/actions/answerAttemptAction"
 import { saveTabSwitchCountAction } from "@/lib/actions/saveTabSwitchCountAction"
 import { calculateScoreAction } from "@/lib/actions/calculateScoreAction"
 import { getAttemptProgressAction } from "@/lib/actions/getAttemptProgressAction"
+import { getQuizProctoringByIdAction } from "@/lib/actions/getQuizProctoringByIdAction"
 
 interface Option {
   id: string
@@ -30,36 +34,67 @@ interface Question {
 export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const router = useRouter()
 
-  // Main states
+  // Quiz and attempt state
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedChoice, setSelectedChoice] = useState<Option | null>(null)
-  const [attemptId, setAttemptId] = useState("")
-  const [timeLeft, setTimeLeft] = useState(0)
-  const [modal, setModal] = useState(true)
+  const [attemptId, setAttemptId] = useState<string>("")
+
+  // Proctoring state
   const [tabSwitches, setTabSwitches] = useState(0)
   const [blurScreen, setBlurScreen] = useState(false)
+  const [proctoring, setProctoring] = useState<{ blurQuestion: boolean; tabMonitoring: boolean } | null>(null)
+
+  // Timer and modal
+  const [timeLeft, setTimeLeft] = useState(0)
+  const [modal, setModal] = useState(true)
   const [progressLoaded, setProgressLoaded] = useState(false)
 
-  // 1️⃣ Fetch all questions
+  // -----------------------------
+  // 1️⃣ FETCH QUESTIONS + PROCTORING SETTINGS
+  // -----------------------------
   useEffect(() => {
-    const fetchQuestions = async () => {
+    const fetchData = async () => {
       const data = await getQuestionsByQuizIdAction(quizId)
-      setQuestions(data)
+      if (!data.success) {
+        toast.error(data.error || "Failed to fetch questions", {
+          icon: "⚠️",
+          style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" },
+        })
+        return
+      }
+      setQuestions(data.questions || [])
+
+      // Fetch proctoring flags
+      const proctoringRes = await getQuizProctoringByIdAction(quizId)
+      if (proctoringRes.success && proctoringRes.quiz) {
+        setProctoring({
+          blurQuestion: proctoringRes.quiz.blurQuestion,
+          tabMonitoring: proctoringRes.quiz.tabMonitoring,
+        })
+      } else {
+        setProctoring({ blurQuestion: false, tabMonitoring: false })
+      }
     }
-    fetchQuestions()
+    fetchData()
   }, [quizId])
 
-  // 2️⃣ Reset timer & selection when question changes
+  // -----------------------------
+  // 2️⃣ SET TIMER WHEN QUESTION CHANGES
+  // -----------------------------
   useEffect(() => {
-    if (!questions[currentQuestion]) return
-    setTimeLeft(questions[currentQuestion].timeLimit || 30)
+    if (questions.length === 0) return
+    const q = questions[currentQuestion]
+    setTimeLeft(q.timeLimit ? Number(q.timeLimit) : 0)
     setSelectedChoice(null)
   }, [currentQuestion, questions])
 
-  // 3️⃣ Timer countdown
+  // -----------------------------
+  // 3️⃣ TIMER COUNTDOWN
+  // -----------------------------
   useEffect(() => {
     if (modal || timeLeft <= 0) return
+
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -70,105 +105,136 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         return prev - 1
       })
     }, 1000)
+
     return () => clearInterval(timer)
   }, [timeLeft, modal])
 
-  // 4️⃣ Track tab switches / blur
-  useEffect(() => {
-    if (modal) return
+  // -----------------------------
+  // 4️⃣ TAB SWITCH / BLUR DETECTION
+  // -----------------------------
+ useEffect(() => {
+  if (modal || !proctoring?.blurQuestion) return
 
-    const handleLeave = () => {
-      setTabSwitches(prev => prev + 1)
-      setBlurScreen(true)
-      setTimeout(() => setBlurScreen(false), 1000)
-    }
+  let leaveCounted = false // flag to prevent double count
 
-    const handleVisibility = () => {
-      if (document.hidden) handleLeave()
-    }
+  const handleLeave = () => {
+    if (leaveCounted) return
+    leaveCounted = true
+    setTabSwitches(prev => prev + 1)
+    setBlurScreen(true)
+    setTimeout(() => setBlurScreen(false), 3000)
+  }
 
-    window.addEventListener("blur", handleLeave)
-    document.addEventListener("visibilitychange", handleVisibility)
+  const handleReturn = () => {
+    leaveCounted = false // reset flag when user comes back
+  }
 
-    return () => {
-      window.removeEventListener("blur", handleLeave)
-      document.removeEventListener("visibilitychange", handleVisibility)
-    }
-  }, [modal])
+  const handleVisibility = () => {
+    if (document.hidden) handleLeave()
+    else handleReturn()
+  }
 
-  // 5️⃣ Start Quiz - create attempt and restore progress
+  window.addEventListener("blur", handleLeave)
+  window.addEventListener("focus", handleReturn) // reset when window comes back
+  document.addEventListener("visibilitychange", handleVisibility)
+
+  return () => {
+    window.removeEventListener("blur", handleLeave)
+    window.removeEventListener("focus", handleReturn)
+    document.removeEventListener("visibilitychange", handleVisibility)
+  }
+}, [modal, proctoring?.blurQuestion])
+
+
+
+  // -----------------------------
+  // 5️⃣ START QUIZ
+  // -----------------------------
   const handleStart = async () => {
     const session = await getSession()
     if (!session) return
-    if (questions.length === 0) return // Wait for questions
 
     try {
-      // 5a️⃣ Create or fetch attempt
-      const result = await createAttemptAction({
-        quizId,
-        userId: session.userId,
-      })
-      setAttemptId(result.attempt.id)
+      const result = await createAttemptAction({ quizId, userId: session.userId })
+      if (!result.success || !result.data?.attempt) {
+        toast.error(result.error || "Attempt creation failed", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
+        return
+      }
 
-      // 5b️⃣ Get progress: which questions were already answered
-      const progress = await getAttemptProgressAction(result.attempt.id)
-      if (progress.length > 0) {
-        const answeredIds = progress.map(p => p.questionId)
+      const attemptData = result.data.attempt
+      setAttemptId(attemptData.id)
+
+      const progressResult = await getAttemptProgressAction(attemptData.id)
+      if (progressResult.success && progressResult.answers?.length) {
+        const answeredIds = progressResult.answers.map(p => p.questionId)
         const nextIndex = questions.findIndex(q => !answeredIds.includes(q.id))
-        setCurrentQuestion(nextIndex === -1 ? questions.length - 1 : nextIndex)
+        setCurrentQuestion(nextIndex === -1 ? 0 : nextIndex)
       }
 
       setModal(false)
       setProgressLoaded(true)
-    } catch (err: any) {
-      console.error(err)
+
+      toast.success("Quiz started!", { icon: "✅", style: { background: "#ffffff", color: "#2563eb", fontWeight: "bold" }, duration: 3000 })
+      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err), { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" }, duration: 5000 })
     }
   }
 
-  // 6️⃣ Submit current answer
+  // -----------------------------
+  // 6️⃣ SUBMIT ANSWER
+  // -----------------------------
   const submitAnswer = async () => {
     if (!selectedChoice || !attemptId) return
     const q = questions[currentQuestion]
 
-    await answerAttemptAction({
-      attemptId,
-      questionId: q.id,
-      optionId: selectedChoice.id,
-      isCorrect: selectedChoice.isCorrect,
-    })
+    try {
+      const response = await answerAttemptAction({ attemptId, questionId: q.id, optionId: selectedChoice.id, isCorrect: selectedChoice.isCorrect })
+      if (!response.success) {
+        toast.error(response.error || "Failed to save answer", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : String(err), { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
+    }
   }
 
-  // 7️⃣ Next / Finish
+  // -----------------------------
+  // 7️⃣ NEXT QUESTION / FINISH
+  // -----------------------------
   const handleNext = async () => {
     await submitAnswer()
 
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(prev => prev + 1)
     } else {
-      // Finish Quiz: calculate score & update tab switch count
-      await calculateScoreAction(attemptId)
-      await saveTabSwitchCountAction(attemptId, tabSwitches)
+      try {
+        const scoreRes = await calculateScoreAction(attemptId)
+        if (!scoreRes.success) {
+          toast.error(scoreRes.error || "Failed to calculate score", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
+        } else {
+          toast.success("Quiz finished!", { icon: "✅", style: { background: "#ffffff", color: "#2563eb", fontWeight: "bold" }, duration: 3000 })
+          confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } })
+        }
 
-      // Redirect to dynamic result page
-      router.push(`/quiz/${quizId}/results/${attemptId}`)
+        const tabRes = await saveTabSwitchCountAction(attemptId, tabSwitches)
+        if (!tabRes.success) {
+          toast.error(tabRes.error || "Failed to save tab switches", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
+        }
+
+        router.push(`/quiz/${quizId}/results/${attemptId}`)
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : String(err), { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
+      }
     }
   }
 
-  // 8️⃣ Choice selection
-  const handleSelect = (choice: Option) => {
-    setSelectedChoice(choice)
-  }
-
-  // 9️⃣ Restore progress after questions loaded
-  useEffect(() => {
-    if (attemptId && questions.length > 0 && !progressLoaded) {
-      handleStart()
-    }
-  }, [attemptId, questions, progressLoaded])
+  // -----------------------------
+  // 8️⃣ SELECT CHOICE
+  // -----------------------------
+  const handleSelect = (choice: Option) => setSelectedChoice(choice)
 
   return (
     <div className="relative min-h-screen bg-background flex flex-col items-center p-4">
-
       {blurScreen && (
         <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex justify-center items-center">
           <p className="text-white font-semibold text-xl">You left the tab!</p>
@@ -178,16 +244,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       {modal && (
         <div className="w-full flex justify-center items-center mt-20">
           <div className="card w-96 p-4 max-w-sm text-center">
-            <p className="text-muted">
-              This quiz is being monitored.<br />
-              Every tab change you make is counted.
-            </p>
-            <button
-              onClick={handleStart}
-              className="mt-4 bg-primary p-2 rounded-md font-semibold cursor-pointer"
-            >
-              Start Quiz
-            </button>
+            <p className="text-muted">This quiz is monitored — tab switches are counted.</p>
+            <button onClick={handleStart} className="mt-4 bg-primary p-2 rounded-md font-semibold cursor-pointer">Start Quiz</button>
           </div>
         </div>
       )}
@@ -199,18 +257,12 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             <TabSwitchesCard count={tabSwitches} />
           </div>
 
-          <QuizCard
-            question={questions[currentQuestion].text}
-            choices={questions[currentQuestion].option}
-            onSelect={handleSelect}
-          />
+          <QuizCard question={questions[currentQuestion].text} choices={questions[currentQuestion].option} onSelect={handleSelect} />
 
           <button
             onClick={handleNext}
             className={`mt-4 p-2 rounded-md font-semibold cursor-pointer ${
-              currentQuestion === questions.length - 1
-                ? "bg-green-600 text-white hover:bg-green-700"
-                : "bg-primary text-white hover:bg-primary/90"
+              currentQuestion === questions.length - 1 ? "bg-green-600 text-white hover:bg-green-700" : "bg-primary text-white hover:bg-primary/90"
             }`}
           >
             {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}
@@ -218,9 +270,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         </div>
       )}
 
-      {!modal && questions.length === 0 && (
-        <p>No questions found for this quiz.</p>
-      )}
+      {!modal && questions.length === 0 && <p>No questions found for this quiz.</p>}
     </div>
   )
 }

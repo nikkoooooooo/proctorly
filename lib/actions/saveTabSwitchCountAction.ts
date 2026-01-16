@@ -1,40 +1,37 @@
-"use server"
+"use server";
 
-import { db } from "@/lib/db"
-import { attempt } from "@/lib/schema"
-import { eq, gt } from "drizzle-orm"
+import { db } from "@/lib/db";
+import { attempt } from "@/lib/schema";
+import { eq } from "drizzle-orm";
 
-/**
- * Saves tab switching count on a specific attempt.
- * Will update only if new count is higher to prevent overwritten data.
- */
 export async function saveTabSwitchCountAction(attemptId: string, count: number) {
+  try {
+    // Fetch current attempt
+    const [existing] = await db
+      .select()
+      .from(attempt)
+      .where(eq(attempt.id, attemptId))
+      .execute();
 
-  // Fetch current attempt data
-  const [existing] = await db
-    .select()
-    .from(attempt)
-    .where(eq(attempt.id, attemptId))
-    .execute()
+    if (!existing) {
+      return { success: false, error: "Attempt not found" };
+    }
 
-  if (!existing) {
-    throw new Error("Attempt not found.")
-  }
+    // Prevent overwriting with smaller number
+    const newCount = Math.max(existing.tabSwitchCount || 0, count);
 
-  // Prevent overwriting with smaller number (e.g. page refresh)
-  const newCount = Math.max(existing.tabSwitchCount || 0, count)
+    await db
+      .update(attempt)
+      .set({ tabSwitchCount: newCount, updatedAt: new Date() })
+      .where(eq(attempt.id, attemptId))
+      .execute();
 
-  await db
-    .update(attempt)
-    .set({
-      tabSwitchCount: newCount,
-      updatedAt: new Date()
-    })
-    .where(eq(attempt.id, attemptId))
-    .execute()
-
-  return {
-    updated: true,
-    tabSwitchCount: newCount
+    return { success: true, updated: true, tabSwitchCount: newCount };
+  } catch (error) {
+    console.error("Failed to save tab switch count:", error);
+    return {
+      success: false,
+      error: "Could not save tab switch count. Please try again in a few seconds.",
+    };
   }
 }

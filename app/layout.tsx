@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getSession } from "@/lib/auth-actions";
 import Navbar from "@/components/Navbar";
+import { Toaster } from "react-hot-toast";
+
 
 
 const geistSans = Geist({
@@ -35,6 +37,18 @@ export default async function RootLayout({
       >
         <Navbar/>
         {children}
+        <Toaster
+          position="top-center" // toast container at top center
+          toastOptions={{
+            className: "w-full max-w-full rounded-none", // full width
+            style: {
+              width: "100%",          // full width of container
+              maxWidth: "100%",       // prevent shrinking
+              margin: 0,              // remove default margin
+              borderRadius: "0px",    // remove rounding
+            },
+          }}
+        />
       </body>
     </html>
   );

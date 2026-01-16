@@ -25,7 +25,11 @@ export default function QuizCard({ question, choices, onSelect }: QuizCardProps)
 
   return (
     <div className="card p-4 w-full text-center">
-      <h2 className="font-semibold my-10 text-2xl">{question}</h2>
+      <h2 
+      className="font-semibold my-10 text-2xl" 
+      onCopy={(e) => e.preventDefault()}>
+        {question}
+      </h2>
 
       <div className="flex flex-col gap-2">
         {choices.map((choice, index) => (

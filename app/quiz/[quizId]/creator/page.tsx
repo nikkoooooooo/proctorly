@@ -14,12 +14,12 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
     <div className="p-8 max-w-4xl mx-auto flex flex-col justify-center">
       <h1 className="text-3xl font-bold text-white mb-6">Students Attempts</h1>
 
-      {attempts.length === 0 ? (
+      {attempts.attempts?.length === 0 ? (
         <p className="text-muted">No students have attempted this quiz yet.</p>
       ) : (
        <div className="w-full max-w-7xl mx-auto px-4">
   <div className="flex flex-col gap-4 w-full">
-    {attempts.map((a) => (
+    {attempts.attempts ? attempts.attempts.map((a) => (
       <div
         key={a.attemptId}
         className="card bg-[#1f1f1f] p-4 rounded-md flex flex-col md:flex-row justify-between items-start md:items-center w-full"
@@ -43,7 +43,9 @@ export default async function TeacherPage({ params }: TeacherPageProps) {
           </p>
         </div>
       </div>
-    ))}
+    )):
+      <p>no students attempt</p> 
+      }
   </div>
 </div>
 

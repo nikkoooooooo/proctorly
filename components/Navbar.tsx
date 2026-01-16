@@ -17,28 +17,28 @@ function Navbar() {
       <div className='max-w-7xl mx-auto px-4'>
         <div className='flex items-center justify-between h-20'>
           {/* Logo */}
-          <Link href='/dashboard' className='font-bold text-4xl text- '>
+          <Link 
+            href='/dashboard' 
+            className='font-bold text-4xl text-white'
+            onCopy={(e) => e.preventDefault()}>
             Proctorly
           </Link>
 
           {/* Navigation Links */}
-          <div className='hidden md:flex items-center space-x-4'>
+          <div className='hidden md:flex items-center '>
             {session ? (
-              <>
+              <div className="flex items-center justify-end w-96 gap-5">
                 <Link href='/dashboard' className='font-bold text-md text-white'>
                   Dashboard
                 </Link>
 
-                <Link 
-                href='/create-quiz' 
-                className={`bg-blue-500 text-white p-2 rounded-lg font-semibold`}>
-                  + Create Quiz
+                <Link href='/dashboard' className='font-bold text-md text-white'>
+                  Profile
                 </Link>
-
                 
                 <LogoutButton/>
                
-              </>
+              </div>
             ) : (
               <Link
                 href='/login'
@@ -84,7 +84,7 @@ function Navbar() {
               <div className="px-4 pt-4 pb-6 space-y-4">
 
                 {session ? (
-                  <>
+                  <div className="flex flex-col">
                     <Link
                       href="/dashboard"
                       className="block text-white font-medium text-lg"
@@ -93,17 +93,13 @@ function Navbar() {
                       Dashboard
                     </Link>
 
-                    <Link
-                      href="/create-quiz"
-                      className="block bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold"
-                      onClick={() => SetIsMenuOpen(false)}
-                    >
-                      + Create Quiz
+                    <Link href='/dashboard' className='block font-medium text-lg text-white'>
+                      Profile
                     </Link>
 
-                    <LogoutButton />
+                    <LogoutButton/>
 
-                  </>
+                  </div>
                 ) : (
                   <Link
                     href="/login"
