@@ -15,9 +15,9 @@ export default async function AlreadyTakenPage({ quizId }: AlreadyTakenPageProps
         <h2 className="text-xl font-bold text-red-600 mb-4">
           You have already taken the quiz:
         </h2>
-        <h3 className="text-lg font-semibold mb-2">{quiz.title}</h3>
-        {quiz.description && (
-          <p className="text-sm text-gray-600 mb-6">{quiz.description}</p>
+        <h3 className="text-lg font-semibold mb-2">{quiz.quiz?.title}</h3>
+        {quiz.quiz?.description && (
+          <p className="text-sm text-gray-600 mb-6">{quiz.quiz.description}</p>
         )}
         <p className="text-sm text-gray-600 mb-6">
           Retaking is not allowed. You can view your results if available.
