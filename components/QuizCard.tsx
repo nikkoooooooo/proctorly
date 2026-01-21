@@ -32,7 +32,7 @@ export default function QuizCard({ question, choices, onSelect }: QuizCardProps)
       </h2>
 
       <div className="flex flex-col gap-2">
-        {choices.map((choice, index) => (
+        {(choices || []).map((choice, index) => (
           <div key={choice.id} className="bg-background p-4 rounded-md">
             <div className="flex gap-4 items-center">
 

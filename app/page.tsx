@@ -1,6 +1,36 @@
-import Image from "next/image";
+"use client"
+
+import { useEffect, useState } from "react";
+import { getSession } from "@/lib/auth-actions";
+import { useRouter } from "next/navigation"
+
+interface session {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: string;
+    expiresAt: Date;
+    token: string;
+    ipAddress?: string | null | undefined;
+    userAgent?: string | null | undefined;
+}
 
 export default function Home() {
+  const router = useRouter()
+  const [session, setSession] = useState<session | null>(null)
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const sessionResult = await getSession()
+
+      if (sessionResult) {
+          setSession(sessionResult)
+          router.replace("/dashboard")
+      }
+    }
+    checkSession()
+  },[router])
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center">
       <div className="max-w-7xl w-full">

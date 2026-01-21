@@ -32,7 +32,7 @@ function Navbar() {
                   Dashboard
                 </Link>
 
-                <Link href='/dashboard' className='font-bold text-md text-white'>
+                <Link href='/profile' className='font-bold text-md text-white'>
                   Profile
                 </Link>
                 

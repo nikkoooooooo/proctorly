@@ -34,64 +34,50 @@ interface Question {
 export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const router = useRouter()
 
-  // Quiz and attempt state
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedChoice, setSelectedChoice] = useState<Option | null>(null)
-  const [attemptId, setAttemptId] = useState<string>("")
+  const [attemptId, setAttemptId] = useState("")
 
-  // Proctoring state
   const [tabSwitches, setTabSwitches] = useState(0)
   const [blurScreen, setBlurScreen] = useState(false)
   const [proctoring, setProctoring] = useState<{ blurQuestion: boolean; tabMonitoring: boolean } | null>(null)
 
-  // Timer and modal
   const [timeLeft, setTimeLeft] = useState(0)
   const [modal, setModal] = useState(true)
-  const [progressLoaded, setProgressLoaded] = useState(false)
 
-  // -----------------------------
-  // 1️⃣ FETCH QUESTIONS + PROCTORING SETTINGS
-  // -----------------------------
+  // 1️⃣ FETCH QUESTIONS + PROCTORING
   useEffect(() => {
     const fetchData = async () => {
       const data = await getQuestionsByQuizIdAction(quizId)
       if (!data.success) {
-        toast.error(data.error || "Failed to fetch questions", {
-          icon: "⚠️",
-          style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" },
-        })
+        toast.error(data.error || "Failed to fetch questions")
         return
       }
       setQuestions(data.questions || [])
 
-      // Fetch proctoring flags
       const proctoringRes = await getQuizProctoringByIdAction(quizId)
-      if (proctoringRes.success && proctoringRes.quiz) {
-        setProctoring({
-          blurQuestion: proctoringRes.quiz.blurQuestion,
-          tabMonitoring: proctoringRes.quiz.tabMonitoring,
-        })
-      } else {
-        setProctoring({ blurQuestion: false, tabMonitoring: false })
-      }
+      setProctoring(
+        proctoringRes.success && proctoringRes.quiz
+          ? {
+              blurQuestion: proctoringRes.quiz.blurQuestion,
+              tabMonitoring: proctoringRes.quiz.tabMonitoring,
+            }
+          : { blurQuestion: false, tabMonitoring: false }
+      )
     }
     fetchData()
   }, [quizId])
 
-  // -----------------------------
-  // 2️⃣ SET TIMER WHEN QUESTION CHANGES
-  // -----------------------------
+  // 2️⃣ SET TIMER PER QUESTION
   useEffect(() => {
-    if (questions.length === 0) return
+    if (!questions.length) return
     const q = questions[currentQuestion]
-    setTimeLeft(q.timeLimit ? Number(q.timeLimit) : 0)
+    setTimeLeft(q?.timeLimit ? Number(q.timeLimit) : 0)
     setSelectedChoice(null)
   }, [currentQuestion, questions])
 
-  // -----------------------------
   // 3️⃣ TIMER COUNTDOWN
-  // -----------------------------
   useEffect(() => {
     if (modal || timeLeft <= 0) return
 
@@ -109,168 +95,139 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     return () => clearInterval(timer)
   }, [timeLeft, modal])
 
-  // -----------------------------
-  // 4️⃣ TAB SWITCH / BLUR DETECTION
-  // -----------------------------
- useEffect(() => {
-  if (modal || !proctoring?.blurQuestion) return
+  // 4️⃣ TAB SWITCH / BLUR DETECTION (PURE)
+  useEffect(() => {
+    if (modal || !proctoring?.blurQuestion) return
 
-  let leaveCounted = false // flag to prevent double count
+    let counted = false
 
-  const handleLeave = () => {
-    if (leaveCounted) return
-    leaveCounted = true
-    setTabSwitches(prev => prev + 1)
-    setBlurScreen(true)
-    setTimeout(() => setBlurScreen(false), 3000)
-  }
+    const handleLeave = () => {
+      if (counted) return
+      counted = true
 
-  const handleReturn = () => {
-    leaveCounted = false // reset flag when user comes back
-  }
+      setTabSwitches(prev => prev + 1)
 
-  const handleVisibility = () => {
-    if (document.hidden) handleLeave()
-    else handleReturn()
-  }
+      setBlurScreen(true)
+      setTimeout(() => setBlurScreen(false), 3000)
+    }
 
-  window.addEventListener("blur", handleLeave)
-  window.addEventListener("focus", handleReturn) // reset when window comes back
-  document.addEventListener("visibilitychange", handleVisibility)
+    const handleReturn = () => {
+      counted = false
+    }
 
-  return () => {
-    window.removeEventListener("blur", handleLeave)
-    window.removeEventListener("focus", handleReturn)
-    document.removeEventListener("visibilitychange", handleVisibility)
-  }
-}, [modal, proctoring?.blurQuestion])
+    const handleVisibility = () => {
+      document.hidden ? handleLeave() : handleReturn()
+    }
 
+    window.addEventListener("blur", handleLeave)
+    window.addEventListener("focus", handleReturn)
+    document.addEventListener("visibilitychange", handleVisibility)
 
+    return () => {
+      window.removeEventListener("blur", handleLeave)
+      window.removeEventListener("focus", handleReturn)
+      document.removeEventListener("visibilitychange", handleVisibility)
+    }
+  }, [modal, proctoring?.blurQuestion])
 
-  // -----------------------------
-  // 5️⃣ START QUIZ
-  // -----------------------------
+  // ✅ 5️⃣ SYNC TAB SWITCH COUNT TO SERVER (SAFE)
+  useEffect(() => {
+    if (!attemptId) return
+    void saveTabSwitchCountAction(attemptId, tabSwitches)
+  }, [tabSwitches, attemptId])
+
+  // 6️⃣ START QUIZ
   const handleStart = async () => {
     const session = await getSession()
     if (!session) return
 
-    try {
-      const result = await createAttemptAction({ quizId, userId: session.userId })
-      if (!result.success || !result.data?.attempt) {
-        toast.error(result.error || "Attempt creation failed", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
-        return
-      }
-
-      const attemptData = result.data.attempt
-      setAttemptId(attemptData.id)
-
-      const progressResult = await getAttemptProgressAction(attemptData.id)
-      if (progressResult.success && progressResult.answers?.length) {
-        const answeredIds = progressResult.answers.map(p => p.questionId)
-        const nextIndex = questions.findIndex(q => !answeredIds.includes(q.id))
-        setCurrentQuestion(nextIndex === -1 ? 0 : nextIndex)
-      }
-
-      setModal(false)
-      setProgressLoaded(true)
-
-      toast.success("Quiz started!", { icon: "✅", style: { background: "#ffffff", color: "#2563eb", fontWeight: "bold" }, duration: 3000 })
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } })
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err), { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" }, duration: 5000 })
+    const result = await createAttemptAction({ quizId, userId: session.userId })
+    if (!result.success || !result.data?.attempt) {
+      toast.error(result.error || "Attempt creation failed")
+      return
     }
+
+    const attempt = result.data.attempt
+    setAttemptId(attempt.id)
+    setTabSwitches(attempt.tabSwitchCount)
+
+    const progress = await getAttemptProgressAction(attempt.id)
+    if (progress.success && progress.answers?.length) {
+      const answered = progress.answers.map(a => a.questionId)
+      const next = questions.findIndex(q => !answered.includes(q.id))
+      setCurrentQuestion(next === -1 ? 0 : next)
+    }
+
+    setModal(false)
+    toast.success("Quiz started!")
   }
 
-  // -----------------------------
-  // 6️⃣ SUBMIT ANSWER
-  // -----------------------------
+  // 7️⃣ SUBMIT ANSWER
   const submitAnswer = async () => {
     if (!selectedChoice || !attemptId) return
     const q = questions[currentQuestion]
-
-    try {
-      const response = await answerAttemptAction({ attemptId, questionId: q.id, optionId: selectedChoice.id, isCorrect: selectedChoice.isCorrect })
-      if (!response.success) {
-        toast.error(response.error || "Failed to save answer", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err), { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
-    }
+    await answerAttemptAction({
+      attemptId,
+      questionId: q.id,
+      optionId: selectedChoice.id,
+      isCorrect: selectedChoice.isCorrect,
+    })
   }
 
-  // -----------------------------
-  // 7️⃣ NEXT QUESTION / FINISH
-  // -----------------------------
+  // 8️⃣ NEXT / FINISH
   const handleNext = async () => {
     await submitAnswer()
 
     if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(prev => prev + 1)
+      setCurrentQuestion(p => p + 1)
     } else {
-      try {
-        const scoreRes = await calculateScoreAction(attemptId)
-        if (!scoreRes.success) {
-          toast.error(scoreRes.error || "Failed to calculate score", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
-        } else {
-          toast.success("Quiz finished!", { icon: "✅", style: { background: "#ffffff", color: "#2563eb", fontWeight: "bold" }, duration: 3000 })
-          confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } })
-        }
-
-        const tabRes = await saveTabSwitchCountAction(attemptId, tabSwitches)
-        if (!tabRes.success) {
-          toast.error(tabRes.error || "Failed to save tab switches", { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
-        }
-
-        router.push(`/quiz/${quizId}/results/${attemptId}`)
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : String(err), { icon: "⚠️", style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" } })
-      }
+      await calculateScoreAction(attemptId)
+      confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } })
+      router.push(`/quiz/${quizId}/results/${attemptId}`)
     }
   }
 
-  // -----------------------------
-  // 8️⃣ SELECT CHOICE
-  // -----------------------------
-  const handleSelect = (choice: Option) => setSelectedChoice(choice)
-
   return (
-    <div className="relative min-h-screen bg-background flex flex-col items-center p-4">
+    <div className="relative min-h-screen flex flex-col items-center p-4">
       {blurScreen && (
-        <div className="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-50 flex justify-center items-center">
-          <p className="text-white font-semibold text-xl">You left the tab!</p>
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+          <p className="text-white text-xl font-semibold">You left the quiz 😡</p>
         </div>
       )}
 
-      {modal && (
-        <div className="w-full flex justify-center items-center mt-20">
-          <div className="card w-96 p-4 max-w-sm text-center">
-            <p className="text-muted">This quiz is monitored — tab switches are counted.</p>
-            <button onClick={handleStart} className="mt-4 bg-primary p-2 rounded-md font-semibold cursor-pointer">Start Quiz</button>
-          </div>
+      {modal ? (
+        <div className="mt-20 text-center">
+          <p>This quiz is monitored — tab switches are counted.</p>
+          <button onClick={handleStart} className="mt-4 bg-primary p-2 rounded">
+            Start Quiz
+          </button>
         </div>
-      )}
-
-      {!modal && questions.length > 0 && (
-        <div className="flex flex-col gap-6 w-full max-w-4xl mt-10">
+      ) : (
+        <div className="max-w-4xl w-full mt-10 space-y-6">
           <div className="flex justify-center gap-10">
             <TimerCard time={timeLeft} />
             <TabSwitchesCard count={tabSwitches} />
           </div>
 
-          <QuizCard question={questions[currentQuestion].text} choices={questions[currentQuestion].option} onSelect={handleSelect} />
+          <QuizCard
+            question={questions[currentQuestion]?.text}
+            choices={questions[currentQuestion]?.option}
+            onSelect={setSelectedChoice}
+          />
 
           <button
             onClick={handleNext}
             className={`mt-4 p-2 rounded-md font-semibold cursor-pointer ${
-              currentQuestion === questions.length - 1 ? "bg-green-600 text-white hover:bg-green-700" : "bg-primary text-white hover:bg-primary/90"
+              currentQuestion === questions.length - 1
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "bg-primary text-white hover:bg-primary/90"
             }`}
           >
             {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}
           </button>
+
         </div>
       )}
-
-      {!modal && questions.length === 0 && <p>No questions found for this quiz.</p>}
     </div>
   )
 }
