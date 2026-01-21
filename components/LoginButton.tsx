@@ -2,6 +2,7 @@
 
 import { authClient } from "@/client/auth-client"
 import { Button } from "@/components/ui/button"
+import toast from "react-hot-toast";
 
 function LoginButton() {
     const handleLogin = async () => {
@@ -11,6 +12,7 @@ function LoginButton() {
             callbackURL: "/dashboard", // Better Auth uses `redirectTo` instead of callbackURL
             });
         } catch (error) {
+            toast.error("error")
             console.error("Login failed:", error);
         }
         };
