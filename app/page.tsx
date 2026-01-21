@@ -51,7 +51,7 @@ export default function Home() {
                   </div>
               </div>
               <p className="text-4xl text-primary font-semibold">Take the stress out of online exams.</p>
-              <p className="text-2xl text-gray-500">Proctorly ensures your quizzes and tests are protected with smart, automated <br />
+              <p className="text-2xl text-gray-500">Proctorly ensures your quizzes and tests are protected with smart, non-invasive <br />
                  proctoring—so you can focus on learning, not cheating.</p>
           </div>
 
