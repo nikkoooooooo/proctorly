@@ -217,7 +217,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
           <button
             onClick={handleNext}
-            className={`mt-4 p-2 rounded-md font-semibold cursor-pointer ${
+            className={`mt-4 p-2 rounded-md font-semibold w-full cursor-pointer ${
               currentQuestion === questions.length - 1
                 ? "bg-green-600 text-white hover:bg-green-700"
                 : "bg-primary text-white hover:bg-primary/90"
