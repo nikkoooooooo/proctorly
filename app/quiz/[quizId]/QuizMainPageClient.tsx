@@ -34,19 +34,27 @@ interface Question {
 export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const router = useRouter()
 
+  // -------------------- CORE QUIZ STATE --------------------
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedChoice, setSelectedChoice] = useState<Option | null>(null)
   const [attemptId, setAttemptId] = useState("")
 
+  // -------------------- PROCTORING STATE --------------------
   const [tabSwitches, setTabSwitches] = useState(0)
   const [blurScreen, setBlurScreen] = useState(false)
   const [proctoring, setProctoring] = useState<{ blurQuestion: boolean; tabMonitoring: boolean } | null>(null)
 
+  // -------------------- TIMER STATE --------------------
   const [timeLeft, setTimeLeft] = useState(0)
+
+  // 🚨 IMPORTANT FIX STATE
+  // This flag tells React: "timer finished, go next AFTER render"
+  const [timeUp, setTimeUp] = useState(false)
+
   const [modal, setModal] = useState(true)
 
-  // 1️⃣ FETCH QUESTIONS + PROCTORING
+  // 1️⃣ FETCH QUESTIONS + PROCTORING SETTINGS
   useEffect(() => {
     const fetchData = async () => {
       const data = await getQuestionsByQuizIdAction(quizId)
@@ -69,15 +77,20 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     fetchData()
   }, [quizId])
 
-  // 2️⃣ SET TIMER PER QUESTION
+  // 2️⃣ RESET TIMER WHEN QUESTION CHANGES
   useEffect(() => {
     if (!questions.length) return
+
     const q = questions[currentQuestion]
+
+    // set time limit per question
     setTimeLeft(q?.timeLimit ? Number(q.timeLimit) : 0)
+
+    // clear selected option for new question
     setSelectedChoice(null)
   }, [currentQuestion, questions])
 
-  // 3️⃣ TIMER COUNTDOWN
+  // 3️⃣ TIMER COUNTDOWN (PURE — NO SIDE EFFECTS)
   useEffect(() => {
     if (modal || timeLeft <= 0) return
 
@@ -85,7 +98,10 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer)
-          handleNext()
+
+          // ✅ ONLY SET STATE — NO ROUTER / SERVER ACTIONS
+          setTimeUp(true)
+
           return 0
         }
         return prev - 1
@@ -95,7 +111,19 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     return () => clearInterval(timer)
   }, [timeLeft, modal])
 
-  // 4️⃣ TAB SWITCH / BLUR DETECTION (PURE)
+  // 3️⃣.5️⃣ HANDLE AUTO NEXT WHEN TIMER EXPIRES (SAFE SIDE EFFECT)
+  useEffect(() => {
+    if (!timeUp) return
+
+    const run = async () => {
+      await handleNext()   // safe: runs AFTER render
+      setTimeUp(false)     // reset for next question
+    }
+
+    run()
+  }, [timeUp])
+
+  // 4️⃣ TAB SWITCH / BLUR DETECTION (PURE EFFECT)
   useEffect(() => {
     if (modal || !proctoring?.blurQuestion) return
 
@@ -130,7 +158,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     }
   }, [modal, proctoring?.blurQuestion])
 
-  // ✅ 5️⃣ SYNC TAB SWITCH COUNT TO SERVER (SAFE)
+  // 5️⃣ SYNC TAB SWITCH COUNT TO SERVER (SAFE)
   useEffect(() => {
     if (!attemptId) return
     void saveTabSwitchCountAction(attemptId, tabSwitches)
@@ -165,7 +193,9 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   // 7️⃣ SUBMIT ANSWER
   const submitAnswer = async () => {
     if (!selectedChoice || !attemptId) return
+
     const q = questions[currentQuestion]
+
     await answerAttemptAction({
       attemptId,
       questionId: q.id,
@@ -174,7 +204,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     })
   }
 
-  // 8️⃣ NEXT / FINISH
+  // 8️⃣ NEXT / FINISH LOGIC
   const handleNext = async () => {
     await submitAnswer()
 
@@ -187,6 +217,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     }
   }
 
+  // -------------------- UI --------------------
   return (
     <div className="relative min-h-screen flex flex-col items-center p-4">
       {blurScreen && (
@@ -225,7 +256,6 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
           >
             {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}
           </button>
-
         </div>
       )}
     </div>
