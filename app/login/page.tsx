@@ -32,7 +32,7 @@ export default function Login() {
                 </CardContent>
 
                 <CardFooter className="flex-col gap-2 text-center text-gray-500">
-                    By signing in, you agree to our Terms of Service and
+                    By signing in, you agree to our Terms of Service &
                     Privacy Policy
                 </CardFooter>
             </Card>
