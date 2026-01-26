@@ -1,28 +1,40 @@
-"use client"
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import toast from "react-hot-toast"
-import confetti from "canvas-confetti"
+"use client" // means this pages will run in the client 
 
-import QuizCard from "@/components/QuizCard"
-import TimerCard from "@/components/TimerCard"
-import TabSwitchesCard from "@/components/TabSwitchesCard"
+import { useState, useEffect } from "react" // importing the useState and useEffect 
+import { useRouter } from "next/navigation" // importing the useRouter
+import toast from "react-hot-toast" // importing the toast for notifying current state
+import confetti from "canvas-confetti" // importing for confetti
 
+import QuizCard from "@/components/QuizCard" // importing quizCard so that we could pass value into it
+import TimerCard from "@/components/TimerCard" // importing timerCard so that we could amke its value dynamic
+import TabSwitchesCard from "@/components/TabSwitchesCard" // import this so that we could amke it value dynamic also for tab Count
+
+
+// importing this server action to get the question on the QUIZ we are about to take
 import { getQuestionsByQuizIdAction } from "@/lib/actions/getQuestionsByQuizIdAction"
+// server action for getSession so that we could check if there is a session
 import { getSession } from "@/lib/auth-actions"
+// server action for creating attempt
 import { createAttemptAction } from "@/lib/actions/createAttemptAction"
+// server action for passing the asnwer attempt immediately after sending
 import { answerAttemptAction } from "@/lib/actions/answerAttemptAction"
+// server action  for saving the tab count switch
 import { saveTabSwitchCountAction } from "@/lib/actions/saveTabSwitchCountAction"
+// a server action for caulcating the answer attempt by students
 import { calculateScoreAction } from "@/lib/actions/calculateScoreAction"
+// server action for getting the progress for previous attempt that maybe been stopped
 import { getAttemptProgressAction } from "@/lib/actions/getAttemptProgressAction"
+// a server action for getting quiz proctored feature if they enable
 import { getQuizProctoringByIdAction } from "@/lib/actions/getQuizProctoringByIdAction"
 
+// data type for option of questions
 interface Option {
   id: string
   text: string
   isCorrect: boolean
 }
 
+// data type of Questions
 interface Question {
   id: string
   quizId: string
@@ -35,23 +47,34 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const router = useRouter()
 
   // -------------------- CORE QUIZ STATE --------------------
+  // state for saving the questions
   const [questions, setQuestions] = useState<Question[]>([])
+  // state for saving the current questions
   const [currentQuestion, setCurrentQuestion] = useState(0)
+  // state for saving the current selected choice
   const [selectedChoice, setSelectedChoice] = useState<Option | null>(null)
+  // state for setting the current attemptId
   const [attemptId, setAttemptId] = useState("")
 
   // -------------------- PROCTORING STATE --------------------
+  // set state for tab switches count
   const [tabSwitches, setTabSwitches] = useState(0)
+  // set state for blurScreen if its true then show the blurry effect and text
   const [blurScreen, setBlurScreen] = useState(false)
-  const [proctoring, setProctoring] = useState<{ blurQuestion: boolean; tabMonitoring: boolean } | null>(null)
+  // checking if the proctored feature is true to enable it
+  const [proctoring, setProctoring] = useState<{ blurQuestion: boolean } | null>(null)
 
   // -------------------- TIMER STATE --------------------
+
+  // state for timer to be dynamic in every question
   const [timeLeft, setTimeLeft] = useState(0)
 
   // 🚨 IMPORTANT FIX STATE
   // This flag tells React: "timer finished, go next AFTER render"
   const [timeUp, setTimeUp] = useState(false)
 
+
+  // show before taking the quiz
   const [modal, setModal] = useState(true)
 
   // 1️⃣ FETCH QUESTIONS + PROCTORING SETTINGS
@@ -69,9 +92,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         proctoringRes.success && proctoringRes.quiz
           ? {
               blurQuestion: proctoringRes.quiz.blurQuestion,
-              tabMonitoring: proctoringRes.quiz.tabMonitoring,
             }
-          : { blurQuestion: false, tabMonitoring: false }
+          : { blurQuestion: false }
       )
     }
     fetchData()
@@ -221,7 +243,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   return (
     <div className="relative min-h-screen flex flex-col items-center p-4">
       {blurScreen && (
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="absolute inset-0 bg-[#FF000080] backdrop-blur-sm z-50 flex items-center justify-center">
           <p className="text-white text-xl font-semibold">You left the quiz 😡</p>
         </div>
       )}
@@ -229,7 +251,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       {modal ? (
         <div className="mt-20 text-center">
           <p>This quiz is monitored — tab switches are counted.</p>
-          <button onClick={handleStart} className="mt-4 bg-primary p-2 rounded">
+          <button onClick={handleStart} className="mt-4 bg-primary hover:bg-blue-400 active:bg-blue-300 p-2 rounded">
             Start Quiz
           </button>
         </div>
@@ -250,8 +272,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             onClick={handleNext}
             className={`mt-4 p-2 rounded-md font-semibold w-full cursor-pointer ${
               currentQuestion === questions.length - 1
-                ? "bg-green-600 text-white hover:bg-green-700"
-                : "bg-primary text-white hover:bg-primary/90"
+                ? "bg-green-600 text-white hover:bg-green-700 active:bg-green-300"
+                : "bg-primary text-white hover:bg-primary/90  active:bg-blue-300"
             }`}
           >
             {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}

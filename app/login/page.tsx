@@ -19,9 +19,9 @@ export default function Login() {
 
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-[#0f172a]">
+    <div className="min-h-screen flex justify-center items-center bg-background">
         <div className="w-full max-w-md px-4">
-            <Card className="bg-[#1e293b] px-4 border-none">
+            <Card className="bg-secondary px-4 border-none">
                 <CardHeader>
                     <h2 className="text-center font-bold text-2xl text-white">Sign in</h2>
                     <p className="text-center text-gray-500">Continue with your Google account</p>
@@ -38,8 +38,6 @@ export default function Login() {
             </Card>
         </div>
       
-    </div>
-
-   
+    </div>   
   )
 }

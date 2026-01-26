@@ -1,5 +1,6 @@
 // components/AlreadyTakenPage.tsx
 import { getQuizByIdAction } from "@/lib/actions/getQuizByIdAction"
+// import { getFinalResultsAction } from "@/lib/actions/getFinalResultsAction"
 import Link from "next/link"
 
 interface AlreadyTakenPageProps {
@@ -8,6 +9,7 @@ interface AlreadyTakenPageProps {
 
 export default async function AlreadyTakenPage({ quizId }: AlreadyTakenPageProps) {
   const quiz = await getQuizByIdAction(quizId)
+  // const { score } = await getFinalResultsAction()
 
   return (
     <div className="min-h-screen bg-background flex justify-center items-center p-4">
@@ -21,6 +23,7 @@ export default async function AlreadyTakenPage({ quizId }: AlreadyTakenPageProps
         )}
         <p className="text-sm text-gray-600 mb-6">
           Retaking is not allowed. You can view your results if available.
+          {}
         </p>
 
         <Link

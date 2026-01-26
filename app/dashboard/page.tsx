@@ -165,7 +165,7 @@ export default function Dashboard() {
         <div className="mt-5 flex flex-col gap-2">
           <div className="flex w-full justify-between">
             <h2 className="text-white text-4xl font-bold">Dashboard</h2>
-            <Link href="/create-quiz" className="bg-blue-500 text-white p-2 rounded-lg font-semibold">
+            <Link href="/create-quiz" className="bg-blue-500 hover:bg-blue-400 active:bg-blue-300 cursor-pointer text-white p-2 rounded-lg font-semibold">
               + Create Quiz
             </Link>
           </div>
@@ -189,7 +189,7 @@ export default function Dashboard() {
                 className="bg-background rounded-md w-full py-2 px-2 text-xl"
                 placeholder="ABC123"
               />
-              <button type="submit" className="bg-primary py-2 px-6 rounded-md font-semibold w-32 cursor-pointer hover:bg-blue-400">
+              <button type="submit" className="bg-primary py-2 px-6 rounded-md font-semibold w-32 cursor-pointer hover:bg-blue-400 active:bg-blue-300">
                 Find Quiz
               </button>
             </form>
@@ -205,7 +205,7 @@ export default function Dashboard() {
               <p>By: {quizCreatorName}</p>
               {joinQuiz.description && <p className="text-muted">{joinQuiz.description}</p>}
             </div>
-            <button onClick={handleJoinQuiz} className="bg-primary p-2 rounded-md">
+            <button onClick={handleJoinQuiz} className="bg-primary hover:bg-blue-400 cursor-pointer active:bg-blue-300 p-2 rounded-md font-semibold">
               Join Quiz
             </button>
           </div>

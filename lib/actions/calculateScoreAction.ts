@@ -13,9 +13,9 @@ export async function calculateScoreAction(attemptId: string) {
       .where(eq(attemptAnswer.attemptId, attemptId))
       .execute()
 
-    if (!answers || answers.length === 0) {
-      return { success: false, error: "No answers found for this attempt." }
-    }
+    // if (!answers || answers.length === 0) {
+    //   return { success: false, error: "No answers found for this attempt." }
+    // }
 
     const totalCorrect = answers.filter(a => a.isCorrect).length
     const totalQuestions = answers.length

@@ -138,7 +138,7 @@ export const attempt = pgTable("attempt", {
 
   quizId: text("quiz_id") // taking the id of the quiz that user attempted to answer
     .notNull() // it should not be null, so that we could know what quiz did he answers
-    .references(() => quiz.id), // passing the id of the quiz the user take
+    .references(() => quiz.id, { onDelete: "cascade" }), // passing the id of the quiz the user take
 
   userId: text("user_id")// taking th id of the user who take the quiz 
     .notNull() // it should not be null, so that we could know who is the user take the quiz

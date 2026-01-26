@@ -252,7 +252,7 @@ export default function CreateQuizPage() {
           </button>
         </div>
 
-        <button type="submit" className="w-full bg-primary p-3 font-semibold rounded-md">
+        <button type="submit" className="w-full bg-primary hover:bg-blue-400 active:bg-blue-300 p-3 font-semibold rounded-md">
           Create Quiz
         </button>
       </form>

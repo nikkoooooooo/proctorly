@@ -28,11 +28,11 @@ function Navbar() {
           <div className='hidden md:flex items-center '>
             {session ? (
               <div className="flex items-center justify-end w-96 gap-5">
-                <Link href='/dashboard' className='font-bold text-md text-white'>
+                <Link href='/dashboard' className='font-bold text-md text-white hover:bg-blue-400 active:bg-blue-300'>
                   Dashboard
                 </Link>
 
-                <Link href='/profile' className='font-bold text-md text-white'>
+                <Link href='/profile' className='font-bold text-md text-white hover:bg-blue-400 active:bg-blue-300'>
                   Profile
                 </Link>
                 
