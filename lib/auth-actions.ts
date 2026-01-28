@@ -10,7 +10,11 @@ import { revalidatePath } from "next/cache";
 
 export async function getSession() {
   const result = await auth.api.getSession({
-    headers: await headers()
+    headers: await headers(),
+    query: {
+    disableCookieCache: true,
+  },
+
   })
   
   return result?.session ?? null;
@@ -33,11 +37,31 @@ export async function signIn() {
 
 
 export async function signOut() {
-  const result = await auth.api.signOut({
-    headers: await headers()
-  })
+  // const result = await auth.api.signOut({
+  //   headers: await headers()
 
-  return result;
+    
+
+  // })
+
+  // return result;
+
+
+  try {
+    const result = await auth.api.signOut({
+      headers: await headers(),
+    });
+
+
+    revalidatePath("/");
+    revalidatePath("/login");
+    revalidatePath("/dashboard");
+
+    return result
+  } catch (err) {
+    console.error("Sign out failed:", err);
+    throw err;
+  }
 }
 /**
  * Get the current session (can be null if not logged in)
