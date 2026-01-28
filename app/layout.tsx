@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   title: "Proctorly",
   description: "Online Proctor",
 };
+
 export const dynamic = "force-dynamic";
 
 

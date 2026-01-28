@@ -77,17 +77,26 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   // show before taking the quiz
   const [modal, setModal] = useState(true)
 
+
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 1️⃣ FETCH QUESTIONS + PROCTORING SETTINGS
   useEffect(() => {
+    // fetch questions using server actions
     const fetchData = async () => {
+      // saving those in the "data" variable
       const data = await getQuestionsByQuizIdAction(quizId)
+      // if there is no data then show toast notify error
       if (!data.success) {
         toast.error(data.error || "Failed to fetch questions")
         return
       }
+      // we set the current questions in state
       setQuestions(data.questions || [])
-
+      //  getting the proctoring value if its true or not
       const proctoringRes = await getQuizProctoringByIdAction(quizId)
+      // then setting it in states to update if there will be a proctoring feature
       setProctoring(
         proctoringRes.success && proctoringRes.quiz
           ? {
@@ -98,43 +107,61 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     }
     fetchData()
   }, [quizId])
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+
+
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 2️⃣ RESET TIMER WHEN QUESTION CHANGES
   useEffect(() => {
-    if (!questions.length) return
+    if (!questions.length) return // WONT ACTUALLY HAPPEN, BUT THIS IS JUST SAFETY CHECK IF THERE IS NO QUESTIONS THEN DO NOTHING
 
-    const q = questions[currentQuestion]
+    const q = questions[currentQuestion] // FOR INITIAL CURRENTQUESTION VALUE IS ZERO SO IT WILL BE THE FIRST QUESTION
 
     // set time limit per question
-    setTimeLeft(q?.timeLimit ? Number(q.timeLimit) : 0)
+    setTimeLeft(q?.timeLimit ? Number(q.timeLimit) : 0) // SETTING THE TIME LIMIT PER CHANGE OF QUESTION
 
     // clear selected option for new question
-    setSelectedChoice(null)
-  }, [currentQuestion, questions])
+    setSelectedChoice(null) // RESET THE SELECTED CHOICE EVERY NEW QUESTIONS
+  }, [currentQuestion, questions]) // DEPENDENCY, ONLY RUN THIS EFFECT WHEN ITS EITHER THE TWO UPDATE
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 3️⃣ TIMER COUNTDOWN (PURE — NO SIDE EFFECTS)
   useEffect(() => {
-    if (modal || timeLeft <= 0) return
+    if (modal || timeLeft <= 0) return // IF ONE OF THIS IS TRUW THEN DO NOTHING
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer)
+    const timer = setInterval(() => { // CREATE A TIMER TO MAKE THE TIMER PER QUESTIONS VALUE DYNAMIC
+      setTimeLeft(prev => { // UPDATE THE TIME LIMIT EVERY SECOND
+        if (prev <= 1) { // ONCE THE CURRENT VALUE IS == OR < TO 1 THEN WE WILL STOP THE TIMER OR RESET THE VALUE TO COUNTDOWN
+          clearInterval(timer) // CLEAR THE TIMER
 
           // ✅ ONLY SET STATE — NO ROUTER / SERVER ACTIONS
-          setTimeUp(true)
+          setTimeUp(true) // A FLAG USESTATE TO KNOW THAT THE TIMER ALREADY DONE
 
-          return 0
+          return 0 // THEN RETURN 0
         }
-        return prev - 1
+        return prev - 1 // SUBSTRACT 1 EVERY SECOND TO THE TIME LIMIT VALUE TO MAKE IT A COUNTDOWN
       })
     }, 1000)
 
-    return () => clearInterval(timer)
+    return () => clearInterval(timer) // CLEAN THE OLD TIMER, SO THAT IT WONT STILL CONTINUING
   }, [timeLeft, modal])
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+
+
+
+
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 3️⃣.5️⃣ HANDLE AUTO NEXT WHEN TIMER EXPIRES (SAFE SIDE EFFECT)
-  useEffect(() => {
+  useEffect(() => { // A USESTATE THAT WILL HANDLE IF THE TIMER TIMES UP THEN WE WILL AUTO NEXT QUESTION
     if (!timeUp) return
 
     const run = async () => {
@@ -144,7 +171,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
     run()
   }, [timeUp])
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 4️⃣ TAB SWITCH / BLUR DETECTION (PURE EFFECT)
   useEffect(() => {
     if (modal || !proctoring?.blurQuestion) return
@@ -179,13 +210,26 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       document.removeEventListener("visibilitychange", handleVisibility)
     }
   }, [modal, proctoring?.blurQuestion])
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+
+
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 5️⃣ SYNC TAB SWITCH COUNT TO SERVER (SAFE)
   useEffect(() => {
     if (!attemptId) return
     void saveTabSwitchCountAction(attemptId, tabSwitches)
   }, [tabSwitches, attemptId])
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+
+
+
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 6️⃣ START QUIZ
   const handleStart = async () => {
     const session = await getSession()
@@ -211,12 +255,19 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     setModal(false)
     toast.success("Quiz started!")
   }
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-  // 7️⃣ SUBMIT ANSWER
+
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  // 7️⃣ SUBMIT ANSWER 
   const submitAnswer = async () => {
     if (!selectedChoice || !attemptId) return
 
     const q = questions[currentQuestion]
+
+  
 
     await answerAttemptAction({
       attemptId,
@@ -225,7 +276,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       isCorrect: selectedChoice.isCorrect,
     })
   }
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+
+
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 8️⃣ NEXT / FINISH LOGIC
   const handleNext = async () => {
     await submitAnswer()
@@ -238,6 +293,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       router.push(`/quiz/${quizId}/results/${attemptId}`)
     }
   }
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   // -------------------- UI --------------------
   return (

@@ -129,7 +129,7 @@ export const option = pgTable("option", {
     .references(() => question.id, { onDelete: "cascade" }), // taking the question ID for FK, so that we could connect this option in the question 
 
   text: text("text").notNull(),
-  isCorrect: boolean("is_correct").default(false),
+  isCorrect: boolean("is_correct"),
 });
 
 

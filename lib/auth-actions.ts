@@ -3,6 +3,8 @@
 import { headers } from "next/headers";
 import { auth } from "./auth";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+
 
 
 
@@ -76,6 +78,11 @@ export const signOutt = async (): Promise<void> => {
     await auth.api.signOut({
       headers: await headers(),
     });
+
+
+    revalidatePath("/");
+    revalidatePath("/login");
+    revalidatePath("/dashboard");
   } catch (err) {
     console.error("Sign out failed:", err);
     throw err;

@@ -8,7 +8,7 @@ interface AnswerAttemptProps {
   questionId: string
   optionId?: string   // optional for identification questions
   textAnswer?: string
-  isCorrect: boolean
+  isCorrect?: boolean
 }
 
 export async function answerAttemptHelper({
