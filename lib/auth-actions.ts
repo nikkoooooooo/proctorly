@@ -16,7 +16,7 @@ export async function getSession() {
   },
 
   })
-  
+          
   return result?.session ?? null;
 }
 
@@ -37,16 +37,6 @@ export async function signIn() {
 
 
 export async function signOut() {
-  // const result = await auth.api.signOut({
-  //   headers: await headers()
-
-    
-
-  // })
-
-  // return result;
-
-
   try {
     const result = await auth.api.signOut({
       headers: await headers(),

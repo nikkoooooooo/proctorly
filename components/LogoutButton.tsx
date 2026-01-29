@@ -8,9 +8,12 @@ function LogoutButton() {
 
     const handleLogout = async () => {
         await signOut();
-        router.push("/login")
+
+        await authClient.signOut();
+
+        router.replace("/login")
         router.refresh()
-        refetch()
+        // refetch()
     }
 
   return (
