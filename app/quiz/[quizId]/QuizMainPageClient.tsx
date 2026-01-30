@@ -318,15 +318,17 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         </div>
       ) : (
         <div className="max-w-4xl w-full mt-10 space-y-6">
-          <div className="flex justify-center gap-10">
+          {/* <div className="flex justify-center gap-10">
             <TimerCard time={timeLeft} />
             <TabSwitchesCard count={tabSwitches} />
-          </div>
+          </div> */}
 
           <QuizCard
             question={questions[currentQuestion]?.text}
             choices={questions[currentQuestion]?.option}
             onSelect={setSelectedChoice}
+            time={timeLeft}
+            tabSwitch={tabSwitches}
           />
 
           <button
