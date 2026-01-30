@@ -10,10 +10,11 @@ import TimerCard from "@/components/TimerCard" // importing timerCard so that we
 import TabSwitchesCard from "@/components/TabSwitchesCard" // import this so that we could amke it value dynamic also for tab Count
 
 
+import { authClient } from "@/client/auth-client"
 // importing this server action to get the question on the QUIZ we are about to take
 import { getQuestionsByQuizIdAction } from "@/lib/actions/getQuestionsByQuizIdAction"
 // server action for getSession so that we could check if there is a session
-import { getSession } from "@/lib/auth-actions"
+// import { getSession } from "@/lib/auth-actions"
 // server action for creating attempt
 import { createAttemptAction } from "@/lib/actions/createAttemptAction"
 // server action for passing the asnwer attempt immediately after sending
@@ -45,6 +46,11 @@ interface Question {
 
 export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const router = useRouter()
+
+
+  const { data } = authClient.useSession()
+  const user = data?.user
+  const session = data?.session
 
   // -------------------- CORE QUIZ STATE --------------------
   // state for saving the questions
@@ -232,7 +238,6 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 6️⃣ START QUIZ
   const handleStart = async () => {
-    const session = await getSession()
     if (!session) return
 
     const result = await createAttemptAction({ quizId, userId: session.userId })

@@ -7,7 +7,9 @@ import { useState } from "react";
 
 function Navbar() {
   //  const session = await getSession();
-    const {data: session} = authClient.useSession();
+    const {data: session} = authClient.useSession(
+  
+    );
     const [isMenuOpen, SetIsMenuOpen] = useState<boolean>(false)
 
 

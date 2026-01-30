@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { v4 as uuid } from "uuid"
 import { createQuiz } from "@/lib/helpers/createQuiz"
-import { getSession } from "@/lib/auth-actions"
+import { authClient } from "@/client/auth-client"
 
 // Question type options
 type QuestionType = "mcq" | "true-false"
@@ -27,6 +27,11 @@ interface Question {
 
 // Main Create Quiz Page
 export default function CreateQuizPage() {
+  const { data } = authClient.useSession()
+  const user = data?.user
+  const session = data?.session
+
+
   const [userId, setUserId] = useState<string | null>(null)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -37,13 +42,13 @@ export default function CreateQuizPage() {
   const [disableCopyPaste, setDisableCopyPaste] = useState(false)
   const [tabMonitoring, setTabMonitoring] = useState(false)
 
+
   useEffect(() => {
-    const fetchUser = async () => {
-      const session = await getSession()
-      if (session?.userId) setUserId(session?.userId)
-    }
-    fetchUser()
-  }, [])
+    if (!user) return
+    setUserId(user.id)
+  }, [user])
+
+ 
 
   function createEmptyQuestion(): Question {
     return {
