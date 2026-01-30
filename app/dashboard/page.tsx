@@ -473,7 +473,7 @@ export default function Dashboard() {
   }
 
   if (!session) {
-    return <p className="text-2xl text-center mt-80 text-muted">Please log in to access this page</p>
+    return <p className="text-xl text-center mt-80 text-muted">Please log in to access this page</p>
   }
 
   // ----------------------
