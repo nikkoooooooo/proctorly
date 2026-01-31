@@ -160,14 +160,6 @@ export default function CreateQuizPage() {
             <input type="checkbox" checked={blurQuestion} onChange={(e) => setBlurQuestion(e.target.checked)} />
             <p className="font-semibold">👁️ Window and Tab Monitoring</p>
           </div>
-          {/* <div className="flex gap-2 items-center">
-            <input type="checkbox" checked={disableCopyPaste} onChange={(e) => setDisableCopyPaste(e.target.checked)} />
-            <p className="font-semibold">🚫 Disable Copy & Paste</p>
-          </div> */}
-          {/* <div className="flex gap-2 items-center">
-            <input type="checkbox" checked={tabMonitoring} onChange={(e) => setTabMonitoring(e.target.checked)} />
-            <p className="font-semibold">📊 Tab Monitoring</p>
-          </div> */}
         </div>
 
         {/* Questions Section */}

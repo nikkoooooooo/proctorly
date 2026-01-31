@@ -17,10 +17,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "Proctorly",
-  description: "Online Proctor",
+  description:
+    "Proctorly is a simple and reliable platform for creating and managing online quizzes.",
+
+  openGraph: {
+    title: "Proctorly",
+    description:
+      "Create and manage online quizzes with a clean and non-invasive system.",
+    type: "website",
+  },
 };
+
 
 export const dynamic = "force-dynamic";
 

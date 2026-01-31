@@ -15,7 +15,6 @@ import getQuizThroughCodeAction from "@/lib/actions/getQuizThroughCodeAction"
 import { deleteQuizAction } from "@/lib/actions/deleteQuizAction"
 import { joinQuizAction } from "@/lib/actions/joinQuizAction"
 import { getUserJoinedQuizAction } from "@/lib/actions/getUserJoinedQuizAction"
-import TimerCard from "@/components/TimerCard";
 
 interface Quiz {
   id: string
@@ -44,28 +43,7 @@ export default function Dashboard() {
   const totalQuizJoined = userJoinedQuiz.length
   const totalQuizzes = totalQuizCreated + totalQuizJoined
 
-  // ----------------------
-  // FETCH USER + QUIZZES
-  // ----------------------
-//   useEffect(() => {
-//     const fetchUser = async () => {
-//       const currentSession = await getSession()
-//       if (!currentSession) return
-//       setSession(currentSession)
-
-//       const userResult = await getUserName(currentSession.id)
-//       if (userResult.success && userResult.username) setUserName(userResult.username)
-
-//       const created = await getUserQuizAction(currentSession.userId)
-//       if (created.quizzes) setUserCreatedQuiz(created.quizzes)
-
-//       const joined = await getUserJoinedQuizAction(currentSession.userId)
-//       if (joined.quizzes) setUserJoinedQuiz(joined.quizzes)
-//     }
-//     fetchUser()
-//   }, [])
-
-
+ 
   useEffect(() => {
     const fetchUser = async () => {
     //   const currentSession = await getSession()
