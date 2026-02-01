@@ -86,6 +86,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
 
 
+
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 1️⃣ FETCH QUESTIONS + PROCTORING SETTINGS
   useEffect(() => {
@@ -260,7 +261,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     setModal(false)
     toast.success("Quiz started!")
   }
-  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 
 
 
@@ -318,10 +320,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         </div>
       ) : (
         <div className="max-w-4xl w-full mt-10 space-y-6">
-          {/* <div className="flex justify-center gap-10">
-            <TimerCard time={timeLeft} />
-            <TabSwitchesCard count={tabSwitches} />
-          </div> */}
+         
 
           <QuizCard
             question={questions[currentQuestion]?.text}
@@ -346,3 +345,14 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     </div>
   )
 }
+
+
+
+
+
+
+// TODO: REMOVE THE ANSWER WHEN IT ALREADY ANSWERED 
+// TODO: SEND NEWLY UPDATED TIMER EVERY 5 SECS
+// TODO: A QUESTION CAN STILL BE ASNWERED AS LONG THERE IS STILL AN TIME FOR ITS
+// TODO: RETAKE FOR STUDENTS
+// TODO: LET THE STUDENTS VEIW THEIR ANSWER HISTORY BUT IF THE TEACHER ENABLE IT

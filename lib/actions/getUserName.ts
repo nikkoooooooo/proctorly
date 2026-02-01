@@ -1,16 +1,16 @@
 "use server";
 
-import { getUserNameFromSession, getUserNameFromQuiz } from "../helpers/getUserName";
+import { getUserById, getUserNameFromQuiz } from "../helpers/getUser";
 
-export async function getUserName(sessionId: string) {
+export async function getUserBySessionIdAction(sessionId: string) {
   try {
-    const username = await getUserNameFromSession(sessionId);
+    const data = await getUserById(sessionId);
 
-    if (!username) {
+    if (!data) {
       return { success: false, error: "User not found for this session" };
     }
 
-    return { success: true, username };
+    return { success: true, data };
   } catch (error) {
     console.error("Failed to get username from session:", error);
     return { success: false, error: "Could not fetch username. Try again later." };

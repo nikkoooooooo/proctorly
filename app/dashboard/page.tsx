@@ -9,12 +9,13 @@ import confetti from "canvas-confetti"
 import QuizStatCard from "@/components/QuizStatCard"
 import { getSession } from "@/lib/auth-actions"
 import { authClient } from "@/client/auth-client";
-import { getUserName, getUserNameFromQuizAction } from "@/lib/actions/getUserName"
+import { getUserBySessionIdAction, getUserNameFromQuizAction } from "@/lib/actions/getUserName"
 import { getUserQuizAction } from "@/lib/actions/getUserQuizAction"
 import getQuizThroughCodeAction from "@/lib/actions/getQuizThroughCodeAction"
 import { deleteQuizAction } from "@/lib/actions/deleteQuizAction"
 import { joinQuizAction } from "@/lib/actions/joinQuizAction"
 import { getUserJoinedQuizAction } from "@/lib/actions/getUserJoinedQuizAction"
+import QuizBox from "@/components/QuizBox";
 
 interface Quiz {
   id: string
@@ -50,8 +51,8 @@ export default function Dashboard() {
       if (!user) return
     //   setSession(currentSession)
       if (session) {
-          const userResult = await getUserName(session.id)
-          if (userResult.success && userResult.username) setUserName(userResult.username)
+          const userResult = await getUserBySessionIdAction(session.id)
+          if (userResult.success && userResult.data) setUserName(userResult.data.user.name)
       }
       
 
@@ -175,7 +176,7 @@ export default function Dashboard() {
         <div className="mt-5 flex flex-col gap-2">
           <div className="flex w-full justify-between">
             <h2 className="text-white text-4xl font-bold">Dashboard</h2>
-            <Link href="/create-quiz" className="bg-blue-500 hover:bg-blue-400 active:bg-blue-300 cursor-pointer text-white p-2 rounded-lg font-semibold">
+            <Link href="/create-quiz" className="bg-primary hover:bg-blue-400 active:bg-blue-300 cursor-pointer text-white p-2 rounded-lg font-semibold">
               + Create Quiz
             </Link>
           </div>
@@ -228,7 +229,29 @@ export default function Dashboard() {
           <QuizStatCard title="Total" value={totalQuizzes} />
         </div>
 
-        {/* Created quizzes */}
+        
+        <div className="w-full flex flex-col sm:flex-row 
+        items-center justify-around mt-5 gap-2 p-4">
+          <QuizBox
+            path="/created-quiz"
+            emoji="📝"
+            quizCount={totalQuizCreated}
+            title="Created Quizzes"
+            description="Quizzes you've created"
+          />
+
+          <QuizBox
+            path="/joined-quiz"
+            emoji="🤝"
+            quizCount={totalQuizJoined}
+            title="Joined Quizzes"
+            description="Quizzes you've joined"
+          />
+        </div>
+
+        
+
+        {/* Created quizzes
         <div className="w-full mt-5">
           <div className="my-5 flex gap-2 items-center">
             <h2 className="text-2xl font-semibold text-white">My Quizzes</h2>
@@ -243,7 +266,7 @@ export default function Dashboard() {
                         <span className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">{quiz.joinCode}</span>
                 </div>
                   <div className="flex gap-2">
-                    <Link href={`/quiz/${quiz.id}/creator`} className="bg-blue-600 p-2 rounded-md font-semibold cursor-pointer text-white hover:bg-blue-700">
+                    <Link href={`/quiz/${quiz.id}/creator`} className="bg-primary p-2 rounded-md font-semibold cursor-pointer text-white hover:bg-blue-700">
                       View
                     </Link>
                     <button onClick={() => handleDeleteQuiz(quiz.id)} className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer">
@@ -259,7 +282,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Joined quizzes */}
+      // {/* Joined quizzes 
         <div className="w-full mb-10">
             <div className="my-5 flex gap-2 items-center">
                 <h2 className="text-2xl font-semibold text-white">Joined Quizzes</h2>
@@ -275,7 +298,7 @@ export default function Dashboard() {
                         </div>
 
                         {/* Uniform button */}
-                        <Link
+                        {/* <Link
                             href={`/quiz/${quiz.id}`}
                             className="bg-primary text-white flex items-center justify-center rounded-md font-semibold cursor-pointer p-2 hover:bg-blue-700 transition-all"
                         >
@@ -288,7 +311,7 @@ export default function Dashboard() {
             ) : (
                 <p className="text-white">No joined quizzes found</p>
             )}
-            </div>
+            </div>   */}
       </div>
     </div>
   )

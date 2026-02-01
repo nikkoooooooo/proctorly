@@ -3,16 +3,18 @@ import { quiz, session, user } from "../schema";
 import { eq } from "drizzle-orm/expressions";
 
 // sessionId could come from getSession() in Better Auth
-export async function getUserNameFromSession(sessionId: string) {
+export async function getUserById(sessionId: string) {
   const result = await db
-    .select({ name: user.name })      // select only the name
+    .select()
     .from(session)
-    .innerJoin(user, eq(user.id, session.userId)) // join session -> user
-    .where(eq(session.id, sessionId))  // filter by session id
+    .innerJoin(user, eq(user.id, session.userId))
+    .where(eq(session.id, sessionId))
     .limit(1)
-    .execute()  // returns an array
+    .execute()
 
-  return result[0]?.name ?? null;  // first element's name or null
+  if (!result || result.length === 0) return null
+
+  return result[0] // return the entire row
 }
 
 

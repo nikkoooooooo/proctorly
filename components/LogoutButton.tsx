@@ -46,7 +46,7 @@ function LogoutButton() {
 
     return (
         <button 
-            className="p-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg font-semibold" 
+            className="p-2 bg-primary hover:bg-blue-400 text-white rounded-lg font-semibold" 
             onClick={handleLogout}
         >
             Logout

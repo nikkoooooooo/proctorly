@@ -95,7 +95,7 @@ function Navbar() {
                       Dashboard
                     </Link>
 
-                    <Link href='/dashboard' className='block font-medium text-lg text-white'>
+                    <Link href='/profile' className='block font-medium text-lg text-white'>
                       Profile
                     </Link>
 

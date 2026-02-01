@@ -1,0 +1,80 @@
+"use client"
+import { authClient } from "@/client/auth-client"
+import { getUserJoinedQuizAction } from "@/lib/actions/getUserJoinedQuizAction"
+import { useEffect, useState } from "react"
+import Link from "next/link"
+
+
+interface Quiz {
+  id: string
+  title: string
+  joinCode: string
+  description?: string | null
+}
+
+function page() {
+
+    const { data } = authClient.useSession()
+    const user = data?.user
+    const session = data?.session
+
+    const [userJoinedQuiz, setUserJoinedQuiz] = useState<Quiz[]>([])
+    
+
+
+    useEffect(() => {
+        if (!user?.id) return
+        const fetchQuiz = async () => {
+            try {
+                const joinedQuizzes = await getUserJoinedQuizAction(user?.id)
+                if (!joinedQuizzes.quizzes) return
+                setUserJoinedQuiz(joinedQuizzes.quizzes)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        fetchQuiz()
+    },[data])
+    
+  return (
+    <div className="bg-background min-h-screen flex flex-col items-center">
+        <div className="max-w-7xl w-full px-4">
+            <div className="mt-5">
+                <Link href={"/dashboard"} className="text-4xl font-bold">←</Link>
+            </div>
+            {/* Joined quizzes */}
+        <div className="w-full mb-10">
+            <div className="my-5 flex gap-2 items-center">
+                <h2 className="text-2xl font-semibold text-white">Joined Quizzes</h2>
+                <span className="bg-gray-700 text-white p-2 font-semibold rounded-md">Participant</span>
+            </div>
+            {userJoinedQuiz.length > 0 ? (
+                userJoinedQuiz.map((quiz, i) => (
+                <div className="card w-full h-auto p-5 mb-4" key={i}>
+                    <div className="flex justify-between items-center gap-10">
+                        <div className="flex flex-col gap-2 items-start w-36">
+                            <h3 className="text-white text-lg font-semibold">{quiz.title}</h3>
+                            <span className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">{quiz.joinCode}</span>
+                        </div>
+
+                        {/* Uniform button */}
+                        <Link
+                            href={`/quiz/${quiz.id}`}
+                            className="bg-primary text-white flex items-center justify-center rounded-md font-semibold cursor-pointer p-2 hover:bg-blue-700 transition-all"
+                        >
+                            Take Quiz
+                        </Link>
+                    </div>
+                    {quiz.description && <p className="text-muted mt-2">{quiz.description}</p>}
+                </div>
+                ))
+            ) : (
+                <p className="text-white">No joined quizzes found</p>
+            )}
+            </div>
+        </div>
+    </div>
+  )
+}
+
+export default page

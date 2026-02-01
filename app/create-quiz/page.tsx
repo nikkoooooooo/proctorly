@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { v4 as uuid } from "uuid"
 import { createQuiz } from "@/lib/helpers/createQuiz"
 import { authClient } from "@/client/auth-client"
+import Link from "next/link"
 
 // Question type options
 type QuestionType = "mcq" | "true-false"
@@ -31,6 +32,7 @@ export default function CreateQuizPage() {
   const user = data?.user
   const session = data?.session
 
+  
 
   const [userId, setUserId] = useState<string | null>(null)
   const [title, setTitle] = useState("")
@@ -128,6 +130,9 @@ export default function CreateQuizPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <div>
+          <Link href={"/dashboard"} className="text-4xl font-bold">←</Link>
+      </div>
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); submitQuiz() }}>
         {/* Quiz Info */}
         <div className="card p-5 space-y-4">
@@ -180,12 +185,17 @@ export default function CreateQuizPage() {
                     <option value="mcq">MCQ</option>
                     <option value="true-false">True / False</option>
                   </select>
-                  <button
-                    onClick={(e) => { e.preventDefault(); removeQuestion(question.id) }}
-                    className="bg-secondary py-1 px-2 rounded-md"
-                  >
-                    Remove
-                  </button>
+                  {questions.length >= 2 && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeQuestion(question.id);
+                        }}
+                        className="bg-secondary py-1 px-2 rounded-md"
+                      >
+                        Remove
+                      </button>
+                    )}
                 </div>
               </div>
 

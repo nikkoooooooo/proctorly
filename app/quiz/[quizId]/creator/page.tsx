@@ -118,7 +118,8 @@ export default function TeacherPage({ params }: TeacherPageProps) {
           {/* Export button */}
           <button
             onClick={exportToExcel}
-            className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 
+            focus:bg-green-300 font-semibold"
           >
             Export to Excel
           </button>
