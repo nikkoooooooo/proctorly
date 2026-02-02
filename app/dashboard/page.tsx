@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import confetti from "canvas-confetti"
 
 import QuizStatCard from "@/components/QuizStatCard"
-import { getSession } from "@/lib/auth-actions"
 import { authClient } from "@/client/auth-client";
 import { getUserBySessionIdAction, getUserNameFromQuizAction } from "@/lib/actions/getUserName"
 import { getUserQuizAction } from "@/lib/actions/getUserQuizAction"
@@ -102,24 +101,6 @@ export default function Dashboard() {
   // ----------------------
   // DELETE QUIZ
   // ----------------------
-  const handleDeleteQuiz = async (quizId: string) => {
-    if (!confirm("Are you sure you want to delete this quiz?")) return
-    try {
-      await deleteQuizAction(quizId)
-      setUserCreatedQuiz(prev => prev.filter(q => q.id !== quizId))
-      toast.success("Quiz deleted!", {
-        icon: "🗑️",
-        style: { background: "#ffffff", color: "#2563eb", fontWeight: "bold" },
-        duration: 4000,
-      });
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : String(err), {
-        icon: "⚠️",
-        style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" },
-        duration: 5000,
-      });
-    }
-  }
 
   // ----------------------
   // JOIN QUIZ
