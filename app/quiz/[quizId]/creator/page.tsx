@@ -107,8 +107,8 @@ export default function TeacherPage({ params }: TeacherPageProps) {
   // =====================
   return (
     <div className="p-8 max-w-4xl mx-auto flex flex-col justify-center">
-      <h1 className="text-3xl font-bold text-white mb-6">Students Attempts</h1>
-
+      <h1 className="text-3xl font-bold text-white ">Students Attempts</h1>
+      <p className="text-muted mb-6">Detailed breakdown of participant performance and proctoring logs</p>
       {loading ? (
         <p className="text-muted">Loading...</p>
       ) : attempts.length === 0 ? (

@@ -4,7 +4,7 @@ import Link from 'next/link'
 interface Props {
     path: string
     emoji: string
-    quizCount: number
+    quizCount?: number
     title: string
     description: string
 }
@@ -16,6 +16,7 @@ function QuizBox({ path, emoji, quizCount, title, description }: Props) {
           {emoji}
           <span>→</span>
         </div>
+        <span></span>
         <span className="w-full text-4xl text-primary font-semibold">{quizCount}</span>
         <h3 className="font-semibold text-2xl">{title}</h3>
         <p className="text-muted">{description}</p>

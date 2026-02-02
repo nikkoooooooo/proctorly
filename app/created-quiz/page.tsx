@@ -84,8 +84,8 @@ function page() {
                             <Link href={`/quiz/${quiz.id}/creator`} className="bg-primary p-2 rounded-md font-semibold cursor-pointer text-white hover:bg-blue-700">
                             View
                             </Link>
-                            <button onClick={() => handleDeleteQuiz(quiz.id)} className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer">
-                            Delete
+                            <button onClick={() => handleDeleteQuiz(quiz.id)} className="bg-gray-700 p-2 hover:bg-gray-500 focus:bg-gray-300 rounded-md font-semibold cursor-pointer">
+                                Delete
                             </button>
                         </div>
                     </div>

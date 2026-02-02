@@ -228,6 +228,15 @@ export default function Dashboard() {
             title="Joined Quizzes"
             description="Quizzes you've joined"
           />
+
+          <QuizBox
+            path="/automation"
+            emoji="🤖"
+            // quizCount={totalQuizJoined}
+            title="Automation"
+            description="Automation for your manual works
+             coming soon..."
+          />
         </div>
 
         
