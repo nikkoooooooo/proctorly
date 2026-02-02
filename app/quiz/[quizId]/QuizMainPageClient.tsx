@@ -6,9 +6,6 @@ import toast from "react-hot-toast" // importing the toast for notifying current
 import confetti from "canvas-confetti" // importing for confetti
 
 import QuizCard from "@/components/QuizCard" // importing quizCard so that we could pass value into it
-import TimerCard from "@/components/TimerCard" // importing timerCard so that we could amke its value dynamic
-import TabSwitchesCard from "@/components/TabSwitchesCard" // import this so that we could amke it value dynamic also for tab Count
-
 
 import { authClient } from "@/client/auth-client"
 // importing this server action to get the question on the QUIZ we are about to take
