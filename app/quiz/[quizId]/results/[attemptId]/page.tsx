@@ -36,7 +36,7 @@ export default async function ResultPage(props: ResultPageProps) {
         <p className="mb-8">🎉 Congratulations on completing the quiz!</p>
         <Link
             href={"/dashboard"}
-            className="mt-10 bg-primary p-2 rounded-md text-white font-semibold"
+            className="mt-10 bg-primary p-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold"
         >
             Go Back to Dashboard
         </Link>

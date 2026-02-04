@@ -107,18 +107,19 @@ export default function TeacherPage({ params }: TeacherPageProps) {
   // =====================
   return (
     <div className="p-8 max-w-4xl mx-auto flex flex-col justify-center">
-      <h1 className="text-3xl font-bold text-white ">Students Attempts</h1>
-      <p className="text-muted mb-6">Detailed breakdown of participant performance and proctoring logs</p>
+      <h1 className="text-3xl font-bold text-foreground ">Students Attempts</h1>
+      {/* Use muted-foreground for readability in both themes */}
+      <p className="text-muted-foreground mb-6">Detailed breakdown of participant performance and proctoring logs</p>
       {loading ? (
-        <p className="text-muted">Loading...</p>
+        <p className="text-muted-foreground">Loading...</p>
       ) : attempts.length === 0 ? (
-        <p className="text-muted">No students have attempted this quiz yet.</p>
+        <p className="text-muted-foreground">No students have attempted this quiz yet.</p>
       ) : (
         <>
           {/* Export button */}
           <button
             onClick={exportToExcel}
-            className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-500 
+            className="mb-4 px-4 py-2 bg-green-600 text-primary-foreground rounded-[var(--radius-button)] hover:bg-green-500 
             focus:bg-green-300 font-semibold"
           >
             Export to Excel
@@ -130,23 +131,23 @@ export default function TeacherPage({ params }: TeacherPageProps) {
               {attempts.map((a) => (
                 <div
                   key={a.attemptId}
-                  className="card bg-[#1f1f1f] p-4 rounded-md flex flex-col md:flex-row justify-between items-start md:items-center w-full"
+                  className="card p-4 flex flex-col md:flex-row justify-between items-start md:items-center w-full"
                 >
                   {/* Left: Name & Email */}
                   <div className="mb-2 md:mb-0">
-                    <h3 className="text-lg font-semibold text-white wrap-break-word">{a.name}</h3>
-                    <p className="text-muted text-sm wrap-break-word">{a.email}</p>
+                    <h3 className="text-lg font-semibold text-foreground wrap-break-word">{a.name}</h3>
+                    <p className="text-muted-foreground text-sm wrap-break-word">{a.email}</p>
                   </div>
 
                   {/* Right: Score, Tab switches, Completed */}
                   <div className="flex flex-col sm:flex-row sm:gap-4 items-start sm:items-center">
-                    <p className="text-white font-semibold text-sm">Score: {a.score ?? 0}</p>
+                    <p className="text-foreground font-semibold text-sm">Score: {a.score ?? 0}</p>
                     <p className="text-red-500 font-semibold text-sm">
                       Tab switches: {a.tabSwitchCount}
                     </p>
                     <p
-                      className={`px-2 py-1 rounded-md font-semibold text-sm mt-1 sm:mt-0 ${
-                        a.completed ? "bg-green-600 text-white" : "bg-gray-600 text-white"
+                      className={`px-2 py-1 rounded-[var(--radius-button)] font-semibold text-sm mt-1 sm:mt-0 ${
+                        a.completed ? "bg-green-600 text-primary-foreground" : "bg-secondary text-secondary-foreground"
                       }`}
                     >
                       {a.completed ? "Completed" : "Ongoing"}

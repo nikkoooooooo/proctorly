@@ -45,22 +45,22 @@ function page() {
             {/* Joined quizzes */}
         <div className="w-full mb-10">
             <div className="my-5 flex gap-2 items-center">
-                <h2 className="text-2xl font-semibold text-white">Joined Quizzes</h2>
-                <span className="bg-gray-700 text-white p-2 font-semibold rounded-md">Participant</span>
+                <h2 className="text-2xl font-semibold text-foreground">Joined Quizzes</h2>
+                <span className="bg-secondary text-secondary-foreground p-2 font-semibold rounded-[var(--radius-button)]">Participant</span>
             </div>
             {userJoinedQuiz.length > 0 ? (
                 userJoinedQuiz.map((quiz, i) => (
                 <div className="card w-full h-auto p-5 mb-4" key={i}>
                     <div className="flex justify-between items-center gap-10">
                         <div className="flex flex-col gap-2 items-start w-36">
-                            <h3 className="text-white text-lg font-semibold">{quiz.title}</h3>
-                            <span className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">{quiz.joinCode}</span>
+                            <h3 className="text-foreground text-lg font-semibold">{quiz.title}</h3>
+                            <span className="bg-primary/20 text-primary p-1 font-semibold rounded-[var(--radius-button)]">{quiz.joinCode}</span>
                         </div>
 
                         {/* Uniform button */}
                         <Link
                             href={`/quiz/${quiz.id}`}
-                            className="bg-primary text-white flex items-center justify-center rounded-md font-semibold cursor-pointer p-2 hover:bg-blue-700 transition-all"
+                            className="bg-primary text-primary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/80 transition-all"
                         >
                             Take Quiz
                         </Link>
@@ -69,7 +69,7 @@ function page() {
                 </div>
                 ))
             ) : (
-                <p className="text-white">No joined quizzes found</p>
+                <p className="text-foreground">No joined quizzes found</p>
             )}
             </div>
         </div>

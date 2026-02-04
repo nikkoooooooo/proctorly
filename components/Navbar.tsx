@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import LogoutButton from "./LogoutButton";
+import ThemeToggle from "./ThemeToggle";
 import { authClient } from "@/client/auth-client";
 import { useState } from "react";
 
@@ -15,36 +16,41 @@ function Navbar() {
 
 
   return (
-    <div className='w-full border-b border-slate-700 shadow-large bg-secondary'>
+    <div className='w-full border-b border-border shadow-large bg-secondary'>
       <div className='max-w-7xl mx-auto px-4'>
         <div className='flex items-center justify-between h-20'>
           {/* Logo */}
           <Link 
             href='/dashboard' 
-            className='font-bold text-4xl text-white'
+            className='font-bold text-4xl text-foreground'
             onCopy={(e) => e.preventDefault()}>
-            Proctorly
+            Proctorly X
           </Link>
 
           {/* Navigation Links */}
           <div className='hidden md:flex items-center '>
             {session ? (
               <div className="flex items-center justify-end w-96 gap-5">
-                <Link href='/dashboard' className='font-bold text-md text-white hover:bg-blue-400 active:bg-blue-300'>
+                <Link href='/dashboard' className='font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30'>
                   Dashboard
                 </Link>
 
-                <Link href='/profile' className='font-bold text-md text-white hover:bg-blue-400 active:bg-blue-300'>
+                <Link href='/profile' className='font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30'>
                   Profile
                 </Link>
+
+                <Link href='/pricing' className='font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30'>
+                  Pricing
+                </Link>
                 
+                <ThemeToggle />
                 <LogoutButton/>
                
               </div>
             ) : (
               <Link
                 href='/login'
-                className={`bg-blue-500 text-background p-2 rounded-lg font-semibold`}
+                className={`bg-primary text-primary-foreground p-2 rounded-lg font-semibold`}
               >
                 Sign in with Google
               </Link>
@@ -53,7 +59,9 @@ function Navbar() {
 
 
 
-            <div className='md:hidden flex items-center'>
+            <div className='md:hidden flex items-center gap-3'>
+            {/* Keep theme toggle visible next to the burger on mobile */}
+            <ThemeToggle />
             {/* Button aligned horizontally with logo */}
             <button 
               onClick={() => SetIsMenuOpen((prev) => !prev)}
@@ -82,21 +90,38 @@ function Navbar() {
 
 
         {isMenuOpen && (
-            <div id="mobile-menu" className="md:hidden bg-secondary border-t border-slate-700">
+            <div id="mobile-menu" className="md:hidden bg-secondary border-t border-border">
               <div className="px-4 pt-4 pb-6 space-y-4">
 
                 {session ? (
-                  <div className="flex flex-col">
+                  <div className="flex flex-col gap-4">
                     <Link
                       href="/dashboard"
-                      className="block text-white font-medium text-lg"
+                      className="block text-foreground font-medium text-lg"
                       onClick={() => SetIsMenuOpen(false)}
                     >
                       Dashboard
                     </Link>
 
-                    <Link href='/profile' className='block font-medium text-lg text-white'>
+                    <Link 
+                        href='/profile' 
+                        className='block 
+                        font-medium 
+                        text-lg text-foreground'
+                        onClick={() => SetIsMenuOpen(false)}
+                      >
                       Profile
+                    </Link>
+
+                    <Link 
+                        href='/pricing' 
+                        className='font-medium 
+                        text-lg text-foreground 
+                        hover:bg-primary/20 
+                        active:bg-primary/30'
+                        onClick={() => SetIsMenuOpen(false)}
+                        >
+                      Pricing
                     </Link>
 
                     <LogoutButton/>
@@ -105,7 +130,7 @@ function Navbar() {
                 ) : (
                   <Link
                     href="/login"
-                    className="block bg-blue-500 text-background px-4 py-2 rounded-lg font-semibold text-center"
+                    className="block bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold text-center"
                     onClick={() => SetIsMenuOpen(false)}
                   >
                     Sign in with Google

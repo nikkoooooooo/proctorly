@@ -156,19 +156,20 @@ export default function Dashboard() {
         {/* Header */}
         <div className="mt-5 flex flex-col gap-2">
           <div className="flex w-full justify-between">
-            <h2 className="text-white text-4xl font-bold">Dashboard</h2>
-            <Link href="/create-quiz" className="bg-primary hover:bg-blue-400 active:bg-blue-300 cursor-pointer text-white p-2 rounded-lg font-semibold">
+            <h2 className="text-foreground text-4xl font-bold">Dashboard</h2>
+            {/* Theme-aware radius so the link still looks rounded in light mode */}
+            <Link href="/create-quiz" className="bg-primary hover:bg-primary/90 active:bg-primary/80 cursor-pointer text-primary-foreground p-2 rounded-[var(--radius-button)] font-semibold shadow-sm">
               + Create Quiz
             </Link>
           </div>
-          <p className="text-white text-xl">Welcome back, {userName}</p>
+          <p className="text-foreground text-xl">Welcome back, {userName}</p>
         </div>
 
         {/* Join Quiz */}
         <div className="mt-5 w-full">
           <div className="card p-4">
             <h2 className="font-semibold text-2xl">Join Quiz</h2>
-            <p className="text-muted">Enter a 6-character quiz code to join</p>
+            <p className="text-muted-foreground">Enter a 6-character quiz code to join</p>
             <form
               className="w-full flex gap-4 pt-4"
               onSubmit={e => { e.preventDefault(); findQuizThroughCode() }}
@@ -178,10 +179,11 @@ export default function Dashboard() {
                 type="text"
                 value={code}
                 onChange={e => setCode(e.target.value)}
-                className="bg-background rounded-md w-full py-2 px-2 text-xl"
+                /* Theme-aware border so it shows in light mode */
+                className="bg-background border border-border rounded-[var(--radius-button)] w-full py-2 px-2 text-xl"
                 placeholder="ABC123"
               />
-              <button type="submit" className="bg-primary py-2 px-6 rounded-md font-semibold w-32 cursor-pointer hover:bg-blue-400 active:bg-blue-300">
+              <button type="submit" className="bg-primary text-primary-foreground py-2 px-6 rounded-[var(--radius-button)] font-semibold w-32 cursor-pointer hover:bg-primary/90 active:bg-primary/80">
                 Find Quiz
               </button>
             </form>
@@ -195,9 +197,9 @@ export default function Dashboard() {
               <h3 className="font-semibold">{joinQuiz.title}</h3>
               <p>Code: {joinQuiz.joinCode}</p>
               <p>By: {quizCreatorName}</p>
-              {joinQuiz.description && <p className="text-muted">{joinQuiz.description}</p>}
+              {joinQuiz.description && <p className="text-muted-foreground">{joinQuiz.description}</p>}
             </div>
-            <button onClick={handleJoinQuiz} className="bg-primary hover:bg-blue-400 cursor-pointer active:bg-blue-300 p-2 rounded-md font-semibold">
+            <button onClick={handleJoinQuiz} className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer active:bg-primary/80 p-2 rounded-[var(--radius-button)] font-semibold">
               Join Quiz
             </button>
           </div>
@@ -238,70 +240,6 @@ export default function Dashboard() {
              coming soon..."
           />
         </div>
-
-        
-
-        {/* Created quizzes
-        <div className="w-full mt-5">
-          <div className="my-5 flex gap-2 items-center">
-            <h2 className="text-2xl font-semibold text-white">My Quizzes</h2>
-            <span className="bg-[#3b82f630] text-primary p-2 font-semibold rounded-md">Creator</span>
-          </div>
-          {userCreatedQuiz.length > 0 ? (
-            userCreatedQuiz.map((quiz, i) => (
-              <div className="card w-full h-auto p-5 mb-4" key={i}>
-                <div className="flex justify-between items-center gap-10">
-                   <div className="flex flex-col gap-2 items-start flex-nowrap">
-                        <h3 className="text-white text-lg font-semibold">{quiz.title}</h3>
-                        <span className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">{quiz.joinCode}</span>
-                </div>
-                  <div className="flex gap-2">
-                    <Link href={`/quiz/${quiz.id}/creator`} className="bg-primary p-2 rounded-md font-semibold cursor-pointer text-white hover:bg-blue-700">
-                      View
-                    </Link>
-                    <button onClick={() => handleDeleteQuiz(quiz.id)} className="bg-gray-700 p-2 rounded-md font-semibold cursor-pointer">
-                      Delete
-                    </button>
-                  </div>
-                </div>
-                {quiz.description && <p className="text-muted mt-2">{quiz.description}</p>}
-              </div>
-            ))
-          ) : (
-            <p className="text-white">No quizzes found</p>
-          )}
-        </div>
-
-      // {/* Joined quizzes 
-        <div className="w-full mb-10">
-            <div className="my-5 flex gap-2 items-center">
-                <h2 className="text-2xl font-semibold text-white">Joined Quizzes</h2>
-                <span className="bg-gray-700 text-white p-2 font-semibold rounded-md">Participant</span>
-            </div>
-            {userJoinedQuiz.length > 0 ? (
-                userJoinedQuiz.map((quiz, i) => (
-                <div className="card w-full h-auto p-5 mb-4" key={i}>
-                    <div className="flex justify-between items-center gap-10">
-                        <div className="flex flex-col gap-2 items-start w-36">
-                            <h3 className="text-white text-lg font-semibold">{quiz.title}</h3>
-                            <span className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">{quiz.joinCode}</span>
-                        </div>
-
-                        {/* Uniform button */}
-                        {/* <Link
-                            href={`/quiz/${quiz.id}`}
-                            className="bg-primary text-white flex items-center justify-center rounded-md font-semibold cursor-pointer p-2 hover:bg-blue-700 transition-all"
-                        >
-                            Take Quiz
-                        </Link>
-                    </div>
-                    {quiz.description && <p className="text-muted mt-2">{quiz.description}</p>}
-                </div>
-                ))
-            ) : (
-                <p className="text-white">No joined quizzes found</p>
-            )}
-            </div>   */}
       </div>
     </div>
   )

@@ -67,25 +67,25 @@ function page() {
             {/* Created quizzes */}
         <div className="w-full mb-10">
             <div className="my-5 flex gap-2 items-center">
-                <h2 className="text-2xl font-semibold text-white">Created Quizzes</h2>
-                <span className="bg-gray-700 text-white p-2 font-semibold rounded-md">Creator</span>
+                <h2 className="text-2xl font-semibold text-foreground">Created Quizzes</h2>
+                <span className="bg-secondary text-secondary-foreground p-2 font-semibold rounded-[var(--radius-button)]">Creator</span>
             </div>
             {userCreatedQuiz.length > 0 ? (
                 userCreatedQuiz.map((quiz, i) => (
                 <div className="card w-full h-auto p-5 mb-4" key={i}>
                     <div className="flex justify-between items-center gap-10">
                         <div className="flex flex-col gap-2 items-start w-36">
-                            <h3 className="text-white text-lg font-semibold">{quiz.title}</h3>
-                            <span className="bg-[#3b82f630] text-primary p-1 font-semibold rounded-md">{quiz.joinCode}</span>
+                            <h3 className="text-foreground text-lg font-semibold">{quiz.title}</h3>
+                            <span className="bg-primary/20 text-primary p-1 font-semibold rounded-[var(--radius-button)]">{quiz.joinCode}</span>
                         </div>
 
                         {/* Uniform button */}
                          <div className="flex gap-2">
-                            <Link href={`/quiz/${quiz.id}/creator`} className="bg-primary p-2 rounded-md font-semibold cursor-pointer text-white hover:bg-blue-700">
-                            View
+                            <Link href={`/quiz/${quiz.id}/creator`} className="bg-primary p-2 rounded-[var(--radius-button)] font-semibold cursor-pointer text-primary-foreground hover:bg-primary/80">
+                                View
                             </Link>
-                            <button onClick={() => handleDeleteQuiz(quiz.id)} className="bg-gray-700 p-2 hover:bg-gray-500 focus:bg-gray-300 rounded-md font-semibold cursor-pointer">
-                                Delete
+                            <button onClick={() => handleDeleteQuiz(quiz.id)} className="bg-secondary text-secondary-foreground p-2 hover:bg-secondary/80 focus:bg-secondary/70 rounded-[var(--radius-button)] font-semibold cursor-pointer">
+                              Delete
                             </button>
                         </div>
                     </div>
@@ -93,7 +93,7 @@ function page() {
                 </div>
                 ))
             ) : (
-                <p className="text-white">No created quizzes found</p>
+                <p className="text-foreground">No created quizzes found</p>
             )}
             </div>
         </div>

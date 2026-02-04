@@ -36,26 +36,31 @@ export default function QuizCard({ question, choices, onSelect, time, tabSwitch 
       </h2>
 
       <div className="flex flex-col items-start">
-          <span className="text-2xl font-semibold text-muted">Time left: <span className="text-red-500">{Math.floor(time/60)}:{String(time%60).padStart(2,'0')}</span> </span>
-          <span className="text-2xl font-semibold text-muted">Tab Switches: <span className="text-red-500">{tabSwitch}</span> </span>
+          {/* Use muted-foreground so labels are readable in both themes */}
+          <span className="text-2xl font-semibold text-muted-foreground">
+            Time left: <span className="text-destructive">{Math.floor(time/60)}:{String(time%60).padStart(2,'0')}</span>
+          </span>
+          <span className="text-2xl font-semibold text-muted-foreground">
+            Tab Switches: <span className="text-destructive">{tabSwitch}</span>
+          </span>
       </div>
 
 
       <div className="flex flex-col gap-2 mt-4">
         {(choices || []).map((choice, index) => (
-          <div key={choice.id} className="bg-background p-4 rounded-md">
+          <div key={choice.id} className="bg-background p-4 rounded-[var(--radius-card)]">
             <div className="flex gap-4 items-center">
 
-              <span className="p-2 bg-[#3b82f630] text-primary rounded-[50%] w-10">
+              <span className="p-2 bg-primary/20 text-primary rounded-[50%] w-10">
                 {labels[index] || String.fromCharCode(65 + index)}
               </span>
 
               <button
                 onClick={() => handleClick(choice)}
                 className={`
-                  cursor-pointer font-semibold text-xl px-4 py-2 rounded-md w-full text-left transition
-                  ${selectedId === choice.id ? "bg-blue-500 text-white" : "bg-background"}
-                  hover:bg-blue-300
+                  cursor-pointer font-semibold text-xl px-4 py-2 rounded-[var(--radius-button)] w-full text-left transition
+                  ${selectedId === choice.id ? "bg-primary text-primary-foreground" : "bg-background"}
+                  hover:bg-primary/20
                 `}
               >
                 {choice.text}

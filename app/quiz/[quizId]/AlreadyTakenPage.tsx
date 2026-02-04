@@ -28,7 +28,7 @@ export default async function AlreadyTakenPage({ quizId }: AlreadyTakenPageProps
 
         <Link
             href={"/dashboard"}
-            className="bg-primary text-white px-4 py-2 rounded-md font-semibold hover:bg-primary/90 transition"
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90 transition"
             >
             Go Back to Dashboard
         </Link>

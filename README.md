@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Proctorly
 
-## Getting Started
+Proctorly is a web app for creating and taking quizzes with lightweight proctoring signals (tab/window tracking) and simple attempt tracking.
 
-First, run the development server:
+## Features
+- Google OAuth login
+- Create quizzes with timed questions
+- Join quizzes using a 6-character code
+- Attempt tracking and scoring
+- Basic proctoring signals (tab/window switch count, blur warning)
 
+## Tech Stack
+- Next.js (App Router)
+- React 19
+- Better Auth
+- Drizzle ORM + Neon (Postgres)
+- Tailwind CSS
+
+## Quick Start
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a `.env` file (or `.env.local`) with:
+```bash
+DATABASE_URL=postgresql://...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+BETTER_AUTH_URL=http://localhost:3000
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the dev server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open `http://localhost:3000`.
 
-## Learn More
+## Scripts
+- `npm run dev` - start dev server
+- `npm run build` - build for production
+- `npm run start` - run production build
+- `npm run lint` - lint the codebase
 
-To learn more about Next.js, take a look at the following resources:
+## Project Structure
+- `app/` - routes and pages
+- `components/` - shared UI components
+- `lib/` - DB, schema, helpers, and server actions
+- `client/` - client-side auth utilities
+- `drizzle/` - migration artifacts and config
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notes
+- Make sure your database schema is in sync with `lib/schema.ts`.
+- OAuth callback URLs must match your app domain.
+- Theme toggle is in the navbar and stored in localStorage (`proctorly-theme`).

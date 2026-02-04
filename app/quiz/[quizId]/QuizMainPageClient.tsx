@@ -303,15 +303,15 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   return (
     <div className="relative min-h-screen flex flex-col items-center p-4">
       {blurScreen && (
-        <div className="absolute inset-0 bg-[#FF000080] backdrop-blur-sm z-50 flex items-center justify-center">
-          <p className="text-white text-xl font-semibold">You left the quiz 😡</p>
+        <div className="absolute inset-0 bg-destructive/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <p className="text-primary-foreground text-xl font-semibold">You left the quiz 😡</p>
         </div>
       )}
 
       {modal ? (
         <div className="mt-20 text-center">
           <p>This quiz is monitored — tab switches are counted.</p>
-          <button onClick={handleStart} className="mt-4 bg-primary hover:bg-blue-400 active:bg-blue-300 p-2 rounded">
+          <button onClick={handleStart} className="mt-4 bg-primary hover:bg-primary/90 active:bg-primary/80 p-2 rounded-[var(--radius-button)] text-primary-foreground">
             Start Quiz
           </button>
         </div>
@@ -329,10 +329,10 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
           <button
             onClick={handleNext}
-            className={`mt-4 p-2 rounded-md font-semibold w-full cursor-pointer ${
+            className={`mt-4 p-2 rounded-[var(--radius-button)] font-semibold w-full cursor-pointer ${
               currentQuestion === questions.length - 1
-                ? "bg-green-600 text-white hover:bg-green-700 active:bg-green-300"
-                : "bg-primary text-white hover:bg-primary/90  active:bg-blue-300"
+                ? "bg-green-600 text-primary-foreground hover:bg-green-700 active:bg-green-300"
+                : "bg-primary text-primary-foreground hover:bg-primary/90  active:bg-primary/80"
             }`}
           >
             {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}

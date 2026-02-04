@@ -191,7 +191,7 @@ export default function CreateQuizPage() {
                           e.preventDefault();
                           removeQuestion(question.id);
                         }}
-                        className="bg-secondary py-1 px-2 rounded-md"
+                        className="bg-secondary py-1 px-2 rounded-[var(--radius-button)]"
                       >
                         Remove
                       </button>
@@ -253,13 +253,13 @@ export default function CreateQuizPage() {
 
           <button
             onClick={(e) => { e.preventDefault(); addQuestion() }}
-            className="w-full p-2 border border-dashed rounded-md"
+            className="w-full p-2 border border-dashed rounded-[var(--radius-button)]"
           >
             + Add Question
           </button>
         </div>
 
-        <button type="submit" className="w-full bg-primary hover:bg-blue-400 active:bg-blue-300 p-3 font-semibold rounded-md">
+        <button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-[var(--radius-button)]">
           Create Quiz
         </button>
       </form>

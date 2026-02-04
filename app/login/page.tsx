@@ -23,15 +23,15 @@ export default function Login() {
         <div className="w-full max-w-md px-4">
             <Card className="bg-secondary px-4 border-none">
                 <CardHeader>
-                    <h2 className="text-center font-bold text-2xl text-white">Sign in</h2>
-                    <p className="text-center text-gray-500">Continue with your Google account</p>
+                    <h2 className="text-center font-bold text-2xl text-foreground">Sign in</h2>
+                    <p className="text-center text-muted-foreground">Continue with your Google account</p>
                 </CardHeader>
                
-                <CardContent className="border-b border-gray-300 pb-6">
+                <CardContent className="border-b border-border pb-6">
                     <LoginButton/>
                 </CardContent>
 
-                <CardFooter className="flex-col gap-2 text-center text-gray-500">
+                <CardFooter className="flex-col gap-2 text-center text-muted-foreground">
                     By signing in, you agree to our Terms of Service &
                     Privacy Policy
                 </CardFooter>

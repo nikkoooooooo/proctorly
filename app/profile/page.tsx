@@ -75,7 +75,8 @@ function profile() {
   return (
     <div className='min-h-screen flex justify-center'>
         <div className='max-w-2xl w-full flex flex-col items-center m-4'>
-            <div className='mt-5 flex flex-col w-full gap-4 border border-muted p-4 rounded-md'>
+            {/* Use theme border + radius so the card looks right in light mode */}
+            <div className='mt-5 flex flex-col w-full gap-4 border border-border p-4 rounded-[var(--radius-card)]'>
               <div className="flex gap-2 flex-col">
                 <label htmlFor="name" className="font-semibold text-xl">Name</label>
                 <input 
@@ -84,22 +85,24 @@ function profile() {
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="border-2 border-muted text-muted w-full p-2 rounded-md
-                   hover:border-blue-300 focus:text-white focus:border-primary focus:outline-none text-xl"
+                  /* Make the input text readable in both themes */
+                  className="border-2 border-border text-foreground w-full p-2 rounded-[var(--radius-button)]
+                   hover:border-primary/50 focus:text-foreground focus:border-primary focus:outline-none text-xl"
                    />
               </div>
                 
                 <button 
                 onClick={handleChangeName}
                 className='
-                bg-primary hover:bg-blue-500 focus:bg-blue-300
-                 py-2 w-32 rounded-md font-semibold cursor-pointer'>
+                bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary/80
+                 py-2 w-32 rounded-[var(--radius-button)] font-semibold cursor-pointer'>
                   Save Changes
                 </button>
 
                 <div className="flex gap-2 flex-col">
                   <label htmlFor="name" className="font-semibold text-xl">Email</label>
-                  <p className="text-xl text-muted">
+                  {/* Ensure email is visible in both themes */}
+                  <p className="text-xl text-foreground">
                     {email}
                   </p>
               </div>

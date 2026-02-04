@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index , integer} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index , integer, uniqueIndex } from "drizzle-orm/pg-core";
 
 
 // export const user = pgTable("user", {
@@ -178,6 +178,39 @@ export const attemptAnswer = pgTable("attempt_answer", {
   answeredAt: timestamp("answered_at").defaultNow(),
 });
 
+// Per-question progress for an attempt (timer + answered status)
+export const attemptQuestionProgress = pgTable(
+  "attempt_question_progress",
+  {
+    id: text("id").primaryKey(),
+
+    attemptId: text("attempt_id")
+      .notNull()
+      .references(() => attempt.id, { onDelete: "cascade" }),
+
+    questionId: text("question_id")
+      .notNull()
+      .references(() => question.id, { onDelete: "cascade" }),
+
+    // Remaining time (in seconds) at last save; used to resume timers
+    remainingTime: integer("remaining_time").notNull(),
+
+    // True once the question has been answered (including auto-fail)
+    isAnswered: boolean("is_answered").default(false).notNull(),
+
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    // Enforce one progress row per (attempt, question)
+    uniqueIndex("attempt_question_unique_idx").on(table.attemptId, table.questionId),
+    index("attempt_question_attempt_idx").on(table.attemptId),
+  ],
+);
+
 
 
 export const quizEnrollment = pgTable( // table for tracking who joined in the quiz 
@@ -225,5 +258,4 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
-
 

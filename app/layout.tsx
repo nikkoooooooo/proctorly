@@ -18,12 +18,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Proctorly",
+  title: "Proctorly X",
   description:
-    "Proctorly is a simple and reliable platform for creating and managing online quizzes.",
+    "ProctorlyX is a simple and reliable platform for creating and managing online quizzes.",
 
   openGraph: {
-    title: "Proctorly",
+    title: "Proctorly X",
     description:
       "Create and manage online quizzes with a clean and non-invasive system.",
     type: "website",
@@ -41,12 +41,22 @@ export default async function RootLayout({
 }>) {
   
   return (
-    <html lang="en">
+    <html lang="en" className="theme-dark">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Navbar/>
         {children}
+        {/* Footer with Terms & Privacy link */}
+        <footer className="w-full border-t border-border bg-secondary/40">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-4 py-6 text-sm text-muted-foreground">
+            <span>© 2026 ProctorlyX. All rights reserved.</span>
+            <span className="px-2">|</span>
+            <a href="/terms-privacy" className="text-foreground hover:underline">
+              Terms &amp; Privacy
+            </a>
+          </div>
+        </footer>
         <Toaster
           position="top-center" // toast container at top center
           toastOptions={{
