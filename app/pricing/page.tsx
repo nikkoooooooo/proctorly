@@ -1,10 +1,28 @@
+/* This page uses router.back, so it needs to be a client component */
+"use client"
+
 import React from 'react'
+import { useRouter } from "next/navigation"
 // Pricing is still in development; keep this page as a creative placeholder.
 
 function Pricing() {
+  const router = useRouter()
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4 ">
-      <div className="max-w-xl w-full my-10">
+    <div className="min-h-screen bg-background px-4">
+      <div className="max-w-xl w-full mx-auto my-6">
+        {/* Back link aligned like create-quiz page */}
+        <div className="mt-5">
+          {/* Use router.back so it returns to the previous page */}
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-4xl font-bold text-foreground hover:text-primary"
+          >
+            ←
+          </button>
+        </div>
+      </div>
+      <div className="max-w-xl w-full mx-auto my-10 flex items-center justify-center">
         {/* Theme-aware card while pricing is under construction */}
         <div className="bg-secondary rounded-[var(--radius-card)] border border-border p-8 shadow-lg text-center space-y-6">
           

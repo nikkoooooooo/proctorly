@@ -20,11 +20,14 @@ function Navbar() {
       <div className='max-w-7xl mx-auto px-4'>
         <div className='flex items-center justify-between h-20'>
           {/* Logo */}
-          <Link 
-            href='/dashboard' 
-            className='font-bold text-4xl text-foreground'
-            onCopy={(e) => e.preventDefault()}>
-            Proctorly X
+          <Link
+            href='/dashboard'
+            className='text-4xl text-foreground'
+            onCopy={(e) => e.preventDefault()}
+          >
+            {/* Text-only wordmark with a quiet emphasis on the "X" */}
+            <span className="font-semibold tracking-tight">Proctorly</span>
+            <span className="ml-0.5 font-medium text-primary">X</span>
           </Link>
 
           {/* Navigation Links */}
@@ -48,12 +51,16 @@ function Navbar() {
                
               </div>
             ) : (
-              <Link
-                href='/login'
-                className={`bg-primary text-primary-foreground p-2 rounded-lg font-semibold`}
-              >
-                Sign in with Google
-              </Link>
+              <div className="flex items-center gap-5">
+                {/* Keep theme toggle visible even without a session */}
+                <ThemeToggle />
+                <Link
+                  href='/login'
+                  className={`bg-primary text-primary-foreground p-2 rounded-[var(--radius-button)] font-semibold`}
+                >
+                  Sign in with Google
+                </Link>
+              </div>
             )}
           </div>
 

@@ -5,6 +5,8 @@ import { v4 as uuid } from "uuid"
 import { createQuiz } from "@/lib/helpers/createQuiz"
 import { authClient } from "@/client/auth-client"
 import Link from "next/link"
+import toast from "react-hot-toast"
+import { Copy } from "lucide-react"
 
 // Question type options
 type QuestionType = "mcq" | "true-false"
@@ -38,6 +40,7 @@ export default function CreateQuizPage() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [questions, setQuestions] = useState<Question[]>([createEmptyQuestion()])
+  const [createdQuizCode, setCreatedQuizCode] = useState<string | null>(null)
 
   // Proctoring settings
   const [blurQuestion, setBlurQuestion] = useState(false)
@@ -115,7 +118,10 @@ export default function CreateQuizPage() {
           tabMonitoring
         )
 
-      alert(`Quiz created! ID: ${quiz.quizId}, Joined Code: ${quiz.joinCode}`)
+      // Show a friendly success toast instead of browser alert
+      toast.success("Quiz created successfully!")
+      // Save join code for the on-page copy UI
+      setCreatedQuizCode(quiz.joinCode)
       setTitle("")
       setDescription("")
       setQuestions([createEmptyQuestion()])
@@ -124,7 +130,8 @@ export default function CreateQuizPage() {
       setTabMonitoring(false)
     } catch (err) {
       console.error(err)
-      alert("Failed to create quiz")
+      // Use toast for errors to keep UX consistent
+      toast.error("Failed to create quiz")
     }
   }
 
@@ -157,6 +164,49 @@ export default function CreateQuizPage() {
             />
           </div>
         </div>
+
+        {/* Created quiz code modal */}
+        {createdQuizCode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm p-4">
+            {/* Modal card */}
+            <div className="card w-full max-w-md p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold">Quiz Created</h2>
+                {/* Close modal */}
+                <button
+                  type="button"
+                  onClick={() => setCreatedQuizCode(null)}
+                  className="text-muted-foreground hover:text-foreground"
+                  aria-label="Close"
+                  title="Close"
+                >
+                  ✕
+                </button>
+              </div>
+              <p className="text-muted-foreground">
+                Share this join code with your students.
+              </p>
+              <div className="flex items-center gap-3">
+                <span className="bg-primary/20 text-primary px-3 py-2 rounded-[var(--radius-button)] font-semibold">
+                  {createdQuizCode}
+                </span>
+                {/* Copy button for quick sharing */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(createdQuizCode)
+                    toast.success("Code copied")
+                  }}
+                  className="bg-secondary text-secondary-foreground px-3 py-2 rounded-[var(--radius-button)] hover:bg-secondary/80"
+                  aria-label="Copy quiz code"
+                  title="Copy quiz code"
+                >
+                  <Copy size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Proctoring */}
         <div className="card p-5 space-y-3">
@@ -253,7 +303,7 @@ export default function CreateQuizPage() {
 
           <button
             onClick={(e) => { e.preventDefault(); addQuestion() }}
-            className="w-full p-2 border border-dashed rounded-[var(--radius-button)]"
+            className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)]"
           >
             + Add Question
           </button>

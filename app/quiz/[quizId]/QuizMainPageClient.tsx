@@ -1,6 +1,6 @@
 "use client" // means this pages will run in the client 
 
-import { useState, useEffect } from "react" // importing the useState and useEffect 
+import { useState, useEffect, useRef } from "react" // importing the useState and useEffect 
 import { useRouter } from "next/navigation" // importing the useRouter
 import toast from "react-hot-toast" // importing the toast for notifying current state
 import confetti from "canvas-confetti" // importing for confetti
@@ -24,6 +24,10 @@ import { calculateScoreAction } from "@/lib/actions/calculateScoreAction"
 import { getAttemptProgressAction } from "@/lib/actions/getAttemptProgressAction"
 // a server action for getting quiz proctored feature if they enable
 import { getQuizProctoringByIdAction } from "@/lib/actions/getQuizProctoringByIdAction"
+// server action to get or create a stable per-attempt question order
+import { getOrCreateAttemptQuestionOrderAction } from "@/lib/actions/getOrCreateAttemptQuestionOrderAction"
+// server action to persist remaining time per question
+import { updateAttemptQuestionTimeAction } from "@/lib/actions/updateAttemptQuestionTimeAction"
 
 // data type for option of questions
 interface Option {
@@ -58,6 +62,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const [selectedChoice, setSelectedChoice] = useState<Option | null>(null)
   // state for setting the current attemptId
   const [attemptId, setAttemptId] = useState("")
+  // remaining time map for each question (used for resume)
+  const [remainingTimeById, setRemainingTimeById] = useState<Record<string, number>>({})
 
   // -------------------- PROCTORING STATE --------------------
   // set state for tab switches count
@@ -71,6 +77,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
   // state for timer to be dynamic in every question
   const [timeLeft, setTimeLeft] = useState(0)
+  // keep the latest timeLeft without re-triggering save intervals
+  const timeLeftRef = useRef(0)
 
   // 🚨 IMPORTANT FIX STATE
   // This flag tells React: "timer finished, go next AFTER render"
@@ -125,11 +133,13 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     const q = questions[currentQuestion] // FOR INITIAL CURRENTQUESTION VALUE IS ZERO SO IT WILL BE THE FIRST QUESTION
 
     // set time limit per question
-    setTimeLeft(q?.timeLimit ? Number(q.timeLimit) : 0) // SETTING THE TIME LIMIT PER CHANGE OF QUESTION
+    // Use saved remaining time if available; otherwise fall back to the question limit
+    const saved = remainingTimeById[q?.id]
+    setTimeLeft(saved != null ? Number(saved) : (q?.timeLimit ? Number(q.timeLimit) : 0)) // SETTING THE TIME LIMIT PER CHANGE OF QUESTION
 
     // clear selected option for new question
     setSelectedChoice(null) // RESET THE SELECTED CHOICE EVERY NEW QUESTIONS
-  }, [currentQuestion, questions]) // DEPENDENCY, ONLY RUN THIS EFFECT WHEN ITS EITHER THE TWO UPDATE
+  }, [currentQuestion, questions, remainingTimeById]) // DEPENDENCY, ONLY RUN THIS EFFECT WHEN ITS EITHER THE TWO UPDATE
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
@@ -141,6 +151,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
     const timer = setInterval(() => { // CREATE A TIMER TO MAKE THE TIMER PER QUESTIONS VALUE DYNAMIC
       setTimeLeft(prev => { // UPDATE THE TIME LIMIT EVERY SECOND
+        // keep ref in sync so save interval can read latest value
+        timeLeftRef.current = prev
         if (prev <= 1) { // ONCE THE CURRENT VALUE IS == OR < TO 1 THEN WE WILL STOP THE TIMER OR RESET THE VALUE TO COUNTDOWN
           clearInterval(timer) // CLEAR THE TIMER
 
@@ -169,7 +181,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     if (!timeUp) return
 
     const run = async () => {
-      await handleNext()   // safe: runs AFTER render
+      // Auto-fail if the user did not answer before time ran out
+      await handleNext(true)   // safe: runs AFTER render
       setTimeUp(false)     // reset for next question
     }
 
@@ -228,6 +241,32 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   }, [tabSwitches, attemptId])
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  // 5️⃣.5️⃣ SAVE REMAINING TIME EVERY 5 SECONDS (SAFE)
+  useEffect(() => {
+    if (modal) return
+    if (!attemptId) return
+    if (!questions.length) return
+
+    const q = questions[currentQuestion]
+    if (!q?.id) return
+
+    const interval = setInterval(() => {
+      const latest = timeLeftRef.current
+      // Persist remaining time so resume can pick up where it left off
+      void updateAttemptQuestionTimeAction({
+        attemptId,
+        questionId: q.id,
+        remainingTime: latest,
+      })
+      // Keep local cache updated as the timer changes
+      setRemainingTimeById((prev) => ({ ...prev, [q.id]: latest }))
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [attemptId, currentQuestion, questions, modal])
+  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+
 
 
 
@@ -248,11 +287,37 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     setAttemptId(attempt.id)
     setTabSwitches(attempt.tabSwitchCount)
 
-    const progress = await getAttemptProgressAction(attempt.id)
-    if (progress.success && progress.answers?.length) {
-      const answered = progress.answers.map(a => a.questionId)
-      const next = questions.findIndex(q => !answered.includes(q.id))
+    // Use a stable shuffled order for this attempt (so resume stays consistent)
+    let orderedQuestions = questions
+    const orderRes = await getOrCreateAttemptQuestionOrderAction(attempt.id)
+    if (orderRes.success && orderRes.order?.length) {
+      const map = new Map(questions.map((q) => [q.id, q]))
+      const ordered = orderRes.order.map((id) => map.get(id)).filter(Boolean) as Question[]
+      if (ordered.length) {
+        orderedQuestions = ordered
+        setQuestions(orderedQuestions)
+      }
+      // Store remaining time map so timer resumes correctly
+      if (orderRes.remainingTimeById) {
+        setRemainingTimeById(orderRes.remainingTimeById)
+      }
+    }
+
+    // If we already know answered IDs, move to the first unanswered question
+    if (orderRes.success && orderRes.answeredIds?.length) {
+      const answeredSet = new Set(orderRes.answeredIds)
+      // Find the next unanswered question in the stable order
+      const next = orderedQuestions.findIndex((q) => !answeredSet.has(q.id))
       setCurrentQuestion(next === -1 ? 0 : next)
+    } else {
+      // Fallback to old progress lookup if we do not have answered IDs
+      const progress = await getAttemptProgressAction(attempt.id)
+      if (progress.success && progress.answers?.length) {
+        const answered = progress.answers.map(a => a.questionId)
+        // Find the next unanswered question in the stable order
+        const next = orderedQuestions.findIndex(q => !answered.includes(q.id))
+        setCurrentQuestion(next === -1 ? 0 : next)
+      }
     }
 
     setModal(false)
@@ -286,8 +351,19 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 8️⃣ NEXT / FINISH LOGIC
-  const handleNext = async () => {
-    await submitAnswer()
+  const handleNext = async (autoFail = false) => {
+    const q = questions[currentQuestion]
+
+    // If time ran out and there is no answer, save an auto-fail
+    if (autoFail && !selectedChoice && attemptId) {
+      await answerAttemptAction({
+        attemptId,
+        questionId: q.id,
+        isAutoFail: true,
+      })
+    } else {
+      await submitAnswer()
+    }
 
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(p => p + 1)
@@ -328,7 +404,8 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
           />
 
           <button
-            onClick={handleNext}
+            // Wrap to avoid passing the click event into handleNext(autoFail)
+            onClick={() => handleNext()}
             className={`mt-4 p-2 rounded-[var(--radius-button)] font-semibold w-full cursor-pointer ${
               currentQuestion === questions.length - 1
                 ? "bg-green-600 text-primary-foreground hover:bg-green-700 active:bg-green-300"

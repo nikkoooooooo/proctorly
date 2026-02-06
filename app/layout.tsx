@@ -18,12 +18,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Proctorly X",
+  title: "ProctorlyX",
   description:
     "ProctorlyX is a simple and reliable platform for creating and managing online quizzes.",
 
   openGraph: {
-    title: "Proctorly X",
+    title: "ProctorlyX",
     description:
       "Create and manage online quizzes with a clean and non-invasive system.",
     type: "website",

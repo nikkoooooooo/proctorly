@@ -89,7 +89,8 @@ function page() {
                             </button>
                         </div>
                     </div>
-                    {quiz.description && <p className="text-muted mt-2">{quiz.description}</p>}
+                    {/* Use muted-foreground for readable description text */}
+                    {quiz.description && <p className="text-muted-foreground mt-2">{quiz.description}</p>}
                 </div>
                 ))
             ) : (

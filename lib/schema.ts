@@ -117,6 +117,8 @@ export const question = pgTable("question", { // TABLE QUESTION
 
   text: text("text").notNull(), // text on question
   type: text("type").notNull(), // "mcq" | "true-false" | "identification"
+  // Original order of the question in the quiz (nullable until backfill)
+  position: integer("position"),
   timerLimit: integer("time_limit").default(30).notNull() // timer per question
 });
 
@@ -195,6 +197,9 @@ export const attemptQuestionProgress = pgTable(
     // Remaining time (in seconds) at last save; used to resume timers
     remainingTime: integer("remaining_time").notNull(),
 
+    // Stable per-attempt order (nullable until backfill)
+    orderIndex: integer("order_index"),
+
     // True once the question has been answered (including auto-fail)
     isAnswered: boolean("is_answered").default(false).notNull(),
 
@@ -258,4 +263,3 @@ export const accountRelations = relations(account, ({ one }) => ({
     references: [user.id],
   }),
 }));
-

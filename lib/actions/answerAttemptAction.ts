@@ -7,7 +7,9 @@ interface AnswerAttemptActionProps {
   questionId: string
   optionId?: string
   textAnswer?: string
-  isCorrect: boolean
+  isCorrect?: boolean
+  // Marks an auto-fail (time ran out without an answer)
+  isAutoFail?: boolean
 }
 
 export async function answerAttemptAction({
@@ -16,6 +18,7 @@ export async function answerAttemptAction({
   optionId,
   textAnswer,
   isCorrect,
+  isAutoFail,
 }: AnswerAttemptActionProps) {
   try {
     const result = await answerAttemptHelper({
@@ -24,6 +27,7 @@ export async function answerAttemptAction({
       optionId,
       textAnswer,
       isCorrect,
+      isAutoFail,
     })
     return { success: true, data: result }
   } catch (error) {

@@ -1,9 +1,23 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+
 export default function TermsPrivacyPage() {
+  const router = useRouter()
   return (
     <div className="min-h-screen bg-background text-foreground px-4 py-10">
       <div className="mx-auto w-full max-w-4xl space-y-6">
+        {/* Back link aligned like create-quiz page */}
+        <div className="mt-5">
+          {/* Use router.back so it returns to the previous page */}
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="text-4xl font-bold text-foreground hover:text-primary"
+          >
+            ←
+          </button>
+        </div>
         {/* Page title */}
         <h1 className="text-3xl font-bold">ProctorlyX Terms & Privacy</h1>
 
