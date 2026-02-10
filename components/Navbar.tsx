@@ -4,6 +4,7 @@ import LogoutButton from "./LogoutButton";
 import ThemeToggle from "./ThemeToggle";
 import { authClient } from "@/client/auth-client";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 
 function Navbar() {
@@ -12,6 +13,9 @@ function Navbar() {
   
     );
     const [isMenuOpen, SetIsMenuOpen] = useState<boolean>(false)
+    const pathname = usePathname()
+    // Disable navbar navigation only on the student quiz-taking view
+    const navDisabled = !!pathname && /^\/quiz\/[^/]+$/.test(pathname)
 
 
 
@@ -22,7 +26,7 @@ function Navbar() {
           {/* Logo */}
           <Link
             href='/dashboard'
-            className='text-4xl text-foreground'
+            className={`text-4xl text-foreground ${navDisabled ? "pointer-events-none opacity-60" : ""}`}
             onCopy={(e) => e.preventDefault()}
           >
             {/* Text-only wordmark with a quiet emphasis on the "X" */}
@@ -34,15 +38,30 @@ function Navbar() {
           <div className='hidden md:flex items-center '>
             {session ? (
               <div className="flex items-center justify-end w-96 gap-5">
-                <Link href='/dashboard' className='font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30'>
+                <Link
+                  href='/dashboard'
+                  className={`font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30 ${
+                    navDisabled ? "pointer-events-none opacity-60" : ""
+                  }`}
+                >
                   Dashboard
                 </Link>
 
-                <Link href='/profile' className='font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30'>
+                <Link
+                  href='/profile'
+                  className={`font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30 ${
+                    navDisabled ? "pointer-events-none opacity-60" : ""
+                  }`}
+                >
                   Profile
                 </Link>
 
-                <Link href='/pricing' className='font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30'>
+                <Link
+                  href='/pricing'
+                  className={`font-bold text-md text-foreground hover:bg-primary/20 active:bg-primary/30 ${
+                    navDisabled ? "pointer-events-none opacity-60" : ""
+                  }`}
+                >
                   Pricing
                 </Link>
                 
@@ -66,87 +85,15 @@ function Navbar() {
 
 
 
+            {/* Mobile: keep only the theme toggle (no burger menu) */}
             <div className='md:hidden flex items-center gap-3'>
-            {/* Keep theme toggle visible next to the burger on mobile */}
-            <ThemeToggle />
-            {/* Button aligned horizontally with logo */}
-            <button 
-              onClick={() => SetIsMenuOpen((prev) => !prev)}
-              className='text-foreground hover:text-primary focus:outline-none focus:text-primary'
-              aria-expanded={isMenuOpen} // Accessibility: indicates menu state
-              aria-controls="mobile-menu"  // Accessibility: associates button with menu
-            >
-              {/* Hamburger icon */}
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-          </div>
+              <ThemeToggle />
+            </div>
 
         </div>
 
 
-        {isMenuOpen && (
-            <div id="mobile-menu" className="md:hidden bg-secondary border-t border-border">
-              <div className="px-4 pt-4 pb-6 space-y-4">
-
-                {session ? (
-                  <div className="flex flex-col gap-4">
-                    <Link
-                      href="/dashboard"
-                      className="block text-foreground font-medium text-lg"
-                      onClick={() => SetIsMenuOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-
-                    <Link 
-                        href='/profile' 
-                        className='block 
-                        font-medium 
-                        text-lg text-foreground'
-                        onClick={() => SetIsMenuOpen(false)}
-                      >
-                      Profile
-                    </Link>
-
-                    <Link 
-                        href='/pricing' 
-                        className='font-medium 
-                        text-lg text-foreground 
-                        hover:bg-primary/20 
-                        active:bg-primary/30'
-                        onClick={() => SetIsMenuOpen(false)}
-                        >
-                      Pricing
-                    </Link>
-
-                    <LogoutButton/>
-
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="block bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold text-center"
-                    onClick={() => SetIsMenuOpen(false)}
-                  >
-                    Sign in with Google
-                  </Link>
-                )}
-
-              </div>
-            </div>
-          )}
+        {/* Mobile menu removed per request */}
 
       </div>
     </div>

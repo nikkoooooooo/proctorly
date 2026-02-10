@@ -8,12 +8,12 @@ import confetti from "canvas-confetti"
 
 import QuizStatCard from "@/components/QuizStatCard"
 import { authClient } from "@/client/auth-client";
-import { getUserBySessionIdAction, getUserNameFromQuizAction } from "@/lib/actions/getUserName"
-import { getUserQuizAction } from "@/lib/actions/getUserQuizAction"
-import getQuizThroughCodeAction from "@/lib/actions/getQuizThroughCodeAction"
-import { deleteQuizAction } from "@/lib/actions/deleteQuizAction"
-import { joinQuizAction } from "@/lib/actions/joinQuizAction"
-import { getUserJoinedQuizAction } from "@/lib/actions/getUserJoinedQuizAction"
+import { getUserBySessionIdAction, getUserNameFromQuizAction } from "@/lib/user/actions/getUserName"
+import { getUserQuizAction } from "@/lib/user/actions/getUserQuizAction"
+import getQuizThroughCodeAction from "@/lib/quiz/actions/getQuizThroughCodeAction"
+import { deleteQuizAction } from "@/lib/quiz/actions/deleteQuizAction"
+import { joinQuizAction } from "@/lib/quiz/actions/joinQuizAction"
+import { getUserJoinedQuizAction } from "@/lib/user/actions/getUserJoinedQuizAction"
 import QuizBox from "@/components/QuizBox";
 
 interface Quiz {
@@ -214,7 +214,7 @@ export default function Dashboard() {
 
         
         <div className="w-full flex flex-col sm:flex-row 
-        items-center justify-around mt-5 gap-2 p-4">
+        items-center justify-between mt-5 gap-2 p-4">
           <QuizBox
             path="/created-quiz"
             emoji="📝"

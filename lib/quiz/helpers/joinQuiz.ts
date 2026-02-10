@@ -1,7 +1,7 @@
 "use server"
 
-import { db } from "../db"
-import { quizEnrollment } from "../schema"
+import { db } from "@/lib/db"
+import { quizEnrollment } from "@/lib/schema"
 import { eq, and } from "drizzle-orm/expressions"
 import { v4 as uuid } from "uuid"
 

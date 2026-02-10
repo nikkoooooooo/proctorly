@@ -1,11 +1,10 @@
 "use client"
 import { authClient } from "@/client/auth-client"
-import { getUserJoinedQuiz } from "@/lib/helpers/getUserJoinedQuiz"
-import { getUserQuizAction } from "@/lib/actions/getUserQuizAction"
+import { getUserQuizAction } from "@/lib/user/actions/getUserQuizAction"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import toast from "react-hot-toast"
-import { deleteQuizAction } from "@/lib/actions/deleteQuizAction"
+import { deleteQuizAction } from "@/lib/quiz/actions/deleteQuizAction"
 
 
 interface Quiz {

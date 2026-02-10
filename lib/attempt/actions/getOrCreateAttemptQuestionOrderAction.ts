@@ -1,6 +1,6 @@
 "use server"
 
-import { getOrCreateAttemptQuestionOrder } from "@/lib/helpers/getOrCreateAttemptQuestionOrder"
+import { getOrCreateAttemptQuestionOrder } from "@/lib/attempt/helpers/getOrCreateAttemptQuestionOrder"
 
 export async function getOrCreateAttemptQuestionOrderAction(attemptId: string) {
   try {

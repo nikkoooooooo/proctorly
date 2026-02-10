@@ -2,7 +2,7 @@
 "use client" // this hook runs on the client
 
 import { useEffect, useRef, useState } from "react" // React utilities
-import { updateAttemptQuestionTimeAction } from "@/lib/actions/updateAttemptQuestionTimeAction" // server action to persist time
+import { updateAttemptQuestionTimeAction } from "@/lib/attempt/actions/updateAttemptQuestionTimeAction" // server action to persist time
 
 interface UseQuestionTimerProps { // input shape for the hook
   attemptId: string // attempt id for persistence

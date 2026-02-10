@@ -2,7 +2,7 @@
 "use client" // this hook runs on the client
 
 import { useEffect, useState } from "react" // React utilities
-import { saveTabSwitchCountAction } from "@/lib/actions/saveTabSwitchCountAction" // server action for tab count
+import { saveTabSwitchCountAction } from "@/lib/attempt/actions/saveTabSwitchCountAction" // server action for tab count
 
 export function useProctoring(attemptId: string, enabled: boolean) { // custom hook signature
   const [tabSwitches, setTabSwitches] = useState(0) // state for tab switches

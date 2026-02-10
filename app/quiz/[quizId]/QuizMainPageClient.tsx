@@ -9,25 +9,29 @@ import QuizCard from "@/components/QuizCard" // importing quizCard so that we co
 
 import { authClient } from "@/client/auth-client"
 // importing this server action to get the question on the QUIZ we are about to take
-import { getQuestionsByQuizIdAction } from "@/lib/actions/getQuestionsByQuizIdAction"
+import { getQuestionsByQuizIdAction } from "@/lib/quiz/actions/getQuestionsByQuizIdAction"
 // server action for getSession so that we could check if there is a session
 // import { getSession } from "@/lib/auth-actions"
 // server action for creating attempt
-import { createAttemptAction } from "@/lib/actions/createAttemptAction"
+import { createAttemptAction } from "@/lib/attempt/actions/createAttemptAction"
 // server action for passing the asnwer attempt immediately after sending
-import { answerAttemptAction } from "@/lib/actions/answerAttemptAction"
+import { answerAttemptAction } from "@/lib/attempt/actions/answerAttemptAction"
 // server action  for saving the tab count switch
-import { saveTabSwitchCountAction } from "@/lib/actions/saveTabSwitchCountAction"
+import { saveTabSwitchCountAction } from "@/lib/attempt/actions/saveTabSwitchCountAction"
 // a server action for caulcating the answer attempt by students
-import { calculateScoreAction } from "@/lib/actions/calculateScoreAction"
+import { calculateScoreAction } from "@/lib/attempt/actions/calculateScoreAction"
 // server action for getting the progress for previous attempt that maybe been stopped
-import { getAttemptProgressAction } from "@/lib/actions/getAttemptProgressAction"
+import { getAttemptProgressAction } from "@/lib/attempt/actions/getAttemptProgressAction"
 // a server action for getting quiz proctored feature if they enable
-import { getQuizProctoringByIdAction } from "@/lib/actions/getQuizProctoringByIdAction"
+import { getQuizProctoringByIdAction } from "@/lib/quiz/actions/getQuizProctoringByIdAction"
+// server action to load instructor name
+import { getUserNameFromQuizAction } from "@/lib/user/actions/getUserName"
 // server action to get or create a stable per-attempt question order
-import { getOrCreateAttemptQuestionOrderAction } from "@/lib/actions/getOrCreateAttemptQuestionOrderAction"
+import { getOrCreateAttemptQuestionOrderAction } from "@/lib/attempt/actions/getOrCreateAttemptQuestionOrderAction"
 // server action to persist remaining time per question
-import { updateAttemptQuestionTimeAction } from "@/lib/actions/updateAttemptQuestionTimeAction"
+import { updateAttemptQuestionTimeAction } from "@/lib/attempt/actions/updateAttemptQuestionTimeAction"
+// custom hook for answer flow (submit/auto-fail/finish)
+import { useAnswerFlow } from "@/hooks/useAnswerFlow"
 
 // data type for option of questions
 interface Option {
@@ -56,6 +60,9 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   // -------------------- CORE QUIZ STATE --------------------
   // state for saving the questions
   const [questions, setQuestions] = useState<Question[]>([])
+  // quiz metadata for display
+  const [quizTitle, setQuizTitle] = useState("")
+  const [instructorName, setInstructorName] = useState("")
   // state for saving the current questions
   const [currentQuestion, setCurrentQuestion] = useState(0)
   // state for saving the current selected choice
@@ -63,7 +70,9 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   // state for setting the current attemptId
   const [attemptId, setAttemptId] = useState("")
   // remaining time map for each question (used for resume)
-  const [remainingTimeById, setRemainingTimeById] = useState<Record<string, number>>({})
+  const remainingTimeByIdRef = useRef<Record<string, number>>({})
+  // answered question ids for skipping already completed questions
+  const [answeredIds, setAnsweredIds] = useState<string[]>([])
 
   // -------------------- PROCTORING STATE --------------------
   // set state for tab switches count
@@ -87,6 +96,27 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
   // show before taking the quiz
   const [modal, setModal] = useState(true)
+
+
+
+
+
+  
+  // use the custom answer flow hook instead of inline handlers
+  const { handleNext } = useAnswerFlow({
+    attemptId,
+    quizId,
+    questions,
+    currentQuestionIndex: currentQuestion,
+    selectedChoice,
+    setCurrentQuestion,
+    answeredIds,
+    setAnsweredIds,
+    onFinish: (id) => {
+      confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } })
+      router.push(`/quiz/${quizId}/results/${id}`)
+    },
+  })
 
 
 
@@ -116,6 +146,15 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             }
           : { blurQuestion: false }
       )
+      // use the proctoring query (already loaded) to set the quiz title
+      if (proctoringRes.success && proctoringRes.quiz?.title) {
+        setQuizTitle(proctoringRes.quiz.title)
+      }
+      // fetch instructor name for header display
+      const instructorRes = await getUserNameFromQuizAction(quizId)
+      if (instructorRes.success && instructorRes.username) {
+        setInstructorName(instructorRes.username)
+      }
     }
     fetchData()
   }, [quizId])
@@ -134,12 +173,17 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
     // set time limit per question
     // Use saved remaining time if available; otherwise fall back to the question limit
-    const saved = remainingTimeById[q?.id]
-    setTimeLeft(saved != null ? Number(saved) : (q?.timeLimit ? Number(q.timeLimit) : 0)) // SETTING THE TIME LIMIT PER CHANGE OF QUESTION
+    const saved = remainingTimeByIdRef.current[q?.id]
+
+
+    
+    const nextTime = saved != null ? Number(saved) : (q?.timeLimit ? Number(q.timeLimit) : 0)
+    setTimeLeft(nextTime) // SETTING THE TIME LIMIT PER CHANGE OF QUESTION
+    timeLeftRef.current = nextTime // keep ref in sync on reset
 
     // clear selected option for new question
     setSelectedChoice(null) // RESET THE SELECTED CHOICE EVERY NEW QUESTIONS
-  }, [currentQuestion, questions, remainingTimeById]) // DEPENDENCY, ONLY RUN THIS EFFECT WHEN ITS EITHER THE TWO UPDATE
+  }, [currentQuestion, questions]) // DEPENDENCY, ONLY RUN THIS EFFECT WHEN ITS EITHER THE TWO UPDATE
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
@@ -151,8 +195,6 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
     const timer = setInterval(() => { // CREATE A TIMER TO MAKE THE TIMER PER QUESTIONS VALUE DYNAMIC
       setTimeLeft(prev => { // UPDATE THE TIME LIMIT EVERY SECOND
-        // keep ref in sync so save interval can read latest value
-        timeLeftRef.current = prev
         if (prev <= 1) { // ONCE THE CURRENT VALUE IS == OR < TO 1 THEN WE WILL STOP THE TIMER OR RESET THE VALUE TO COUNTDOWN
           clearInterval(timer) // CLEAR THE TIMER
 
@@ -161,7 +203,10 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
           return 0 // THEN RETURN 0
         }
-        return prev - 1 // SUBSTRACT 1 EVERY SECOND TO THE TIME LIMIT VALUE TO MAKE IT A COUNTDOWN
+        const next = prev - 1 // SUBSTRACT 1 EVERY SECOND TO THE TIME LIMIT VALUE TO MAKE IT A COUNTDOWN
+        // keep ref in sync so save interval can read latest value
+        timeLeftRef.current = next
+        return next
       })
     }, 1000)
 
@@ -260,7 +305,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         remainingTime: latest,
       })
       // Keep local cache updated as the timer changes
-      setRemainingTimeById((prev) => ({ ...prev, [q.id]: latest }))
+      // Keep local cache updated as the timer changes
+      remainingTimeByIdRef.current = {
+        ...remainingTimeByIdRef.current,
+        [q.id]: latest,
+      }
     }, 5000)
 
     return () => clearInterval(interval)
@@ -299,7 +348,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       }
       // Store remaining time map so timer resumes correctly
       if (orderRes.remainingTimeById) {
-        setRemainingTimeById(orderRes.remainingTimeById)
+        remainingTimeByIdRef.current = orderRes.remainingTimeById
+      }
+      // Store answered IDs so we can skip them during navigation
+      if (orderRes.answeredIds) {
+        setAnsweredIds(orderRes.answeredIds)
       }
     }
 
@@ -327,54 +380,6 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
 
 
-
-
-  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  // 7️⃣ SUBMIT ANSWER 
-  const submitAnswer = async () => {
-    if (!selectedChoice || !attemptId) return
-
-    const q = questions[currentQuestion]
-
-  
-
-    await answerAttemptAction({
-      attemptId,
-      questionId: q.id,
-      optionId: selectedChoice.id,
-      isCorrect: selectedChoice.isCorrect,
-    })
-  }
-  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
-
-
-  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-  // 8️⃣ NEXT / FINISH LOGIC
-  const handleNext = async (autoFail = false) => {
-    const q = questions[currentQuestion]
-
-    // If time ran out and there is no answer, save an auto-fail
-    if (autoFail && !selectedChoice && attemptId) {
-      await answerAttemptAction({
-        attemptId,
-        questionId: q.id,
-        isAutoFail: true,
-      })
-    } else {
-      await submitAnswer()
-    }
-
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(p => p + 1)
-    } else {
-      await calculateScoreAction(attemptId)
-      confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } })
-      router.push(`/quiz/${quizId}/results/${attemptId}`)
-    }
-  }
-  // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-
   // -------------------- UI --------------------
   return (
     <div className="relative min-h-screen flex flex-col items-center p-4">
@@ -386,13 +391,35 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
       {modal ? (
         <div className="mt-20 text-center">
-          <p>This quiz is monitored — tab switches are counted.</p>
-          <button onClick={handleStart} className="mt-4 bg-primary hover:bg-primary/90 active:bg-primary/80 p-2 rounded-[var(--radius-button)] text-primary-foreground">
-            Start Quiz
-          </button>
+          {/* Pre-quiz modal content (clear rules + authority note) */}
+          <div className="card mx-auto w-full max-w-xl p-6 space-y-4 text-left">
+            <h2 className="text-2xl font-semibold text-foreground">Before you start</h2>
+            <ul className="space-y-2 text-muted-foreground">
+              <li>• This quiz is monitored. Tab switches are counted.</li>
+              <li>• Questions cannot be skipped unless time runs out.</li>
+              <li>• If time runs out, the question is marked incorrect.</li>
+              <li>• Retakes are controlled by your instructor.</li>
+            </ul>
+            <div className="pt-2">
+              <button
+                onClick={handleStart}
+                className="bg-primary hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold"
+              >
+                Start Quiz
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="max-w-4xl w-full mt-10 space-y-6">
+          {/* Quiz context header */}
+          <div className="card p-4">
+            <p className="text-sm text-muted-foreground">Now taking</p>
+            <h3 className="text-xl font-semibold text-foreground">{quizTitle || "Quiz"}</h3>
+            <p className="text-sm text-muted-foreground">
+              Instructor: {instructorName || "Unknown"}
+            </p>
+          </div>
          
 
           <QuizCard
@@ -404,13 +431,14 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
           />
 
           <button
-            // Wrap to avoid passing the click event into handleNext(autoFail)
+            // Disable next until an answer is selected
+            disabled={!selectedChoice}
             onClick={() => handleNext()}
-            className={`mt-4 p-2 rounded-[var(--radius-button)] font-semibold w-full cursor-pointer ${
+            className={`mt-4 p-2 rounded-[var(--radius-button)] font-semibold w-full ${
               currentQuestion === questions.length - 1
                 ? "bg-green-600 text-primary-foreground hover:bg-green-700 active:bg-green-300"
                 : "bg-primary text-primary-foreground hover:bg-primary/90  active:bg-primary/80"
-            }`}
+            } ${!selectedChoice ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
           >
             {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}
           </button>

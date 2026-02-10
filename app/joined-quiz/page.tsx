@@ -1,6 +1,6 @@
 "use client"
 import { authClient } from "@/client/auth-client"
-import { getUserJoinedQuizAction } from "@/lib/actions/getUserJoinedQuizAction"
+import { getUserJoinedQuizAction } from "@/lib/user/actions/getUserJoinedQuizAction"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 

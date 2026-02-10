@@ -1,6 +1,6 @@
 "use server";
 
-import { createQuiz, QuestionInput } from "@/lib/helpers/createQuiz";
+import { createQuiz, QuestionInput } from "@/lib/quiz/helpers/createQuiz";
 
 export async function createQuizAction(
   title: string,

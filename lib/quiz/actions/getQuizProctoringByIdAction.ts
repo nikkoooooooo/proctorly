@@ -1,7 +1,7 @@
 "use server";
 
-import { db } from "../db";
-import { quiz } from "../schema";
+import { db } from "@/lib/db";
+import { quiz } from "@/lib/schema";
 import { eq } from "drizzle-orm"
 
 export async function getQuizProctoringByIdAction(quizId: string) {

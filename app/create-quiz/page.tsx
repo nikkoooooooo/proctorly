@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { v4 as uuid } from "uuid"
-import { createQuiz } from "@/lib/helpers/createQuiz"
+import { createQuiz } from "@/lib/quiz/helpers/createQuiz"
 import { authClient } from "@/client/auth-client"
 import Link from "next/link"
 import toast from "react-hot-toast"

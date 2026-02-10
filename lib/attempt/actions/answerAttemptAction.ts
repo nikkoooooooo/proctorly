@@ -1,6 +1,6 @@
 "use server"
 
-import { answerAttemptHelper } from "@/lib/helpers/answerAttemptHelper"
+import { answerAttemptHelper } from "@/lib/attempt/helpers/answerAttemptHelper"
 
 interface AnswerAttemptActionProps {
   attemptId: string

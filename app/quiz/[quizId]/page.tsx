@@ -1,7 +1,7 @@
 // app/quiz/[quizId]/page.tsx
 import { redirect } from "next/navigation"
 import QuizMainPageClient from "./QuizMainPageClient"
-import { checkAttemptAction } from "@/lib/actions/checkAttemptAction"
+import { checkAttemptAction } from "@/lib/attempt/actions/checkAttemptAction"
 import { getSession } from "@/lib/auth-actions"
 import AlreadyTakenPage from "./AlreadyTakenPage"
 

@@ -1,8 +1,8 @@
 // FOR SUBMITTING ANSWERS AND FINISHING THE QUIZ
 "use client" // this hook runs on the client
 
-import { answerAttemptAction } from "@/lib/actions/answerAttemptAction" // server action to save answers
-import { calculateScoreAction } from "@/lib/actions/calculateScoreAction" // server action to finalize score
+import { answerAttemptAction } from "@/lib/attempt/actions/answerAttemptAction" // server action to save answers
+import { calculateScoreAction } from "@/lib/attempt/actions/calculateScoreAction" // server action to finalize score
 
 interface Option { // minimal option shape
   id: string // option id
@@ -17,6 +17,11 @@ interface UseAnswerFlowProps { // input shape for the hook
   attemptId: string // attempt id
   quizId: string // quiz id
   questions: Question[] // list of questions
+  currentQuestionIndex: number // current question index
+  selectedChoice: Option | null // current selected choice
+  setCurrentQuestion: (updater: (prev: number) => number) => void // setter for question index
+  answeredIds: string[] // ids already answered
+  setAnsweredIds: (updater: (prev: string[]) => string[]) => void // setter for answered ids
   onFinish: (attemptId: string) => void // callback for finish action
 }
 
@@ -24,6 +29,11 @@ export function useAnswerFlow({ // custom hook signature
   attemptId, // attempt id
   quizId, // quiz id
   questions, // questions list
+  currentQuestionIndex, // current index
+  selectedChoice, // selected choice
+  setCurrentQuestion, // setter for index
+  answeredIds, // answered ids
+  setAnsweredIds, // setter for answered ids
   onFinish, // finish callback
 }: UseAnswerFlowProps) { // explicit props type
   const submitAnswer = async (questionId: string, choice?: Option) => { // submit answer helper
@@ -45,11 +55,44 @@ export function useAnswerFlow({ // custom hook signature
     })
   }
 
+  const markAnswered = (questionId: string) => { // mark a question as answered locally
+    setAnsweredIds((prev) => (prev.includes(questionId) ? prev : [...prev, questionId])) // avoid duplicates
+  }
+
+  const findNextUnansweredIndex = () => { // find next unanswered question index
+    for (let i = currentQuestionIndex + 1; i < questions.length; i += 1) { // scan forward
+      if (!answeredIds.includes(questions[i].id)) return i // return first unanswered
+    }
+    return -1 // no more unanswered questions
+  }
+
   const finishQuiz = async () => { // finish helper
     if (!attemptId) return // skip if no attempt
     await calculateScoreAction(attemptId) // compute final score
     onFinish(attemptId) // trigger finish callback
   }
 
-  return { submitAnswer, autoFail, finishQuiz } // expose helpers
+  const handleNext = async (autoFailFlag = false) => { // next/finish flow
+    const q = questions[currentQuestionIndex] // get current question
+    if (!q) return // safety check
+
+    // Auto-fail when time runs out and no answer is selected
+    if (autoFailFlag && !selectedChoice) {
+      await autoFail(q.id) // mark as auto-fail
+      markAnswered(q.id) // mark answered locally
+    } else {
+      await submitAnswer(q.id, selectedChoice ?? undefined) // save normal answer
+      markAnswered(q.id) // mark answered locally
+    }
+
+    const nextIndex = findNextUnansweredIndex() // compute next unanswered index
+    if (nextIndex !== -1) {
+      setCurrentQuestion(() => nextIndex) // jump to next unanswered
+      return
+    }
+
+    await finishQuiz() // finish quiz if nothing left
+  }
+
+  return { submitAnswer, autoFail, finishQuiz, handleNext } // expose helpers
 }

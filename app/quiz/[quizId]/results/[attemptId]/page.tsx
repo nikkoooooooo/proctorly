@@ -1,5 +1,5 @@
 // app/quiz/[quizId]/results/[attemptId]/page.tsx
-import { getFinalResultsAction } from "@/lib/actions/getFinalResultsAction"
+import { getFinalResultsAction } from "@/lib/attempt/actions/getFinalResultsAction"
 import Link from "next/link"
 
 interface ResultPageProps {

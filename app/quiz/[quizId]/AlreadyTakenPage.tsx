@@ -1,6 +1,6 @@
 // components/AlreadyTakenPage.tsx
-import { getQuizByIdAction } from "@/lib/actions/getQuizByIdAction"
-// import { getFinalResultsAction } from "@/lib/actions/getFinalResultsAction"
+import { getQuizByIdAction } from "@/lib/quiz/actions/getQuizByIdAction"
+// import { getFinalResultsAction } from "@/lib/attempt/actions/getFinalResultsAction"
 import Link from "next/link"
 
 interface AlreadyTakenPageProps {

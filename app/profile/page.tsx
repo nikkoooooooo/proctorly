@@ -11,8 +11,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getUserBySessionIdAction } from "@/lib/actions/getUserName"
-import { updateName } from "@/lib/actions/updateName"
+import { getUserBySessionIdAction } from "@/lib/user/actions/getUserName"
+import { updateName } from "@/lib/user/actions/updateName"
 import { authClient } from "@/client/auth-client"
 import toast from "react-hot-toast"
 

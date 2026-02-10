@@ -43,10 +43,12 @@ export default async function RootLayout({
   return (
     <html lang="en" className="theme-dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <Navbar/>
-        {children}
+        <Navbar />
+        <main className="flex-1 w-full">
+          {children}
+        </main>
         {/* Footer with Terms & Privacy link */}
         <footer className="w-full border-t border-border bg-secondary/40">
           <div className="mx-auto flex w-full max-w-7xl items-center justify-center px-4 py-6 text-sm text-muted-foreground">

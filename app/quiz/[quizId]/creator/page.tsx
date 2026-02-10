@@ -5,11 +5,11 @@
 
 "use client" // ✅ Required: Excel export uses browser APIs (Blob, FileSaver)
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import * as XLSX from "xlsx" // ✅ SheetJS for creating Excel
 import { saveAs } from "file-saver" // ✅ Save Blob as file in browser
 
-import { getQuizAttemptsAction } from "@/lib/actions/getQuizAttemptsAction"
+import { getQuizAttemptsAction } from "@/lib/attempt/actions/getQuizAttemptsAction"
 import { quiz } from "@/lib/schema"
 
 interface Attempt {
@@ -22,7 +22,7 @@ interface Attempt {
 }
 
 interface TeacherPageProps {
-  params: { quizId: string }
+  params: Promise<{ quizId: string }>
 }
 
 // =====================
@@ -33,27 +33,15 @@ export default function TeacherPage({ params }: TeacherPageProps) {
   // 1️⃣ Store attempts in state
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
-  const [quizIdParams, setQuizIdParams] = useState("")
-
-
-
-  useEffect(() => {
-    const fetchParams = async () => {
-      try {
-          const { quizId } = await params
-          setQuizIdParams(quizId)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    fetchParams()
-  }, [params])
+  const { quizId } = use<{ quizId: string }>(params)
 
   // 2️⃣ Fetch attempts on mount
   useEffect(() => {
+    if (!quizId) return
     const fetchAttempts = async () => {
       try { 
-        const data = await getQuizAttemptsAction(quizIdParams)
+        setLoading(true)
+        const data = await getQuizAttemptsAction(quizId)
         if (data) {
           setAttempts(data.attempts ?? [])
         }
@@ -66,7 +54,7 @@ export default function TeacherPage({ params }: TeacherPageProps) {
     }
 
     fetchAttempts()
-  }, [quizIdParams])
+  }, [quizId])
 
   // =====================
   // 3️⃣ Export to Excel
@@ -99,7 +87,7 @@ export default function TeacherPage({ params }: TeacherPageProps) {
     })
 
     // Save file
-    saveAs(file, `quiz-results-${quizIdParams}.xlsx`)
+    saveAs(file, `quiz-results-${quizId}.xlsx`)
   }
 
   // =====================

@@ -1,8 +1,8 @@
 "use server"
 
-import { db } from "../db"
+import { db } from "@/lib/db"
 import { eq } from "drizzle-orm/expressions";
-import { quiz, session, user, quizEnrollment } from "../schema";
+import { quiz, session, user, quizEnrollment } from "@/lib/schema";
 
 
 

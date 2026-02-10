@@ -2,7 +2,7 @@
 "use client" // this hook runs on the client
 
 import { useEffect, useState } from "react" // React state + effects
-import { getOrCreateAttemptQuestionOrderAction } from "@/lib/actions/getOrCreateAttemptQuestionOrderAction" // server action for stable order
+import { getOrCreateAttemptQuestionOrderAction } from "@/lib/attempt/actions/getOrCreateAttemptQuestionOrderAction" // server action for stable order
 
 interface Question { // minimal question shape needed here
   id: string // question id

@@ -1,6 +1,6 @@
 "use server"
 
-import { updateAttemptQuestionTime } from "@/lib/helpers/updateAttemptQuestionTime"
+import { updateAttemptQuestionTime } from "@/lib/attempt/helpers/updateAttemptQuestionTime"
 
 interface UpdateAttemptQuestionTimeActionProps {
   attemptId: string
