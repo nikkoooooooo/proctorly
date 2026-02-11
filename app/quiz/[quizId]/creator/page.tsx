@@ -10,7 +10,7 @@ import * as XLSX from "xlsx" // ✅ SheetJS for creating Excel
 import { saveAs } from "file-saver" // ✅ Save Blob as file in browser
 
 import { getQuizAttemptsAction } from "@/lib/attempt/actions/getQuizAttemptsAction"
-import { quiz } from "@/lib/schema"
+import { getQuizByIdAction } from "@/lib/quiz/actions/getQuizByIdAction"
 
 interface Attempt {
   attemptId: string
@@ -19,6 +19,8 @@ interface Attempt {
   score: number | null
   tabSwitchCount: number
   completed: boolean
+  startedAt?: string | Date | null
+  submittedAt?: string | Date | null
 }
 
 interface TeacherPageProps {
@@ -33,7 +35,23 @@ export default function TeacherPage({ params }: TeacherPageProps) {
   // 1️⃣ Store attempts in state
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
+  const [quizTitle, setQuizTitle] = useState("Quiz")
   const { quizId } = use<{ quizId: string }>(params)
+
+  const formatPHDateTime = (value?: string | Date | null) => {
+    if (!value) return "N/A"
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return "N/A"
+    return new Intl.DateTimeFormat("en-PH", {
+      timeZone: "Asia/Manila",
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date)
+  }
 
   // 2️⃣ Fetch attempts on mount
   useEffect(() => {
@@ -41,9 +59,18 @@ export default function TeacherPage({ params }: TeacherPageProps) {
     const fetchAttempts = async () => {
       try { 
         setLoading(true)
+        const quizRes = await getQuizByIdAction(quizId)
+        if (quizRes.success && quizRes.quiz?.title) {
+          setQuizTitle(quizRes.quiz.title)
+        }
         const data = await getQuizAttemptsAction(quizId)
         if (data) {
-          setAttempts(data.attempts ?? [])
+          const sortedAttempts = [...(data.attempts ?? [])].sort((a, b) => {
+            const aTime = a.startedAt ? new Date(a.startedAt).getTime() : 0
+            const bTime = b.startedAt ? new Date(b.startedAt).getTime() : 0
+            return bTime - aTime
+          })
+          setAttempts(sortedAttempts)
         }
       } catch (err) {
         console.error("Failed to fetch attempts:", err)
@@ -62,17 +89,55 @@ export default function TeacherPage({ params }: TeacherPageProps) {
   const exportToExcel = () => {
     if (!attempts || attempts.length === 0) return
 
-    // Map attempts into rows for Excel
-    const rows = attempts.map((a) => ({
-      Name: a.name ?? "unknown",
-      Email: a.email ?? "unknown",
-      Score: a.completed ? a.score : null, // ✅ null if not completed
-      "Tab Switches": a.tabSwitchCount,
-      Status: a.completed ? "Completed" : "Ongoing",
-    }))
+    const generatedAt = formatPHDateTime(new Date())
+    const headers = [
+      "Name",
+      "Email",
+      "Score",
+      "Tab Switches",
+      "Status",
+      "Started (PH)",
+      "Finished (PH)",
+    ]
 
-    // Create worksheet
-    const worksheet = XLSX.utils.json_to_sheet(rows)
+    // Build a structured sheet layout for cleaner export
+    const worksheet = XLSX.utils.aoa_to_sheet([
+      ["Proctorly Quiz Attempts Report"],
+      [`Quiz Title: ${quizTitle}`],
+      [`Generated (PH): ${generatedAt}`],
+      [],
+      headers,
+    ])
+
+    const dataRows = attempts.map((a) => [
+      a.name ?? "Unknown",
+      a.email ?? "Unknown",
+      a.completed ? (a.score ?? 0) : null,
+      a.tabSwitchCount,
+      a.completed ? "Completed" : "Ongoing",
+      formatPHDateTime(a.startedAt),
+      formatPHDateTime(a.submittedAt),
+    ])
+
+    XLSX.utils.sheet_add_aoa(worksheet, dataRows, { origin: "A6" })
+
+    // Sheet formatting
+    worksheet["!cols"] = [
+      { wch: 24 }, // Name
+      { wch: 32 }, // Email
+      { wch: 10 }, // Score
+      { wch: 14 }, // Tab Switches
+      { wch: 14 }, // Status
+      { wch: 24 }, // Started
+      { wch: 24 }, // Finished
+    ]
+    worksheet["!merges"] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } },
+    ]
+    worksheet["!autofilter"] = { ref: "A5:G5" }
+    worksheet["!freeze"] = { xSplit: 0, ySplit: 5 }
 
     // Create workbook and append sheet
     const workbook = XLSX.utils.book_new()
@@ -125,6 +190,12 @@ export default function TeacherPage({ params }: TeacherPageProps) {
                   <div className="mb-2 md:mb-0">
                     <h3 className="text-lg font-semibold text-foreground wrap-break-word">{a.name}</h3>
                     <p className="text-muted-foreground text-sm wrap-break-word">{a.email}</p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      Started (PH): {formatPHDateTime(a.startedAt)}
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      Finished (PH): {formatPHDateTime(a.submittedAt)}
+                    </p>
                   </div>
 
                   {/* Right: Score, Tab switches, Completed */}

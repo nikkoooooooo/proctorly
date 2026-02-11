@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { attempt, user as userTable } from "@/lib/schema";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 export async function getQuizAttemptsAction(quizId: string) {
   try {
@@ -15,11 +15,13 @@ export async function getQuizAttemptsAction(quizId: string) {
         completed: attempt.isCompleted,
         name: userTable.name,
         email: userTable.email,
+        startedAt: attempt.startedAt,
+        submittedAt: attempt.submittedAt,
       })
       .from(attempt)
       .leftJoin(userTable, eq(userTable.id, attempt.userId))
       .where(eq(attempt.quizId, quizId))
-      .orderBy(attempt.startedAt)
+      .orderBy(desc(attempt.startedAt))
       .execute();
 
     return { success: true, attempts: results };

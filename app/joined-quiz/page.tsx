@@ -10,13 +10,28 @@ interface Quiz {
   title: string
   joinCode: string
   description?: string | null
+  createdAt?: string | Date | null
 }
 
-function page() {
+function formatPHDateTime(value?: string | Date | null) {
+  if (!value) return "N/A"
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "N/A"
+  return new Intl.DateTimeFormat("en-PH", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date)
+}
+
+function Page() {
 
     const { data } = authClient.useSession()
     const user = data?.user
-    const session = data?.session
 
     const [userJoinedQuiz, setUserJoinedQuiz] = useState<Quiz[]>([])
     
@@ -28,7 +43,12 @@ function page() {
             try {
                 const joinedQuizzes = await getUserJoinedQuizAction(user?.id)
                 if (!joinedQuizzes.quizzes) return
-                setUserJoinedQuiz(joinedQuizzes.quizzes)
+                const sortedQuizzes = [...joinedQuizzes.quizzes].sort((a, b) => {
+                  const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0
+                  const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
+                  return bTime - aTime
+                })
+                setUserJoinedQuiz(sortedQuizzes)
             } catch (error) {
                 console.error(error)
             }
@@ -67,6 +87,9 @@ function page() {
                     </div>
                     {/* Use muted-foreground for readable description text */}
                     {quiz.description && <p className="text-muted-foreground mt-2">{quiz.description}</p>}
+                    <p className="text-muted-foreground mt-2 text-sm">
+                      Created (PH): {formatPHDateTime(quiz.createdAt)}
+                    </p>
                 </div>
                 ))
             ) : (
@@ -78,4 +101,4 @@ function page() {
   )
 }
 
-export default page
+export default Page

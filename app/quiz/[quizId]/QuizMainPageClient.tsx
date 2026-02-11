@@ -1,6 +1,6 @@
 "use client" // means this pages will run in the client 
 
-import { useState, useEffect, useRef } from "react" // importing the useState and useEffect 
+import { useState, useEffect, useRef, useCallback } from "react" // importing the useState and useEffect 
 import { useRouter } from "next/navigation" // importing the useRouter
 import toast from "react-hot-toast" // importing the toast for notifying current state
 import confetti from "canvas-confetti" // importing for confetti
@@ -71,8 +71,12 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const [attemptId, setAttemptId] = useState("")
   // remaining time map for each question (used for resume)
   const remainingTimeByIdRef = useRef<Record<string, number>>({})
+  // prevent late async fetch from overwriting question state after quiz starts
+  const hasStartedRef = useRef(false)
   // answered question ids for skipping already completed questions
   const [answeredIds, setAnsweredIds] = useState<string[]>([])
+  // avoid duplicate starts while preparing attempt/order
+  const [isPreparingStart, setIsPreparingStart] = useState(false)
 
   // -------------------- PROCTORING STATE --------------------
   // set state for tab switches count
@@ -96,6 +100,9 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
   // show before taking the quiz
   const [modal, setModal] = useState(true)
+  // prevent rapid multi-click submits on next/finish
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false)
+  const isSubmittingAnswerRef = useRef(false)
 
 
 
@@ -118,6 +125,24 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     },
   })
 
+  const runHandleNext = useCallback(
+    async (autoFailFlag = false) => {
+      if (isSubmittingAnswerRef.current) return
+      isSubmittingAnswerRef.current = true
+      setIsSubmittingAnswer(true)
+      try {
+        await handleNext(autoFailFlag)
+      } catch (error) {
+        console.error("Failed to submit answer:", error)
+        toast.error("Failed to submit answer. Please try again.")
+      } finally {
+        isSubmittingAnswerRef.current = false
+        setIsSubmittingAnswer(false)
+      }
+    },
+    [handleNext],
+  )
+
 
 
 
@@ -135,7 +160,9 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
         return
       }
       // we set the current questions in state
-      setQuestions(data.questions || [])
+      if (!hasStartedRef.current) {
+        setQuestions(data.questions || [])
+      }
       //  getting the proctoring value if its true or not
       const proctoringRes = await getQuizProctoringByIdAction(quizId)
       // then setting it in states to update if there will be a proctoring feature
@@ -227,12 +254,12 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
     const run = async () => {
       // Auto-fail if the user did not answer before time ran out
-      await handleNext(true)   // safe: runs AFTER render
+      await runHandleNext(true)   // safe: runs AFTER render
       setTimeUp(false)     // reset for next question
     }
 
     run()
-  }, [timeUp])
+  }, [timeUp, runHandleNext])
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
@@ -324,28 +351,40 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
   // 6️⃣ START QUIZ
   const handleStart = async () => {
-    if (!session) return
-
-    const result = await createAttemptAction({ quizId, userId: session.userId })
-    if (!result.success || !result.data?.attempt) {
-      toast.error(result.error || "Attempt creation failed")
+    if (!session || isPreparingStart) return
+    if (!questions.length) {
+      toast.error("Questions are still loading. Please try again.")
       return
     }
+    setIsPreparingStart(true)
+    try {
+      const result = await createAttemptAction({ quizId, userId: session.userId })
+      if (!result.success || !result.data?.attempt) {
+        toast.error(result.error || "Attempt creation failed")
+        return
+      }
 
-    const attempt = result.data.attempt
-    setAttemptId(attempt.id)
-    setTabSwitches(attempt.tabSwitchCount)
+      const attempt = result.data.attempt
+      setAttemptId(attempt.id)
+      setTabSwitches(attempt.tabSwitchCount)
 
-    // Use a stable shuffled order for this attempt (so resume stays consistent)
-    let orderedQuestions = questions
-    const orderRes = await getOrCreateAttemptQuestionOrderAction(attempt.id)
-    if (orderRes.success && orderRes.order?.length) {
+      // Use a stable shuffled order for this attempt (so resume stays consistent)
+      let orderedQuestions = questions
+      const orderRes = await getOrCreateAttemptQuestionOrderAction(attempt.id)
+      if (!orderRes.success || !orderRes.order?.length) {
+        toast.error(orderRes.error || "Could not prepare shuffled question order")
+        return
+      }
+
       const map = new Map(questions.map((q) => [q.id, q]))
       const ordered = orderRes.order.map((id) => map.get(id)).filter(Boolean) as Question[]
-      if (ordered.length) {
-        orderedQuestions = ordered
-        setQuestions(orderedQuestions)
+      if (!ordered.length || ordered.length !== orderRes.order.length) {
+        toast.error("Question order is invalid. Please try starting again.")
+        return
       }
+      orderedQuestions = ordered
+      setQuestions(orderedQuestions)
+
       // Store remaining time map so timer resumes correctly
       if (orderRes.remainingTimeById) {
         remainingTimeByIdRef.current = orderRes.remainingTimeById
@@ -354,27 +393,33 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       if (orderRes.answeredIds) {
         setAnsweredIds(orderRes.answeredIds)
       }
-    }
 
-    // If we already know answered IDs, move to the first unanswered question
-    if (orderRes.success && orderRes.answeredIds?.length) {
-      const answeredSet = new Set(orderRes.answeredIds)
-      // Find the next unanswered question in the stable order
-      const next = orderedQuestions.findIndex((q) => !answeredSet.has(q.id))
-      setCurrentQuestion(next === -1 ? 0 : next)
-    } else {
-      // Fallback to old progress lookup if we do not have answered IDs
-      const progress = await getAttemptProgressAction(attempt.id)
-      if (progress.success && progress.answers?.length) {
-        const answered = progress.answers.map(a => a.questionId)
+      // If we already know answered IDs, move to the first unanswered question
+      if (orderRes.answeredIds?.length) {
+        const answeredSet = new Set(orderRes.answeredIds)
         // Find the next unanswered question in the stable order
-        const next = orderedQuestions.findIndex(q => !answered.includes(q.id))
+        const next = orderedQuestions.findIndex((q) => !answeredSet.has(q.id))
         setCurrentQuestion(next === -1 ? 0 : next)
+      } else {
+        // Fallback to old progress lookup if we do not have answered IDs
+        const progress = await getAttemptProgressAction(attempt.id)
+        if (progress.success && progress.answers?.length) {
+          const answered = progress.answers.map(a => a.questionId)
+          // Find the next unanswered question in the stable order
+          const next = orderedQuestions.findIndex(q => !answered.includes(q.id))
+          setCurrentQuestion(next === -1 ? 0 : next)
+        }
       }
-    }
 
-    setModal(false)
-    toast.success("Quiz started!")
+      hasStartedRef.current = true
+      setModal(false)
+      toast.success("Quiz started!")
+    } catch (error) {
+      console.error("Failed to start quiz:", error)
+      toast.error("Failed to start quiz. Please try again.")
+    } finally {
+      setIsPreparingStart(false)
+    }
   }
   // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
@@ -403,9 +448,10 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             <div className="pt-2">
               <button
                 onClick={handleStart}
+                disabled={isPreparingStart || !questions.length}
                 className="bg-primary hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold"
               >
-                Start Quiz
+                {isPreparingStart ? "Preparing..." : "Start Quiz"}
               </button>
             </div>
           </div>
@@ -432,15 +478,19 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
           <button
             // Disable next until an answer is selected
-            disabled={!selectedChoice}
-            onClick={() => handleNext()}
+            disabled={!selectedChoice || isSubmittingAnswer}
+            onClick={() => runHandleNext()}
             className={`mt-4 p-2 rounded-[var(--radius-button)] font-semibold w-full ${
               currentQuestion === questions.length - 1
                 ? "bg-green-600 text-primary-foreground hover:bg-green-700 active:bg-green-300"
                 : "bg-primary text-primary-foreground hover:bg-primary/90  active:bg-primary/80"
-            } ${!selectedChoice ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            } ${!selectedChoice || isSubmittingAnswer ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
           >
-            {currentQuestion === questions.length - 1 ? "Finish Quiz" : "Next Question"}
+            {isSubmittingAnswer
+              ? "Submitting..."
+              : currentQuestion === questions.length - 1
+                ? "Finish Quiz"
+                : "Next Question"}
           </button>
         </div>
       )}

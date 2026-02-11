@@ -41,6 +41,8 @@ export default function CreateQuizPage() {
   const [description, setDescription] = useState("")
   const [questions, setQuestions] = useState<Question[]>([createEmptyQuestion()])
   const [createdQuizCode, setCreatedQuizCode] = useState<string | null>(null)
+  const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false)
+  const [isCopyingCode, setIsCopyingCode] = useState(false)
 
   // Proctoring settings
   const [blurQuestion, setBlurQuestion] = useState(false)
@@ -103,10 +105,12 @@ export default function CreateQuizPage() {
     setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, timerLimit: seconds } : q)))
 
   const submitQuiz = async () => {
+    if (isSubmittingQuiz) return
     if (!userId) return alert("User not logged in")
     if (!title) return alert("Quiz title cannot be empty")
     if (questions.length === 0) return alert("Add at least one question")
 
+    setIsSubmittingQuiz(true)
     try {
       const quiz = await createQuiz(
           userId,
@@ -132,6 +136,8 @@ export default function CreateQuizPage() {
       console.error(err)
       // Use toast for errors to keep UX consistent
       toast.error("Failed to create quiz")
+    } finally {
+      setIsSubmittingQuiz(false)
     }
   }
 
@@ -194,14 +200,24 @@ export default function CreateQuizPage() {
                 <button
                   type="button"
                   onClick={async () => {
-                    await navigator.clipboard.writeText(createdQuizCode)
-                    toast.success("Code copied")
+                    if (isCopyingCode) return
+                    setIsCopyingCode(true)
+                    try {
+                      await navigator.clipboard.writeText(createdQuizCode)
+                      toast.success("Code copied")
+                    } catch (error) {
+                      console.error("Failed to copy code:", error)
+                      toast.error("Failed to copy code")
+                    } finally {
+                      setIsCopyingCode(false)
+                    }
                   }}
-                  className="bg-secondary text-secondary-foreground px-3 py-2 rounded-[var(--radius-button)] hover:bg-secondary/80"
+                  disabled={isCopyingCode}
+                  className="bg-secondary text-secondary-foreground px-3 py-2 rounded-[var(--radius-button)] hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed"
                   aria-label="Copy quiz code"
                   title="Copy quiz code"
                 >
-                  <Copy size={16} />
+                  {isCopyingCode ? "Copying..." : <Copy size={16} />}
                 </button>
               </div>
             </div>
@@ -237,11 +253,13 @@ export default function CreateQuizPage() {
                   </select>
                   {questions.length >= 2 && (
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.preventDefault();
                           removeQuestion(question.id);
                         }}
-                        className="bg-secondary py-1 px-2 rounded-[var(--radius-button)]"
+                        disabled={isSubmittingQuiz}
+                        className="bg-secondary py-1 px-2 rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         Remove
                       </button>
@@ -302,15 +320,21 @@ export default function CreateQuizPage() {
           ))}
 
           <button
+            type="button"
             onClick={(e) => { e.preventDefault(); addQuestion() }}
-            className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)]"
+            disabled={isSubmittingQuiz}
+            className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
             + Add Question
           </button>
         </div>
 
-        <button type="submit" className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-[var(--radius-button)]">
-          Create Quiz
+        <button
+          type="submit"
+          disabled={isSubmittingQuiz}
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isSubmittingQuiz ? "Creating..." : "Create Quiz"}
         </button>
       </form>
     </div>
