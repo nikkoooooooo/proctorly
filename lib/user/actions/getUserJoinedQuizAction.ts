@@ -1,3 +1,4 @@
+
 "use server";
 
 import { getUserJoinedQuiz } from "../helpers/getUserJoinedQuiz";

@@ -1,3 +1,5 @@
+"use client"
+
 // FOR TRACKING TAB SWITCHES AND BLUR EVENTS
 "use client" // this hook runs on the client
 
@@ -26,7 +28,8 @@ export function useProctoring(attemptId: string, enabled: boolean) { // custom h
     }
 
     const handleVisibility = () => { // when visibility changes
-      document.hidden ? handleLeave() : handleReturn() // map to leave/return
+      if (document.hidden) handleLeave() // map hidden state to leave handler
+      else handleReturn() // map visible state to return handler
     }
 
     window.addEventListener("blur", handleLeave) // listen for blur
@@ -45,5 +48,5 @@ export function useProctoring(attemptId: string, enabled: boolean) { // custom h
     void saveTabSwitchCountAction(attemptId, tabSwitches) // send count to server
   }, [attemptId, tabSwitches]) // re-run on changes
 
-  return { tabSwitches, blurScreen } // expose values
+  return { tabSwitches, blurScreen, setTabSwitches } // expose values
 }

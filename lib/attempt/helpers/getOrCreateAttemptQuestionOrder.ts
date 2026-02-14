@@ -1,5 +1,3 @@
-"use server"
-
 import { db } from "@/lib/db"
 import { attempt, attemptQuestionProgress, question } from "@/lib/schema"
 import { eq, asc, and } from "drizzle-orm"

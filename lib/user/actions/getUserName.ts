@@ -1,3 +1,4 @@
+
 "use server";
 
 import { getUserById, getUserNameFromQuiz } from "../helpers/getUser";

@@ -1,3 +1,5 @@
+"use server"
+
 // app/actions/getCurrentUser.ts
 import { getSession } from "@/lib/auth-actions";
 import { db } from "@/lib/db";

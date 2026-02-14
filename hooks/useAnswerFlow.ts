@@ -1,5 +1,4 @@
-// FOR SUBMITTING ANSWERS AND FINISHING THE QUIZ
-"use client" // this hook runs on the client
+"use client"
 
 import { answerAttemptAction } from "@/lib/attempt/actions/answerAttemptAction" // server action to save answers
 import { calculateScoreAction } from "@/lib/attempt/actions/calculateScoreAction" // server action to finalize score
@@ -15,7 +14,6 @@ interface Question { // minimal question shape
 
 interface UseAnswerFlowProps { // input shape for the hook
   attemptId: string // attempt id
-  quizId: string // quiz id
   questions: Question[] // list of questions
   currentQuestionIndex: number // current question index
   selectedChoice: Option | null // current selected choice
@@ -27,7 +25,6 @@ interface UseAnswerFlowProps { // input shape for the hook
 
 export function useAnswerFlow({ // custom hook signature
   attemptId, // attempt id
-  quizId, // quiz id
   questions, // questions list
   currentQuestionIndex, // current index
   selectedChoice, // selected choice
