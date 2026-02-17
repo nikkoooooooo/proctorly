@@ -100,9 +100,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
     [handleNext], // refresh callback only when hook handler changes
   )
 
-
-
-
+  
 
 
 
@@ -178,11 +176,6 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
 
 
 
-
-
-
-
-
   // -------------------- Start Quiz --------------------
   const handleStart = async () => {
     if (!session || isPreparingStart) return // block start when no session or already preparing
@@ -254,7 +247,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
               <button
                 onClick={handleStart} // start quiz flow
                 disabled={isPreparingStart || !questions.length} // disable while preparing or loading questions
-                className="bg-primary hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold" // button style
+                className="bg-primary cursor-pointer hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold" // button style
               >
                 {isPreparingStart ? "Preparing..." : "Start Quiz"} {/* button text by loading state */}
               </button>

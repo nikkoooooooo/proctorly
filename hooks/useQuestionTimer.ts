@@ -1,5 +1,3 @@
-"use client"
-
 // FOR SAVING AND RESUMING THE QUESTION TIMER
 "use client" // this hook runs on the client
 
@@ -24,6 +22,7 @@ export function useQuestionTimer({ // custom hook signature
   const [timeLeft, setTimeLeft] = useState(initialTime) // visible timer state
   const timeRef = useRef(initialTime) // ref for latest time without re-renders
   const lastResetQuestionIdRef = useRef<string>("") // track last question reset
+  const [timeUp, setTimeUp] = useState(false) // flag to trigger timeout side effects safely
 
   useEffect(() => { // reset timer only when question changes
     if (!questionId) return // avoid resetting before question is ready
@@ -43,7 +42,7 @@ export function useQuestionTimer({ // custom hook signature
         if (prev <= 1) { // stop and trigger callback on timeout
           clearInterval(timer) // clear timer when reaching 0
           timeRef.current = 0 // keep ref in sync at 0
-          void onTimeUp?.() // fire optional timeout callback
+          setTimeUp(true) // mark time-up to trigger callback in separate effect
           return 0 // lock at zero
         }
         // Keep ref in sync without re-rendering
@@ -55,6 +54,15 @@ export function useQuestionTimer({ // custom hook signature
 
     return () => clearInterval(timer) // cleanup interval
   }, [enabled, timeLeft, onTimeUp]) // re-run on enable/time/callback change
+
+  useEffect(() => { // run timeout callback outside render/update cycle
+    if (!enabled || !timeUp) return // only run when timer actually finished
+    const run = async () => {
+      await onTimeUp?.() // invoke optional timeout callback safely
+      setTimeUp(false) // reset flag for next question
+    }
+    void run()
+  }, [enabled, timeUp, onTimeUp])
 
   useEffect(() => { // persistence effect
     if (!enabled || !attemptId || !questionId) return // skip if missing data

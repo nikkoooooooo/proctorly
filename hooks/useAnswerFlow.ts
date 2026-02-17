@@ -75,6 +75,13 @@ export function useAnswerFlow({ // custom hook signature
 
     // Auto-fail when time runs out and no answer is selected
     if (autoFailFlag && !selectedChoice) {
+      // If this is the last question, auto-fail and finish immediately
+      if (currentQuestionIndex >= questions.length - 1) {
+        await autoFail(q.id) // mark as auto-fail
+        markAnswered(q.id) // mark answered locally
+        await finishQuiz() // finish immediately on last question
+        return
+      }
       await autoFail(q.id) // mark as auto-fail
       markAnswered(q.id) // mark answered locally
     } else {

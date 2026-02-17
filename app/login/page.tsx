@@ -32,8 +32,10 @@ export default function Login() {
                 </CardContent>
 
                 <CardFooter className="flex-col gap-2 text-center text-muted-foreground">
-                    By signing in, you agree to our Terms of Service &
-                    Privacy Policy
+                    By signing in, you agree to our
+                    <a href="/terms" className="mx-1 text-foreground hover:underline">Terms &amp; Conditions</a>
+                    &amp;
+                    <a href="/privacy" className="mx-1 text-foreground hover:underline">Privacy Policy</a>
                 </CardFooter>
             </Card>
         </div>

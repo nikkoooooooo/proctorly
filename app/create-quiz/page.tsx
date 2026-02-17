@@ -74,9 +74,12 @@ export default function CreateQuizPage() {
   }
 
   const addQuestion = () => setQuestions(prev => [...prev, createEmptyQuestion()])
+
   const removeQuestion = (id: string) => setQuestions(prev => prev.filter(q => q.id !== id))
+
   const updateQuestionText = (id: string, newText: string) =>
     setQuestions(prev => prev.map(q => (q.id === id ? { ...q, text: newText } : q)))
+
   const updateOptionText = (questionId: string, optionId: string, newText: string) =>
     setQuestions(prev =>
       prev.map(q =>
@@ -88,6 +91,7 @@ export default function CreateQuizPage() {
             },
       ),
     )
+    
   const setCorrectAnswer = (questionId: string, optionId: string) =>
     setQuestions(prev =>
       prev.map(q =>
