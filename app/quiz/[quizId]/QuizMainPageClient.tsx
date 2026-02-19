@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation" // Next router for redirects
 import toast from "react-hot-toast" // toast notifications for user feedback
 import confetti from "canvas-confetti" // finish animation
 
-import QuizCard from "@/components/QuizCard" // presentational quiz card component
+import QuizCardMCQ from "@/components/QuizCardMCQ" // presentational quiz card component
 import { authClient } from "@/client/auth-client" // auth session client
 import { getQuestionsByQuizIdAction } from "@/lib/quiz/actions/getQuestionsByQuizIdAction" // fetch quiz questions
 import { createAttemptAction } from "@/lib/attempt/actions/createAttemptAction" // create quiz attempt
@@ -264,7 +264,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             </p>
           </div>
 
-          <QuizCard
+          <QuizCardMCQ
             question={questions[currentQuestion]?.text} // current question text
             choices={questions[currentQuestion]?.option} // current question options
             onSelect={setSelectedChoice} // option select handler

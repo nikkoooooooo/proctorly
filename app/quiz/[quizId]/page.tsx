@@ -25,7 +25,7 @@ export default async function Page({ params }: PageProps) {
   })
 
   if (attemptCheck.attempt?.isCompleted) {
-    return <AlreadyTakenPage quizId={quizId}/> // no return needed
+    return <AlreadyTakenPage quizId={quizId} attemptId={attemptCheck.attempt.id}/> // no return needed
   }
 
   // 3️⃣ Render quiz client

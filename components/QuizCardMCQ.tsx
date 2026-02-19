@@ -13,11 +13,12 @@ interface QuizCardProps {
   onSelect: (choice: Option) => void   // <-- callback FROM parent
   time: number
   tabSwitch: number
+  imageUrl?: string
 }
 
 
 
-export default function QuizCard({ question, choices, onSelect, time, tabSwitch  }: QuizCardProps) {
+export default function QuizCard({ question, choices, onSelect, time, tabSwitch, imageUrl  }: QuizCardProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const labels = ["A", "B", "C", "D"]
@@ -29,6 +30,15 @@ export default function QuizCard({ question, choices, onSelect, time, tabSwitch 
 
   return (
     <div className="card p-4 w-full text-center wrap-anywhere">
+      {imageUrl && (
+        <div className="mb-4 rounded-[var(--radius-card)] border border-border/60 bg-background p-2">
+          <img
+            src={imageUrl}
+            alt="Question"
+            className="max-h-56 w-full rounded-[var(--radius-card)] object-contain"
+          />
+        </div>
+      )}
       <h2 
       className="font-semibold my-5 text-2xl" 
       onCopy={(e) => e.preventDefault()}>

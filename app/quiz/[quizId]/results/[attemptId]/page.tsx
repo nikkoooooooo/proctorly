@@ -29,7 +29,9 @@ export default async function ResultPage(props: ResultPageProps) {
     <div className="p-8 flex flex-col items-center gap-4 text-center">
       <h1 className="text-3xl font-bold">{result.quizTitle}</h1>
       <p className="text-lg">Created By: {result.quizAuthor}</p>
-      <p className="text-2xl font-semibold">Score: {result.score}</p>
+      <p className="text-2xl font-semibold">
+        Score: {result.score} / {result.totalPoints}
+      </p>
       <p className="text-lg text-red-500">Tab Switches: {result.tabSwitchCount}</p>
 
       <div className="mt-6 w-full max-w-md text-center">

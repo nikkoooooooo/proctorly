@@ -1,53 +1,22 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { attempt, attemptAnswer, question } from "@/lib/schema"
+import { attempt } from "@/lib/schema"
 import { eq } from "drizzle-orm"
+import { calculateScoreHelper } from "@/lib/attempt/helpers/calculateScoreHelper"
 
 export async function calculateScoreAction(attemptId: string) {
   try {
-    // 1️⃣ Get attempt (to know quizId)
-    const [currentAttempt] = await db
-      .select()
-      .from(attempt)
-      .where(eq(attempt.id, attemptId))
-      .execute()
+    const result = await calculateScoreHelper(attemptId)
+    if (!result.success) return result
 
-    if (!currentAttempt) {
-      return { success: false, error: "Attempt not found." }
-    }
-
-    // 2️⃣ Get total questions in quiz
-    const totalQuestions = await db
-      .select()
-      .from(question)
-      .where(eq(question.quizId, currentAttempt.quizId))
-      .execute()
-
-    // 3️⃣ Get submitted answers
-    const answers = await db
-      .select()
-      .from(attemptAnswer)
-      .where(eq(attemptAnswer.attemptId, attemptId))
-      .execute()
-
-    // 4️⃣ 🚫 Block completion if not all questions are answered
-    if (answers.length < totalQuestions.length) {
-      return {
-        success: false,
-        error: "Quiz is not fully answered yet.",
-      }
-    }
-
-    // 5️⃣ Calculate score
-    const totalCorrect = answers.filter(a => a.isCorrect).length
-    const score = totalCorrect
+    const { earnedPoints, totalPoints, totalCorrect, totalQuestions } = result
 
     // 6️⃣ Mark attempt as completed
     await db
       .update(attempt)
       .set({
-        score,
+        score: earnedPoints,
         isCompleted: true,
         submittedAt: new Date(),
       })
@@ -57,8 +26,9 @@ export async function calculateScoreAction(attemptId: string) {
     return {
       success: true,
       totalCorrect,
-      totalQuestions: totalQuestions.length,
-      score,
+      totalQuestions,
+      score: earnedPoints,
+      totalPoints,
     }
   } catch (error) {
     console.error("Failed to calculate score:", error)
@@ -76,5 +46,4 @@ export async function calculateScoreAction(attemptId: string) {
 // SERVER ACTION FOR REMOVING IT AFTER ANSWERED, PLUS THE SERVER ACTION MAKE THE 
 // COUNT DOUBLED THINKING IT ALREADY AASNWERED ALL QUESTIONS NOT KNOWING 
 // THEY ASNWERED SOME QUESTIONS MULTIPLE TIMES, WHICH IT SHOULD NOT
-
 

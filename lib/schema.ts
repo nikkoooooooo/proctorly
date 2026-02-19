@@ -119,7 +119,9 @@ export const question = pgTable("question", { // TABLE QUESTION
   type: text("type").notNull(), // "mcq" | "true-false" | "identification"
   // Original order of the question in the quiz (nullable until backfill)
   position: integer("position"),
-  timerLimit: integer("time_limit").default(30).notNull() // timer per question
+  timerLimit: integer("time_limit").default(30).notNull(), // timer per question
+  points: integer("points").default(1).notNull(), // points per question
+  imageUrl: text("image_url"), // optional question image URL
 });
 
 
@@ -158,27 +160,32 @@ export const attempt = pgTable("attempt", {
 });
 
 
-export const attemptAnswer = pgTable("attempt_answer", {
-  id: text("id").primaryKey(),
+export const attemptAnswer = pgTable(
+  "attempt_answer",
+  {
+    id: text("id").primaryKey(),
 
-  attemptId: text("attempt_id")
-    .notNull()
-    .references(() => attempt.id, { onDelete: "cascade" }),
+    attemptId: text("attempt_id")
+      .notNull()
+      .references(() => attempt.id, { onDelete: "cascade" }),
 
-  questionId: text("question_id")
-    .notNull()
-    
-    .references(() => question.id, { onDelete: "cascade" }),
+    questionId: text("question_id")
+      .notNull()
+      .references(() => question.id, { onDelete: "cascade" }),
 
-  optionId: text("option_id")  // nullable because identification questions don't use options
-    .references(() => option.id),
+    optionId: text("option_id")  // nullable because identification questions don't use options
+      .references(() => option.id),
 
-  textAnswer: text("text_answer"), // for identification or open-ended answers
+    textAnswer: text("text_answer"), // for identification or open-ended answers
 
-  isCorrect: boolean("is_correct"), // store computed correctness for faster grading
+    isCorrect: boolean("is_correct"), // store computed correctness for faster grading
 
-  answeredAt: timestamp("answered_at").defaultNow(),
-});
+    answeredAt: timestamp("answered_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("attempt_answer_unique_idx").on(table.attemptId, table.questionId),
+  ],
+);
 
 // Per-question progress for an attempt (timer + answered status)
 export const attemptQuestionProgress = pgTable(

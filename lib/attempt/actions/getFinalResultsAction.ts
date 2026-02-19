@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { attempt, quiz, user as userTable } from "@/lib/schema";
+import { attempt, quiz, user as userTable, question } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 
 export async function getFinalResultsAction(attemptId: string) {
@@ -41,9 +41,19 @@ export async function getFinalResultsAction(attemptId: string) {
       .where(eq(userTable.id, quizData.creatorId))
       .execute();
 
+    // 4️⃣ Fetch total points for this quiz
+    const questions = await db
+      .select({ points: question.points })
+      .from(question)
+      .where(eq(question.quizId, userAttempt.quizId))
+      .execute();
+
+    const totalPoints = questions.reduce((sum, q) => sum + (q.points ?? 1), 0);
+
     return {
       success: true,
       score: userAttempt.score ?? 0,
+      totalPoints,
       tabSwitchCount: userAttempt.tabSwitchCount ?? 0,
       quizTitle: quizData.title,
       quizAuthor: creator?.name ?? "Unknown",

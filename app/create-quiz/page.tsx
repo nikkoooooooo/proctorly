@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react"
 import { v4 as uuid } from "uuid"
-import { createQuiz } from "@/lib/quiz/helpers/createQuiz"
+import { createQuiz, QuestionInput } from "@/lib/quiz/helpers/createQuiz"
 import { authClient } from "@/client/auth-client"
 import Link from "next/link"
 import toast from "react-hot-toast"
 import { Copy } from "lucide-react"
+import CreateQuestionMCQ from "@/components/create-quiz/CreateQuestionMCQ"
+import CreateQuestionTorF from "@/components/create-quiz/CreateQuestionTorF"
 
 // Question type options
 type QuestionType = "mcq" | "true-false"
@@ -26,6 +28,9 @@ interface Question {
   options: Option[]
   description: string
   timerLimit: number // NEW: timer per question in seconds
+  points: number
+  correctAnswer: "true" | "false"
+  imageUrl?: string
 }
 
 // Main Create Quiz Page
@@ -64,6 +69,8 @@ export default function CreateQuizPage() {
       description: "",
       type: "mcq",
       timerLimit: 30, // default 30 seconds
+      points: 1,
+      correctAnswer: "true",
       options: [
         { id: uuid(), text: "", isCorrect: true },
         { id: uuid(), text: "", isCorrect: false },
@@ -104,9 +111,38 @@ export default function CreateQuizPage() {
       ),
     )
   const setQuestionType = (questionId: string, newType: QuestionType) =>
-    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, type: newType } : q)))
+    setQuestions(prev =>
+      prev.map(q => {
+        if (q.id !== questionId) return q
+        if (q.type === newType) return q
+        if (newType === "true-false") {
+          return {
+            ...q,
+            type: newType,
+            correctAnswer: "true",
+            options: [],
+          }
+        }
+        return {
+          ...q,
+          type: newType,
+          options: [
+            { id: uuid(), text: "", isCorrect: true },
+            { id: uuid(), text: "", isCorrect: false },
+            { id: uuid(), text: "", isCorrect: false },
+            { id: uuid(), text: "", isCorrect: false },
+          ],
+        }
+      }),
+    )
   const setQuestionTimer = (questionId: string, seconds: number) =>
     setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, timerLimit: seconds } : q)))
+  const setQuestionPoints = (questionId: string, points: number) =>
+    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, points } : q)))
+  const setQuestionImage = (questionId: string, imageUrl: string) =>
+    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, imageUrl } : q)))
+  const setCorrectAnswerTorF = (questionId: string, value: "true" | "false") =>
+    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, correctAnswer: value } : q)))
 
   const submitQuiz = async () => {
     if (isSubmittingQuiz) return
@@ -116,15 +152,39 @@ export default function CreateQuizPage() {
 
     setIsSubmittingQuiz(true)
     try {
+      const normalizedQuestions: QuestionInput[] = questions.map((q) => {
+        if (q.type === "true-false") {
+          return {
+            text: q.text,
+            type: q.type,
+            timerLimit: q.timerLimit,
+            points: q.points ?? 1,
+            imageUrl: q.imageUrl,
+            options: [
+              { text: "True", isCorrect: q.correctAnswer === "true" },
+              { text: "False", isCorrect: q.correctAnswer === "false" },
+            ],
+          }
+        }
+        return {
+          text: q.text,
+          type: q.type,
+          timerLimit: q.timerLimit,
+          points: q.points ?? 1,
+          imageUrl: q.imageUrl,
+          options: q.options.map((opt) => ({ text: opt.text, isCorrect: opt.isCorrect })),
+        }
+      })
+
       const quiz = await createQuiz(
-          userId,
-          title,
-          questions,
-          description,
-          blurQuestion,
-          disableCopyPaste,
-          tabMonitoring
-        )
+        userId,
+        title,
+        normalizedQuestions,
+        description,
+        blurQuestion,
+        disableCopyPaste,
+        tabMonitoring
+      )
 
       // Show a friendly success toast instead of browser alert
       toast.success("Quiz created successfully!")
@@ -271,55 +331,34 @@ export default function CreateQuizPage() {
                 </div>
               </div>
 
-              {/* Question Text */}
-              <input
-                type="text"
-                value={question.text}
-                onChange={(e) => updateQuestionText(question.id, e.target.value)}
-                placeholder="Enter question"
-                className="w-full bg-secondary p-2 rounded-md"
-              />
-
-              {/* Timer per question */}
-              <div className="flex flex-col w-40">
-                <label className="font-semibold">Timer (seconds)</label>
-                <input
-                  type="number"
-                  min={5}
-                  value={question.timerLimit}
-                  onChange={(e) => setQuestionTimer(question.id, Number(e.target.value))}
-                  className="w-full bg-secondary p-2 rounded-md"
+              {question.type === "true-false" ? (
+                <CreateQuestionTorF
+                  question={question}
+                  index={index}
+                  isSubmitting={isSubmittingQuiz}
+                  onRemove={removeQuestion}
+                  showRemove={false}
+                  onQuestionTextChange={updateQuestionText}
+                  onTimerChange={setQuestionTimer}
+                  onCorrectAnswerChange={setCorrectAnswerTorF}
+                  onQuestionImageChange={setQuestionImage}
+                  onPointsChange={setQuestionPoints}
                 />
-              </div>
-
-              {/* Options */}
-              <div className="flex flex-col gap-2">
-                {question.options.map((option, i) => (
-                  <input
-                    key={option.id}
-                    value={option.text}
-                    onChange={(e) => updateOptionText(question.id, option.id, e.target.value)}
-                    placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                    className="w-full bg-secondary p-2 rounded-md"
-                  />
-                ))}
-              </div>
-
-              {/* Correct answer selector */}
-              <div className="flex flex-col w-40">
-                <label>Correct Answer:</label>
-                <select
-                  className="bg-secondary p-1 rounded"
-                  value={question.options.find(o => o.isCorrect)?.id || ""}
-                  onChange={(e) => setCorrectAnswer(question.id, e.target.value)}
-                >
-                  {question.options.map((option, i) => (
-                    <option key={option.id} value={option.id}>
-                      Option {String.fromCharCode(65 + i)}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              ) : (
+                <CreateQuestionMCQ
+                  question={question}
+                  index={index}
+                  isSubmitting={isSubmittingQuiz}
+                  onRemove={removeQuestion}
+                  showRemove={false}
+                  onQuestionTextChange={updateQuestionText}
+                  onOptionTextChange={updateOptionText}
+                  onSetCorrect={setCorrectAnswer}
+                  onTimerChange={setQuestionTimer}
+                  onQuestionImageChange={setQuestionImage}
+                  onPointsChange={setQuestionPoints}
+                />
+              )}
             </div>
           ))}
 

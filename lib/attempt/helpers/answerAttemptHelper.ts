@@ -22,6 +22,22 @@ export async function answerAttemptHelper({
   isCorrect,
   isAutoFail,
 }: AnswerAttemptProps) {
+  // Guard: prevent duplicate answers for the same (attempt, question)
+  const existing = await db
+    .select()
+    .from(attemptAnswer)
+    .where(
+      and(
+        eq(attemptAnswer.attemptId, attemptId),
+        eq(attemptAnswer.questionId, questionId),
+      ),
+    )
+    .limit(1)
+
+  if (existing.length > 0) {
+    return existing[0]
+  }
+
   // Save the student's answer first
   const result = await db.insert(attemptAnswer).values({
     id: uuid(),

@@ -23,6 +23,8 @@ export interface QuestionInput {
   text: string
   type: "mcq" | "true-false" | "identification"
   timerLimit?: number
+  points?: number
+  imageUrl?: string
   options?: { text: string; isCorrect: boolean }[]
 }
 
@@ -63,6 +65,8 @@ export async function createQuiz(
       text: q.text,
       type: q.type,
       timerLimit: q.timerLimit ?? 30, // default 30 seconds
+      points: q.points ?? 1,
+      imageUrl: q.imageUrl ?? null,
     })
 
     // Insert options
