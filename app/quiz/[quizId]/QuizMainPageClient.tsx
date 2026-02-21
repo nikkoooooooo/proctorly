@@ -27,6 +27,8 @@ interface Question { // quiz question shape
   text: string // question text
   option: Option[] // available options
   timeLimit?: number // optional time limit in seconds
+  imageUrl?: string | null
+
 }
 
 export default function QuizMainPageClient({ quizId }: { quizId: string }) {
