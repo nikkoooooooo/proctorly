@@ -304,9 +304,9 @@ export default function CreateQuizPage() {
           {questions.map((question, index) => (
             <div key={question.id} className="bg-background p-4 rounded-md space-y-3">
               {/* Header */}
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3>Question {index + 1}</h3>
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <select
                     value={question.type}
                     className="bg-secondary p-1 rounded-md w-28"

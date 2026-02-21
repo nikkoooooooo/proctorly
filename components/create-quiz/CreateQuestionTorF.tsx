@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import QuestionImageUploader from "@/components/QuestionImageUploader"
 interface Question {
   id: string
   text: string
@@ -71,44 +72,29 @@ export default function CreateQuestionTorF({
       {onQuestionImageChange && (
         <div className="flex flex-col gap-2">
           <label className="font-semibold">Question Image (optional)</label>
-          <div
-            className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed border-border/60 bg-secondary/40 p-4 text-sm text-muted-foreground"
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={(event) => {
-              event.preventDefault()
-              const file = event.dataTransfer.files?.[0]
-              if (!file) return
-              const objectUrl = URL.createObjectURL(file)
-              onQuestionImageChange(question.id, objectUrl)
-            }}
-          >
-            <p>Drag and drop an image here</p>
-            <label className="cursor-pointer rounded-[var(--radius-button)] bg-foreground px-3 py-2 text-xs font-semibold text-background">
-              Upload Image
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(event) => {
-                  const file = event.target.files?.[0]
-                  if (!file) return
-                  const objectUrl = URL.createObjectURL(file)
-                  onQuestionImageChange(question.id, objectUrl)
-                }}
-              />
-            </label>
-            <span className="text-xs">or paste a URL below</span>
-          </div>
+          {!question.imageUrl && (
+            <QuestionImageUploader
+              onUploaded={(url) => onQuestionImageChange(question.id, url)}
+            />
+          )}
           <input
             type="text"
             value={question.imageUrl ?? ""}
             onChange={(e) => onQuestionImageChange(question.id, e.target.value)}
-            placeholder="https://example.com/image.png"
+            placeholder="Or paste an image URL"
             className="w-full bg-secondary p-2 rounded-md"
           />
           {question.imageUrl && (
+            <button
+              type="button"
+              onClick={() => onQuestionImageChange(question.id, "")}
+              className="self-start rounded-[var(--radius-button)] bg-secondary px-3 py-1 text-xs font-semibold text-foreground hover:bg-secondary/80"
+            >
+              Remove Image
+            </button>
+          )}
+          {question.imageUrl && (
             <div className="rounded-md border border-border/60 bg-background p-2">
-              {/* Preview only when a URL is provided */}
               <img
                 src={question.imageUrl}
                 alt="Question"
@@ -130,7 +116,7 @@ export default function CreateQuestionTorF({
         />
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row">
         <div className="flex flex-col w-40">
           <label>Correct Answer:</label>
           <select

@@ -10,6 +10,7 @@ export async function getQuestionsByQuizId(quizId: string) {
       text: question.text,
       quizId: question.quizId,
       type: question.type,
+      imageUrl: question.imageUrl,
       timeLimit: question.timerLimit,  // <-- FIXED (correct field)
     })
     .from(question)
