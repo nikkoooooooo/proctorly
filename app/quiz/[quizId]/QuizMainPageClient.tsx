@@ -272,7 +272,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             onSelect={setSelectedChoice} // option select handler
             time={timeLeft} // live timer value
             tabSwitch={tabSwitches} // tab switch count for display
-            imageUrl={questions[currentQuestion]?.imageUrl} // question image if present
+            imageUrl={questions[currentQuestion]?.imageUrl ?? undefined} // question image if present
           />
 
           <button
