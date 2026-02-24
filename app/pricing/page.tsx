@@ -9,10 +9,8 @@ function Pricing() {
   const router = useRouter()
   return (
     <div className="min-h-screen bg-background px-4">
-      <div className="max-w-xl w-full mx-auto my-6">
-        {/* Back link aligned like create-quiz page */}
-        <div className="mt-5">
-          {/* Use router.back so it returns to the previous page */}
+      <div className="max-w-5xl w-full mx-auto py-10">
+        <div className="mb-8">
           <button
             type="button"
             onClick={() => router.back()}
@@ -21,44 +19,57 @@ function Pricing() {
             ←
           </button>
         </div>
-      </div>
-      <div className="max-w-xl w-full mx-auto my-10 flex items-center justify-center">
-        {/* Theme-aware card while pricing is under construction */}
-        <div className="bg-secondary rounded-[var(--radius-card)] border border-border p-8 shadow-lg text-center space-y-6">
-          
-          {/* Headline stays bold and on-brand */}
-          <h1 className="text-4xl font-bold text-primary">Pricing Is Brewing</h1>
 
-          {/* Short, creative status message */}
-          {/* Keep the message human and instructor-focused */}
-          <p className="text-muted-foreground text-lg">
-            We are still crafting the plans. Clean, fair, and built for instructors.
+        <div className="mb-10">
+          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
+            Pricing
           </p>
+          <h1 className="mt-4 text-4xl font-semibold text-foreground">Simple, instructor-first pricing.</h1>
+          <p className="mt-3 text-sm text-muted-foreground max-w-2xl">
+            Founding Educator Access gives early supporters priority input and premium capabilities.
+          </p>
+        </div>
 
-          {/* Feature promise list for the upcoming plans */}
-          <div className="space-y-3 text-left max-w-md mx-auto">
-            <div className="flex gap-3">
-              <span className="text-xl">🧪</span>
-              {/* Humanized promise for instructors */}
-              <p className="text-xl text-foreground">Start small, scale when you are ready</p>
+        <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-start">
+          <div className="border border-border/60 rounded-[var(--radius-card)] bg-secondary/30 p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              Founding Educator Access
+            </p>
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className="text-4xl font-semibold text-foreground">₱249</span>
+              <span className="text-sm text-muted-foreground">per month (early access)</span>
             </div>
-            <div className="flex gap-3">
-              <span className="text-xl">⚡</span>
-              {/* Humanized pricing clarity */}
-              <p className="text-xl text-foreground">Clear tiers, no surprise fees</p>
-            </div>
-            <div className="flex gap-3">
-              <span className="text-xl">🤝</span>
-              {/* Humanized instructor-first benefits */}
-              <p className="text-xl text-foreground">Built for instructors, made easy to access</p>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Pricing updates to <span className="text-foreground font-semibold">₱349</span> per month after early
+              access ends.
+            </p>
+            <div className="mt-6">
+              <button
+                type="button"
+                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
+              >
+                Start Early Access
+              </button>
             </div>
           </div>
 
-          {/* Soft callout while we build */}
-          <p className="text-sm text-muted-foreground">
-            Pricing page is in active development. Check back soon.
-          </p>
-
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-foreground">Early access benefits</h2>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <div className="flex items-start gap-3">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
+                <span>Priority for feature suggestions and roadmap feedback.</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
+                <span>Premium dashboard with cleaner analytics and monitoring views.</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
+                <span>Advanced features as they launch, included in early access.</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
