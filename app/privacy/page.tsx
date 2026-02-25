@@ -48,7 +48,7 @@ export default function PrivacyPage() {
           <div>
             <h2 className="text-xl font-semibold">4. Data Deletion</h2>
             <p className="text-muted-foreground">
-              You can request deletion of your data anytime by contacting [your email], and we will remove it as soon
+              You can request deletion of your data anytime by contacting tryproctorly.app@gmail.com, and we will remove it as soon
               as possible.
             </p>
           </div>

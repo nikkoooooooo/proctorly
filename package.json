@@ -9,10 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.997.0",
+    "@aws-sdk/s3-request-presigner": "^3.997.0",
     "@neondatabase/serverless": "^1.0.2",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
-    "@uploadthing/react": "^7.3.3",
     "better-auth": "^1.4.7",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
@@ -27,7 +28,6 @@
     "react-dom": "19.2.1",
     "react-hot-toast": "^2.6.0",
     "tailwind-merge": "^3.4.0",
-    "uploadthing": "^7.7.4",
     "uuid": "^13.0.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },

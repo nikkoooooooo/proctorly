@@ -76,7 +76,7 @@ export default function TermsPage() {
               We may suspend or terminate accounts that violate these terms.
             </p>
             <p className="text-muted-foreground">
-              Users may request deletion of their account at any time via [your email].
+              Users may request deletion of their account at any time via tryproctorly.app@gmail.com.
             </p>
           </div>
 

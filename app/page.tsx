@@ -25,15 +25,16 @@ export default function Home() {
 
         <div className="relative mx-auto w-full max-w-6xl px-4 py-20">
           <div className="mb-8 flex items-center justify-between text-sm text-muted-foreground">
-            <span className="font-semibold uppercase tracking-[0.25em] text-foreground bg-secondary/60 border border-border/60 px-3 py-1 rounded-full">
+            {/* <span className="font-semibold uppercase tracking-[0.25em] text-foreground bg-secondary/60 border border-border/60 px-3 py-1 rounded-full">
               Hero
-            </span>
+            </span> */}
             <span className="h-px flex-1 bg-border/60 ml-4" />
           </div>
           <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
             <div className="space-y-6">
               <h1 className="text-4xl font-semibold text-foreground md:text-5xl">
-                ProctorlyX keeps assessments focused, fair, and trusted.
+                <span className="font-semibold tracking-tight">Proctorly</span>
+                <span className="ml-0.5 font-medium text-primary">X</span> keeps assessments focused, fair, and trusted.
               </h1>
               <p className="text-lg text-muted-foreground">
                 Launch secure quizzes fast with clean workflows, real-time signals, and clear analytics.
@@ -52,7 +53,7 @@ export default function Home() {
                   View Pricing
                 </a>
               </div>
-              <p className="text-sm text-muted-foreground">Free users can create up to 2 quizzes.</p>
+              <p className="text-sm text-muted-foreground">Free users can create up to 3 quizzes.</p>
             </div>
 
             <div className="space-y-3 text-sm text-muted-foreground">
@@ -163,7 +164,11 @@ export default function Home() {
           </div>
           <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-center">
             <div className="space-y-4">
-              <h2 className="text-3xl font-semibold text-foreground">What we truly build at ProctorlyX.</h2>
+            <h2 className="text-3xl font-semibold text-foreground">
+              What we truly build at{" "}
+              <span className="font-semibold tracking-tight">Proctorly</span>
+              <span className="ml-0.5 font-medium text-primary">X</span>.
+            </h2>
               <p className="text-sm text-muted-foreground">
                 We build trust in assessments. Our product keeps exams fair, transparent, and efficient for academic
                 teams. Proctoring should support students and instructors without intruding on the learning experience.

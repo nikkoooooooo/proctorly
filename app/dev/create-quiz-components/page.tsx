@@ -177,6 +177,7 @@ export default function DevCreateQuizComponentsPage() {
 
               {question.type === "true-false" ? (
                 <CreateQuestionTorF
+                  userId=""
                   question={question}
                   index={index}
                   isSubmitting={false}
@@ -200,6 +201,7 @@ export default function DevCreateQuizComponentsPage() {
                 />
               ) : (
                 <CreateQuestionMCQ
+                  userId=""
                   question={question}
                   index={index}
                   isSubmitting={false}

@@ -82,7 +82,7 @@ export default function TermsPrivacyPage() {
               Your data is stored securely and access is limited to authorized team members.
             </p>
             <p className="text-muted-foreground">
-              You can request deletion of your data anytime by contacting [your email], and we will remove it as soon
+              You can request deletion of your data anytime by contacting tryproctorly.app@gmail.com, and we will remove it as soon
               as possible.
             </p>
           </div>
@@ -101,7 +101,7 @@ export default function TermsPrivacyPage() {
               We may suspend or terminate accounts that violate these terms.
             </p>
             <p className="text-muted-foreground">
-              Users may request deletion of their account at any time via [your email].
+              Users may request deletion of their account at any time via tryproctorly.app@gmail.com.
             </p>
           </div>
 

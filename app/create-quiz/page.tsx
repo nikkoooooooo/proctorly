@@ -333,6 +333,7 @@ export default function CreateQuizPage() {
 
               {question.type === "true-false" ? (
                 <CreateQuestionTorF
+                  userId={userId ?? ""}
                   question={question}
                   index={index}
                   isSubmitting={isSubmittingQuiz}
@@ -346,6 +347,7 @@ export default function CreateQuizPage() {
                 />
               ) : (
                 <CreateQuestionMCQ
+                  userId={userId ?? ""}
                   question={question}
                   index={index}
                   isSubmitting={isSubmittingQuiz}

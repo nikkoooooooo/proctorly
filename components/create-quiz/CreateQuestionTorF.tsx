@@ -13,6 +13,7 @@ interface Question {
 }
 
 interface CreateQuestionTorFProps {
+  userId: string
   question: Question
   index: number
   isSubmitting: boolean
@@ -26,6 +27,7 @@ interface CreateQuestionTorFProps {
 }
 
 export default function CreateQuestionTorF({
+  userId,
   question,
   index,
   isSubmitting,
@@ -38,10 +40,46 @@ export default function CreateQuestionTorF({
   showRemove = true,
 }: CreateQuestionTorFProps) {
   const [pointsInput, setPointsInput] = useState<string>(String(question.points ?? ""))
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
   useEffect(() => {
     setPointsInput(question.points === undefined ? "" : String(question.points))
   }, [question.points])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadPreview() {
+      if (!question.imageUrl) {
+        setPreviewUrl(null)
+        return
+      }
+
+      if (question.imageUrl.startsWith("http://") || question.imageUrl.startsWith("https://")) {
+        setPreviewUrl(question.imageUrl)
+        return
+      }
+
+      try {
+        const res = await fetch("/api/images/sign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key: question.imageUrl }),
+        })
+
+        if (!res.ok) throw new Error("Failed to sign image")
+        const data = await res.json()
+        if (!cancelled) setPreviewUrl(data.url || null)
+      } catch {
+        if (!cancelled) setPreviewUrl(null)
+      }
+    }
+
+    loadPreview()
+    return () => {
+      cancelled = true
+    }
+  }, [question.imageUrl])
   return (
     <div className="bg-background p-4 rounded-md space-y-3">
       <div className="flex justify-between items-center">
@@ -74,6 +112,8 @@ export default function CreateQuestionTorF({
           <label className="font-semibold">Question Image (optional)</label>
           {!question.imageUrl && (
             <QuestionImageUploader
+              userId={userId}
+              questionId={question.id}
               onUploaded={(url) => onQuestionImageChange(question.id, url)}
             />
           )}
@@ -93,10 +133,10 @@ export default function CreateQuestionTorF({
               Remove Image
             </button>
           )}
-          {question.imageUrl && (
+          {question.imageUrl && previewUrl && (
             <div className="rounded-md border border-border/60 bg-background p-2">
               <img
-                src={question.imageUrl}
+                src={previewUrl}
                 alt="Question"
                 className="max-h-48 w-full rounded-md object-contain"
               />
