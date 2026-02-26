@@ -57,8 +57,10 @@ export default function EditQuizPage({ params }: EditPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [isReadOnly, setIsReadOnly] = useState(false)
 
   const [blurQuestion, setBlurQuestion] = useState(false)
+  const [expiresAt, setExpiresAt] = useState("")
 
   useEffect(() => {
     if (!user) return
@@ -83,6 +85,15 @@ export default function EditQuizPage({ params }: EditPageProps) {
     }
   }
 
+  const toLocalDatetimeInputValue = (value?: string | Date | null) => {
+    if (!value) return ""
+    const date = new Date(value)
+    if (Number.isNaN(date.getTime())) return ""
+    const offsetMs = date.getTimezoneOffset() * 60000
+    const local = new Date(date.getTime() - offsetMs)
+    return local.toISOString().slice(0, 16)
+  }
+
   useEffect(() => {
     const loadQuiz = async () => {
       try {
@@ -99,7 +110,10 @@ export default function EditQuizPage({ params }: EditPageProps) {
         setTitle(res.quiz.title ?? "")
         setDescription(res.quiz.description ?? "")
         setBlurQuestion(!!res.quiz.blurQuestion)
+        setExpiresAt(toLocalDatetimeInputValue(res.quiz.expiresAt))
+        setIsReadOnly(!!res.readOnly)
 
+        
         const mapped: Question[] = res.questions.map((q: LoadedQuestion) => {
           const rawType = q.type === "true-false" ? "true-false" : "mcq"
           const options: Option[] = (q.options ?? []).map((o) => ({
@@ -219,17 +233,19 @@ export default function EditQuizPage({ params }: EditPageProps) {
 
   const submitQuiz = async () => {
     if (isSubmitting) return
-    if (!title) return alert("Quiz title cannot be empty")
-    if (questions.length === 0) return alert("Add at least one question")
-    if (
-      questions.some((q) => {
-        const hasText = q.text.trim().length > 0
-        const hasImage = (q.imageUrl ?? "").trim().length > 0
-        return !hasText && !hasImage
-      })
-    ) {
-      toast.error("Each question must have text or an image")
-      return
+    if (!isReadOnly) {
+      if (!title) return alert("Quiz title cannot be empty")
+      if (questions.length === 0) return alert("Add at least one question")
+      if (
+        questions.some((q) => {
+          const hasText = q.text.trim().length > 0
+          const hasImage = (q.imageUrl ?? "").trim().length > 0
+          return !hasText && !hasImage
+        })
+      ) {
+        toast.error("Each question must have text or an image")
+        return
+      }
     }
 
     setIsSubmitting(true)
@@ -238,6 +254,8 @@ export default function EditQuizPage({ params }: EditPageProps) {
         title,
         description,
         blurQuestion,
+        expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+        expiryOnly: isReadOnly,
         questions,
       }
       const res = await updateQuizAction(quizId, payload)
@@ -273,115 +291,133 @@ export default function EditQuizPage({ params }: EditPageProps) {
         <Link href={"/created-quiz"} className="text-4xl font-bold">←</Link>
       </div>
 
+      {isReadOnly && (
+        <div className="card p-4 text-sm text-muted-foreground">
+          This quiz already has attempts. Only the expiry can be edited.
+        </div>
+      )}
+
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); submitQuiz() }}>
         <div className="card p-5 space-y-4">
           <h2 className="text-2xl font-semibold">Quiz Information</h2>
-          <div className="flex flex-col gap-2">
-            <label className="font-semibold">Title</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="bg-background p-3 rounded-md"
-              placeholder="Quiz title"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="font-semibold">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="bg-background p-3 rounded-md"
-              rows={2}
-              placeholder="Quiz description"
-            />
-          </div>
-        </div>
-
-        <div className="card p-5 space-y-3">
-          <h2 className="text-2xl font-semibold">Proctoring Features</h2>
-          <div className="flex gap-2 items-center">
-            <input type="checkbox" checked={blurQuestion} onChange={(e) => setBlurQuestion(e.target.checked)} />
-            <p className="font-semibold">👁️ Window and Tab Monitoring</p>
-          </div>
-        </div>
-
-        <div className="card p-5 space-y-4">
-          <h2 className="text-2xl font-semibold">Questions</h2>
-
-          {questions.map((question, index) => (
-            <div key={question.id} className="bg-background p-4 rounded-md space-y-3">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h3>Question {index + 1}</h3>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <select
-                    value={question.type}
-                    className="bg-secondary p-1 rounded-md w-28"
-                    onChange={(e) => setQuestionType(question.id, e.target.value as QuestionType)}
-                  >
-                    <option value="mcq">MCQ</option>
-                    <option value="true-false">True / False</option>
-                  </select>
-                  {questions.length >= 2 && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        removeQuestion(question.id)
-                      }}
-                      disabled={isSubmitting}
-                      className="bg-secondary py-1 px-2 rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {question.type === "true-false" ? (
-                <CreateQuestionTorF
-                  userId={userId ?? ""}
-                  question={question}
-                  index={index}
-                  isSubmitting={isSubmitting}
-                  onRemove={removeQuestion}
-                  showRemove={false}
-                  onQuestionTextChange={updateQuestionText}
-                  onTimerChange={setQuestionTimer}
-                  onCorrectAnswerChange={setCorrectAnswerTorF}
-                  onQuestionImageChange={setQuestionImage}
-                  onPointsChange={setQuestionPoints}
-                />
-              ) : (
-                <CreateQuestionMCQ
-                  userId={userId ?? ""}
-                  question={question}
-                  index={index}
-                  isSubmitting={isSubmitting}
-                  onRemove={removeQuestion}
-                  showRemove={false}
-                  onQuestionTextChange={updateQuestionText}
-                  onOptionTextChange={updateOptionText}
-                  onSetCorrect={setCorrectAnswer}
-                  onTimerChange={setQuestionTimer}
-                  onQuestionImageChange={setQuestionImage}
-                  onPointsChange={setQuestionPoints}
-                />
-              )}
+          <fieldset disabled={isReadOnly || isSubmitting} className="space-y-4">
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold">Title</label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="bg-background p-3 rounded-md"
+                placeholder="Quiz title"
+              />
             </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault()
-              addQuestion()
-            }}
-            disabled={isSubmitting}
-            className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            + Add Question
-          </button>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold">Description</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="bg-background p-3 rounded-md"
+                rows={2}
+                placeholder="Quiz description"
+              />
+            </div>
+          </fieldset>
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold">Expiry (creator local time)</label>
+            <input
+              type="datetime-local"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              className="bg-background p-3 rounded-md datetime-white"
+            />
+            <p className="text-sm text-muted-foreground">Leave blank for no expiry.</p>
+          </div>
         </div>
+
+        <fieldset disabled={isReadOnly || isSubmitting} className="space-y-6">
+          <div className="card p-5 space-y-3">
+            <h2 className="text-2xl font-semibold">Proctoring Features</h2>
+            <div className="flex gap-2 items-center">
+              <input type="checkbox" checked={blurQuestion} onChange={(e) => setBlurQuestion(e.target.checked)} />
+              <p className="font-semibold">👁️ Window and Tab Monitoring</p>
+            </div>
+          </div>
+
+          <div className="card p-5 space-y-4">
+            <h2 className="text-2xl font-semibold">Questions</h2>
+
+            {questions.map((question, index) => (
+              <div key={question.id} className="bg-background p-4 rounded-md space-y-3">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <h3>Question {index + 1}</h3>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <select
+                      value={question.type}
+                      className="bg-secondary p-1 rounded-md w-28"
+                      onChange={(e) => setQuestionType(question.id, e.target.value as QuestionType)}
+                    >
+                      <option value="mcq">MCQ</option>
+                      <option value="true-false">True / False</option>
+                    </select>
+                    {questions.length >= 2 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          removeQuestion(question.id)
+                        }}
+                        className="bg-secondary py-1 px-2 rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {question.type === "true-false" ? (
+                  <CreateQuestionTorF
+                    userId={userId ?? ""}
+                    question={question}
+                    index={index}
+                    isSubmitting={isSubmitting || isReadOnly}
+                    onRemove={removeQuestion}
+                    showRemove={false}
+                    onQuestionTextChange={updateQuestionText}
+                    onTimerChange={setQuestionTimer}
+                    onCorrectAnswerChange={setCorrectAnswerTorF}
+                    onQuestionImageChange={setQuestionImage}
+                    onPointsChange={setQuestionPoints}
+                  />
+                ) : (
+                  <CreateQuestionMCQ
+                    userId={userId ?? ""}
+                    question={question}
+                    index={index}
+                    isSubmitting={isSubmitting || isReadOnly}
+                    onRemove={removeQuestion}
+                    showRemove={false}
+                    onQuestionTextChange={updateQuestionText}
+                    onOptionTextChange={updateOptionText}
+                    onSetCorrect={setCorrectAnswer}
+                    onTimerChange={setQuestionTimer}
+                    onQuestionImageChange={setQuestionImage}
+                    onPointsChange={setQuestionPoints}
+                  />
+                )}
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                addQuestion()
+              }}
+              className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              + Add Question
+            </button>
+          </div>
+        </fieldset>
 
         <button
           type="submit"

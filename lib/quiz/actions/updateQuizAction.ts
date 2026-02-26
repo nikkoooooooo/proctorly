@@ -11,6 +11,8 @@ interface UpdateQuizPayload {
   title: string
   description: string
   blurQuestion: boolean
+  expiresAt?: string | null
+  expiryOnly?: boolean
   questions: Array<{
     id: string
     text: string
@@ -33,7 +35,16 @@ export async function updateQuizAction(quizId: string, payload: UpdateQuizPayloa
       .execute()
 
     if (attempts.length > 0) {
-      return { success: false, error: "Quiz already has attempts and cannot be edited." }
+      if (!payload.expiryOnly) {
+        return { success: false, error: "Quiz already has attempts and only expiry can be edited." }
+      }
+      await db
+        .update(quiz)
+        .set({
+          expiresAt: payload.expiresAt ? new Date(payload.expiresAt) : null,
+        })
+        .where(eq(quiz.id, quizId))
+      return { success: true }
     }
 
     await db
@@ -42,6 +53,7 @@ export async function updateQuizAction(quizId: string, payload: UpdateQuizPayloa
         title: payload.title,
         description: payload.description,
         blurQuestion: payload.blurQuestion,
+        expiresAt: payload.expiresAt ? new Date(payload.expiresAt) : null,
       })
       .where(eq(quiz.id, quizId))
 

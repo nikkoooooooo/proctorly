@@ -8,7 +8,8 @@ export async function createQuizAction(
   questions: QuestionInput[],
   creatorId: string,
   description: string,
-  blurQuestion = false
+  blurQuestion = false,
+  expiresAt?: string | null
 ) {
   try {
     const quiz = await createQuiz(
@@ -16,7 +17,8 @@ export async function createQuizAction(
       title,
       questions,
       description,
-      blurQuestion
+      blurQuestion,
+      expiresAt
     );
 
     return { success: true, quiz };

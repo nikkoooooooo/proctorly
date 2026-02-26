@@ -36,7 +36,8 @@ export async function createQuiz(
   title: string,
   questionsData: QuestionInput[],
   description: string,
-  blurQuestion = false
+  blurQuestion = false,
+  expiresAt?: string | null
 ) {
   const quizId = uuid()
   const joinCode = generateJoinCode()
@@ -49,6 +50,7 @@ export async function createQuiz(
     creatorId,
     joinCode,
     blurQuestion,
+    expiresAt: expiresAt ? new Date(expiresAt) : null,
   })
 
   // Loop through questions
@@ -86,6 +88,7 @@ export async function createQuiz(
     description,
     creatorId,
     blurQuestion,
+    expiresAt: expiresAt ?? null,
     questions: questionsData,
   }
 }

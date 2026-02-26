@@ -124,6 +124,12 @@ body.theme-light {
   --sidebar-ring: #94a3b8;
 }
 
+.theme-dark .datetime-white::-webkit-calendar-picker-indicator,
+html.theme-dark .datetime-white::-webkit-calendar-picker-indicator,
+body.theme-dark .datetime-white::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 /* Colors are driven by the CSS variables above (light/dark). */
 
 @layer base {

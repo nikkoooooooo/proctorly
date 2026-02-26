@@ -23,9 +23,7 @@ export async function getQuizForEditAction(quizId: string) {
       .limit(1)
       .execute()
 
-    if (attemptExists.length > 0) {
-      return { success: false, error: "Quiz already has attempts and cannot be edited." }
-    }
+    const readOnly = attemptExists.length > 0
 
     const questions = await db
       .select()
@@ -50,7 +48,7 @@ export async function getQuizForEditAction(quizId: string) {
       options: optionsByQuestionId.get(q.id) ?? [],
     }))
 
-    return { success: true, quiz: quizData, questions: questionsWithOptions }
+    return { success: true, quiz: quizData, questions: questionsWithOptions, readOnly }
   } catch (error) {
     console.error("Failed to fetch quiz for edit:", error)
     return { success: false, error: "Failed to load quiz." }

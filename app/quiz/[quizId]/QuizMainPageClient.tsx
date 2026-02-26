@@ -31,7 +31,13 @@ interface Question { // quiz question shape
 
 }
 
-export default function QuizMainPageClient({ quizId }: { quizId: string }) {
+export default function QuizMainPageClient({
+  quizId,
+  hasActiveAttempt,
+}: {
+  quizId: string
+  hasActiveAttempt: boolean
+}) {
   const router = useRouter() // initialize router
 
   const { data } = authClient.useSession() // read active auth session
@@ -41,6 +47,7 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   const [questions, setQuestions] = useState<Question[]>([]) // currently active ordered questions
   const [quizTitle, setQuizTitle] = useState("") // quiz title for header
   const [instructorName, setInstructorName] = useState("") // instructor name for header
+  const [expiresAt, setExpiresAt] = useState<string | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0) // current question index
   const [selectedChoice, setSelectedChoice] = useState<Option | null>(null) // selected option for current question
   const [attemptId, setAttemptId] = useState("") // active attempt id
@@ -161,6 +168,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
       if (proctoringRes.success && proctoringRes.quiz?.title) {
         setQuizTitle(proctoringRes.quiz.title) // display title in quiz header
       }
+      if (proctoringRes.success && proctoringRes.quiz?.expiresAt) {
+        setExpiresAt(String(proctoringRes.quiz.expiresAt))
+      } else {
+        setExpiresAt(null)
+      }
 
       const instructorRes = await getUserNameFromQuizAction(quizId) // fetch owner/instructor display name
       if (instructorRes.success && instructorRes.username) {
@@ -181,6 +193,11 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   // -------------------- Start Quiz --------------------
   const handleStart = async () => {
     if (!session || isPreparingStart) return // block start when no session or already preparing
+    const isExpired = !!expiresAt && new Date(expiresAt).getTime() < Date.now()
+    if (isExpired && !hasActiveAttempt) {
+      toast.error("Quiz is expired and can no longer be started.")
+      return
+    }
 
     if (!questions.length) {
       toast.error("Questions are still loading. Please try again.") // guard against early click
@@ -227,8 +244,14 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
   }
 
   // -------------------- UI --------------------
+  const isExpired = !!expiresAt && new Date(expiresAt).getTime() < Date.now()
   return (
     <div className="relative min-h-screen flex flex-col items-center p-4"> {/* page container */}
+      {!!expiresAt && (
+        <div className="mb-4 w-full max-w-xl text-center text-sm text-muted-foreground">
+          Quiz expires at {new Date(expiresAt).toLocaleString()}
+        </div>
+      )}
       {blurScreen && ( // show warning overlay when user leaves tab (if enabled)
         <div className="absolute inset-0 bg-destructive/50 backdrop-blur-sm z-50 flex items-center justify-center"> {/* blocking overlay */}
           <p className="text-primary-foreground text-xl font-semibold">You left the quiz 😡</p> {/* warning text */}
@@ -248,10 +271,10 @@ export default function QuizMainPageClient({ quizId }: { quizId: string }) {
             <div className="pt-2"> {/* button spacing */}
               <button
                 onClick={handleStart} // start quiz flow
-                disabled={isPreparingStart || !questions.length} // disable while preparing or loading questions
+                disabled={isPreparingStart || !questions.length || (isExpired && !hasActiveAttempt)} // disable while preparing, loading, or expired
                 className="bg-primary cursor-pointer hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold" // button style
               >
-                {isPreparingStart ? "Preparing..." : "Start Quiz"} {/* button text by loading state */}
+                {isPreparingStart ? "Preparing..." : isExpired && !hasActiveAttempt ? "Quiz Expired" : "Start Quiz"} {/* button text by loading state */}
               </button>
             </div>
           </div>

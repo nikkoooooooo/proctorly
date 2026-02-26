@@ -103,6 +103,8 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
   // Proctoring columns
   blurQuestion: boolean("blur_question").default(false).notNull(),
 
+  expiresAt: timestamp("expires_at"),
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 

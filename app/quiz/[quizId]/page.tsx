@@ -29,5 +29,6 @@ export default async function Page({ params }: PageProps) {
   }
 
   // 3️⃣ Render quiz client
-  return <QuizMainPageClient quizId={quizId} />
+  const hasActiveAttempt = !!attemptCheck.attempt && !attemptCheck.attempt.isCompleted
+  return <QuizMainPageClient quizId={quizId} hasActiveAttempt={hasActiveAttempt} />
 }

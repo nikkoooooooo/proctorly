@@ -6,6 +6,7 @@
 "use client" // ✅ Required: Excel export uses browser APIs (Blob, FileSaver)
 
 import { useState, useEffect, use } from "react"
+import Link from "next/link"
 import * as XLSX from "xlsx" // ✅ SheetJS for creating Excel
 import { saveAs } from "file-saver" // ✅ Save Blob as file in browser
 
@@ -168,6 +169,7 @@ export default function TeacherPage({ params }: TeacherPageProps) {
   // =====================
   return (
     <div className="p-8 max-w-4xl mx-auto flex flex-col justify-center">
+      <Link href={"/created-quiz"} className="text-4xl font-bold">←</Link>
       <h1 className="text-3xl font-bold text-foreground ">Students Attempts</h1>
       {/* Use muted-foreground for readability in both themes */}
       <p className="text-muted-foreground mb-6">Detailed breakdown of participant performance and proctoring logs</p>

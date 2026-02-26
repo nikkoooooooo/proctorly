@@ -48,6 +48,7 @@ export default function CreateQuizPage() {
   const [createdQuizCode, setCreatedQuizCode] = useState<string | null>(null)
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false)
   const [isCopyingCode, setIsCopyingCode] = useState(false)
+  const [expiresAt, setExpiresAt] = useState("")
 
   // Proctoring settings
   const [blurQuestion, setBlurQuestion] = useState(false)
@@ -189,7 +190,8 @@ export default function CreateQuizPage() {
         title,
         normalizedQuestions,
         description,
-        blurQuestion
+        blurQuestion,
+        expiresAt ? new Date(expiresAt).toISOString() : null,
       )
 
       // Show a friendly success toast instead of browser alert
@@ -200,6 +202,7 @@ export default function CreateQuizPage() {
       setDescription("")
       setQuestions([createEmptyQuestion()])
       setBlurQuestion(false)
+      setExpiresAt("")
     } catch (err) {
       console.error(err)
       // Use toast for errors to keep UX consistent
@@ -236,6 +239,16 @@ export default function CreateQuizPage() {
               rows={2}
               placeholder="Quiz description"
             />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold">Expiry (creator local time)</label>
+            <input
+              type="datetime-local"
+              value={expiresAt}
+              onChange={(e) => setExpiresAt(e.target.value)}
+              className="bg-background p-3 rounded-md datetime-white"
+            />
+            <p className="text-sm text-muted-foreground">Leave blank for no expiry.</p>
           </div>
         </div>
 

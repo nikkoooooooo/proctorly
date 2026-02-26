@@ -104,21 +104,12 @@ function Page() {
                             <Link href={`/quiz/${quiz.id}/creator`} className="bg-primary p-2 rounded-[var(--radius-button)] font-semibold cursor-pointer text-primary-foreground hover:bg-primary/80">
                                 View
                             </Link>
-                            {(quiz.attemptCount ?? 0) === 0 ? (
-                              <Link
-                                href={`/quiz/${quiz.id}/edit`}
-                                className="bg-secondary text-secondary-foreground p-2 hover:bg-secondary/80 focus:bg-secondary/70 rounded-[var(--radius-button)] font-semibold cursor-pointer"
-                              >
-                                Edit
-                              </Link>
-                            ) : (
-                              <button
-                                onClick={() => toast.error("Cannot edit once attempts exist")}
-                                className="bg-secondary/60 text-secondary-foreground/60 p-2 rounded-[var(--radius-button)] font-semibold cursor-not-allowed"
-                              >
-                                Edit
-                              </button>
-                            )}
+                            <Link
+                              href={`/quiz/${quiz.id}/edit`}
+                              className="bg-secondary text-secondary-foreground p-2 hover:bg-secondary/80 focus:bg-secondary/70 rounded-[var(--radius-button)] font-semibold cursor-pointer"
+                            >
+                              Edit
+                            </Link>
                             <button onClick={() => handleDeleteQuiz(quiz.id)} className="bg-secondary text-secondary-foreground p-2 hover:bg-secondary/80 focus:bg-secondary/70 rounded-[var(--radius-button)] font-semibold cursor-pointer">
                               Delete
                             </button>

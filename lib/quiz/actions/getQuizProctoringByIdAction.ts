@@ -12,6 +12,7 @@ export async function getQuizProctoringByIdAction(quizId: string) {
         id: quiz.id,
         title: quiz.title,
         blurQuestion: quiz.blurQuestion,
+        expiresAt: quiz.expiresAt,
       })
       .from(quiz)
       .where(eq(quiz.id, quizId));
@@ -20,7 +21,8 @@ export async function getQuizProctoringByIdAction(quizId: string) {
       return { success: false, error: "Quiz not found" };
     }
 
-    return { success: true, quiz: quizData };
+    const isExpired = !!quizData.expiresAt && new Date() > new Date(quizData.expiresAt);
+    return { success: true, quiz: quizData, isExpired };
   } catch (err) {
     console.error("Failed to fetch quiz proctoring:", err);
     return { success: false, error: "Failed to fetch quiz proctoring settings" };
