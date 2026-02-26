@@ -16,6 +16,8 @@ interface Attempt {
   attemptId: string
   name: string | null
   email: string | null
+  studentNo?: string | null
+  section?: string | null
   score: number | null
   tabSwitchCount: number
   completed: boolean
@@ -93,6 +95,8 @@ export default function TeacherPage({ params }: TeacherPageProps) {
     const headers = [
       "Name",
       "Email",
+      "Student No",
+      "Section",
       "Score",
       "Tab Switches",
       "Status",
@@ -112,6 +116,8 @@ export default function TeacherPage({ params }: TeacherPageProps) {
     const dataRows = attempts.map((a) => [
       a.name ?? "Unknown",
       a.email ?? "Unknown",
+      a.studentNo ?? "N/A",
+      a.section ?? "N/A",
       a.completed ? (a.score ?? 0) : null,
       a.tabSwitchCount,
       a.completed ? "Completed" : "Ongoing",
@@ -125,6 +131,8 @@ export default function TeacherPage({ params }: TeacherPageProps) {
     worksheet["!cols"] = [
       { wch: 24 }, // Name
       { wch: 32 }, // Email
+      { wch: 16 }, // Student No
+      { wch: 16 }, // Section
       { wch: 10 }, // Score
       { wch: 14 }, // Tab Switches
       { wch: 14 }, // Status
@@ -132,11 +140,11 @@ export default function TeacherPage({ params }: TeacherPageProps) {
       { wch: 24 }, // Finished
     ]
     worksheet["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 6 } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 6 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 8 } },
     ]
-    worksheet["!autofilter"] = { ref: "A5:G5" }
+    worksheet["!autofilter"] = { ref: "A5:I5" }
     worksheet["!freeze"] = { xSplit: 0, ySplit: 5 }
 
     // Create workbook and append sheet
@@ -190,6 +198,12 @@ export default function TeacherPage({ params }: TeacherPageProps) {
                   <div className="mb-2 md:mb-0">
                     <h3 className="text-lg font-semibold text-foreground wrap-break-word">{a.name}</h3>
                     <p className="text-muted-foreground text-sm wrap-break-word">{a.email}</p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      Student No: {a.studentNo ?? "N/A"}
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      Section: {a.section ?? "N/A"}
+                    </p>
                     <p className="text-muted-foreground text-xs mt-1">
                       Started (PH): {formatPHDateTime(a.startedAt)}
                     </p>

@@ -4,6 +4,7 @@
 import { db } from "@/lib/db";
 import { attempt, user as userTable } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
+import { decryptStudentNo } from "@/lib/crypto/studentNo";
 
 export async function getQuizAttemptsAction(quizId: string) {
   try {
@@ -16,6 +17,8 @@ export async function getQuizAttemptsAction(quizId: string) {
         completed: attempt.isCompleted,
         name: userTable.name,
         email: userTable.email,
+        studentNoEncrypted: userTable.studentNoEncrypted,
+        section: userTable.section,
         startedAt: attempt.startedAt,
         submittedAt: attempt.submittedAt,
       })
@@ -25,7 +28,20 @@ export async function getQuizAttemptsAction(quizId: string) {
       .orderBy(desc(attempt.startedAt))
       .execute();
 
-    return { success: true, attempts: results };
+    const attempts = results.map((a) => {
+      let studentNo: string | null = null
+      if (a.studentNoEncrypted) {
+        try {
+          studentNo = decryptStudentNo(a.studentNoEncrypted)
+        } catch {
+          studentNo = null
+        }
+      }
+      const { studentNoEncrypted, ...rest } = a
+      return { ...rest, studentNo }
+    })
+
+    return { success: true, attempts };
   } catch (error) {
     console.error("Failed to fetch quiz attempts:", error);
     return {

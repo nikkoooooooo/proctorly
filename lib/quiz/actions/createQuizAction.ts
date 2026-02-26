@@ -8,9 +8,7 @@ export async function createQuizAction(
   questions: QuestionInput[],
   creatorId: string,
   description: string,
-  blurQuestion = false,
-  disableCopyPaste = false,
-  tabMonitoring = false
+  blurQuestion = false
 ) {
   try {
     const quiz = await createQuiz(
@@ -18,9 +16,7 @@ export async function createQuizAction(
       title,
       questions,
       description,
-      blurQuestion,
-      disableCopyPaste,
-      tabMonitoring
+      blurQuestion
     );
 
     return { success: true, quiz };

@@ -18,21 +18,20 @@ function applyTheme(theme: Theme) {
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark")
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "dark"
+    const stored = window.localStorage.getItem(THEME_KEY)
+    return stored === "light" ? "light" : "dark"
+  })
 
   useEffect(() => {
-    // On first load, restore the saved theme (defaults to dark).
-    const stored = window.localStorage.getItem(THEME_KEY)
-    const initial = stored === "light" ? "light" : "dark"
-    setTheme(initial)
-    applyTheme(initial)
-  }, [])
+    applyTheme(theme)
+    window.localStorage.setItem(THEME_KEY, theme)
+  }, [theme])
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark"
     setTheme(next)
-    window.localStorage.setItem(THEME_KEY, next)
-    applyTheme(next)
   }
 
   return (

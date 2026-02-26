@@ -12,8 +12,6 @@ export async function getQuizProctoringByIdAction(quizId: string) {
         id: quiz.id,
         title: quiz.title,
         blurQuestion: quiz.blurQuestion,
-        // disableCopyPaste: quiz.disableCopyPaste,
-        // tabMonitoring: quiz.tabMonitoring,
       })
       .from(quiz)
       .where(eq(quiz.id, quizId));

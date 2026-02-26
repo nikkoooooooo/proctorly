@@ -36,9 +36,7 @@ export async function createQuiz(
   title: string,
   questionsData: QuestionInput[],
   description: string,
-  blurQuestion = false,
-  disableCopyPaste = false,
-  tabMonitoring = false
+  blurQuestion = false
 ) {
   const quizId = uuid()
   const joinCode = generateJoinCode()
@@ -51,8 +49,6 @@ export async function createQuiz(
     creatorId,
     joinCode,
     blurQuestion,
-    disableCopyPaste,
-    tabMonitoring,
   })
 
   // Loop through questions
@@ -90,8 +86,6 @@ export async function createQuiz(
     description,
     creatorId,
     blurQuestion,
-    disableCopyPaste,
-    tabMonitoring,
     questions: questionsData,
   }
 }

@@ -1,8 +1,8 @@
 "use server"
 
 import { db } from "@/lib/db";
-import { quiz, session, user } from "@/lib/schema";
-import { eq } from "drizzle-orm/expressions";
+import { quiz, attempt } from "@/lib/schema";
+import { eq, sql } from "drizzle-orm";
 
 
 
@@ -11,11 +11,22 @@ import { eq } from "drizzle-orm/expressions";
 
 export async function getUserQuiz(creatorId: string) {
   const result = await db
-    .select()
+    .select({
+      id: quiz.id,
+      title: quiz.title,
+      description: quiz.description,
+      joinCode: quiz.joinCode,
+      createdAt: quiz.createdAt,
+      attemptCount: sql<number>`count(${attempt.id})`.as("attemptCount"),
+    })
     .from(quiz)
+    .leftJoin(attempt, eq(attempt.quizId, quiz.id))
     .where(eq(quiz.creatorId, creatorId))
-    .execute(); // returns raw result object
+    .groupBy(quiz.id)
+    .execute();
 
-  // return only plain array of quizzes
-  return result; // ✅ plain array of objects
+  return result.map((row) => ({
+    ...row,
+    attemptCount: Number(row.attemptCount ?? 0),
+  }));
 }

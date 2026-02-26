@@ -5,6 +5,7 @@
 import { db } from "@/lib/db"
 import { user } from "@/lib/schema"
 import { eq } from "drizzle-orm"
+import { encryptStudentNo } from "@/lib/crypto/studentNo"
 
 interface UpdateUserPayload {
   userId: string
@@ -16,9 +17,11 @@ interface UpdateUserPayload {
 export async function updateUser({ userId, name, studentNo, section }: UpdateUserPayload) {
   try {
     // Only include fields that are provided
-    const updateData: Partial<{ name: string; studentNo: string; section: string }> = {}
+    const updateData: Partial<{ name: string; studentNoEncrypted: string | null; section: string }> = {}
     if (name !== undefined) updateData.name = name
-    if (studentNo !== undefined) updateData.studentNo = studentNo
+    if (studentNo !== undefined) {
+      updateData.studentNoEncrypted = studentNo ? encryptStudentNo(studentNo) : null
+    }
     if (section !== undefined) updateData.section = section
 
     if (Object.keys(updateData).length === 0) {

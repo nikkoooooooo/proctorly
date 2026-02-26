@@ -1,64 +1,69 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState, use } from "react"
 import { v4 as uuid } from "uuid"
-import { createQuiz, QuestionInput } from "@/lib/quiz/helpers/createQuiz"
-import { authClient } from "@/client/auth-client"
 import Link from "next/link"
 import toast from "react-hot-toast"
-import { Copy } from "lucide-react"
+import { authClient } from "@/client/auth-client"
 import CreateQuestionMCQ from "@/components/create-quiz/CreateQuestionMCQ"
 import CreateQuestionTorF from "@/components/create-quiz/CreateQuestionTorF"
+import { getQuizForEditAction } from "@/lib/quiz/actions/getQuizForEditAction"
+import { updateQuizAction } from "@/lib/quiz/actions/updateQuizAction"
 
-// Question type options
 type QuestionType = "mcq" | "true-false"
 
-// Option structure
 interface Option {
   id: string
   text: string
   isCorrect: boolean
 }
 
-// Question structure
 interface Question {
   id: string
   text: string
   type: QuestionType
   options: Option[]
   description: string
-  timerLimit: number // NEW: timer per question in seconds
+  timerLimit: number
   points: number
   correctAnswer: "true" | "false"
   imageUrl?: string
 }
 
-// Main Create Quiz Page
-export default function CreateQuizPage() {
+type LoadedQuestion = {
+  id: string
+  text: string
+  type: string
+  timerLimit?: number | null
+  points?: number | null
+  imageUrl?: string | null
+  options?: Array<{ id: string; text: string; isCorrect: boolean | null }>
+}
+
+interface EditPageProps {
+  params: Promise<{ quizId: string }>
+}
+
+export default function EditQuizPage({ params }: EditPageProps) {
+  const { quizId } = use<{ quizId: string }>(params)
+
   const { data } = authClient.useSession()
   const user = data?.user
-  const session = data?.session
-
-  
-
   const [userId, setUserId] = useState<string | null>(null)
+
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [questions, setQuestions] = useState<Question[]>([createEmptyQuestion()])
-  const [createdQuizCode, setCreatedQuizCode] = useState<string | null>(null)
-  const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false)
-  const [isCopyingCode, setIsCopyingCode] = useState(false)
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
-  // Proctoring settings
   const [blurQuestion, setBlurQuestion] = useState(false)
-
 
   useEffect(() => {
     if (!user) return
     setUserId(user.id)
   }, [user])
-
- 
 
   function createEmptyQuestion(): Question {
     return {
@@ -66,7 +71,7 @@ export default function CreateQuizPage() {
       text: "",
       description: "",
       type: "mcq",
-      timerLimit: 30, // default 30 seconds
+      timerLimit: 30,
       points: 1,
       correctAnswer: "true",
       options: [
@@ -78,39 +83,105 @@ export default function CreateQuizPage() {
     }
   }
 
-  const addQuestion = () => setQuestions(prev => [...prev, createEmptyQuestion()])
+  useEffect(() => {
+    const loadQuiz = async () => {
+      try {
+        setIsLoading(true)
+        setLoadError(null)
+        const res = await getQuizForEditAction(quizId)
+        if (!res.success || !res.quiz) {
+          const message = res.error ?? "Failed to load quiz"
+          toast.error(message)
+          setLoadError(message)
+          return
+        }
 
-  const removeQuestion = (id: string) => setQuestions(prev => prev.filter(q => q.id !== id))
+        setTitle(res.quiz.title ?? "")
+        setDescription(res.quiz.description ?? "")
+        setBlurQuestion(!!res.quiz.blurQuestion)
+
+        const mapped: Question[] = res.questions.map((q: LoadedQuestion) => {
+          const rawType = q.type === "true-false" ? "true-false" : "mcq"
+          const options: Option[] = (q.options ?? []).map((o) => ({
+            id: o.id,
+            text: o.text,
+            isCorrect: !!o.isCorrect,
+          }))
+          if (rawType === "true-false") {
+            const trueOption = options.find((o) => o.text.toLowerCase() === "true")
+            const falseOption = options.find((o) => o.text.toLowerCase() === "false")
+            const correctAnswer = trueOption?.isCorrect ? "true" : falseOption?.isCorrect ? "false" : "true"
+            return {
+              id: q.id,
+              text: q.text,
+              description: "",
+              type: rawType,
+              timerLimit: q.timerLimit ?? 30,
+              points: q.points ?? 1,
+              correctAnswer,
+              options: [],
+              imageUrl: q.imageUrl ?? undefined,
+            }
+          }
+
+          return {
+            id: q.id,
+            text: q.text,
+            description: "",
+            type: rawType,
+            timerLimit: q.timerLimit ?? 30,
+            points: q.points ?? 1,
+            correctAnswer: "true",
+            options,
+            imageUrl: q.imageUrl ?? undefined,
+          }
+        })
+
+        setQuestions(mapped.length > 0 ? mapped : [createEmptyQuestion()])
+      } catch (err) {
+        console.error(err)
+        toast.error("Failed to load quiz")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadQuiz()
+  }, [quizId])
+
+  const addQuestion = () => setQuestions((prev) => [...prev, createEmptyQuestion()])
+  const removeQuestion = (id: string) => setQuestions((prev) => prev.filter((q) => q.id !== id))
 
   const updateQuestionText = (id: string, newText: string) =>
-    setQuestions(prev => prev.map(q => (q.id === id ? { ...q, text: newText } : q)))
+    setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, text: newText } : q)))
 
   const updateOptionText = (questionId: string, optionId: string, newText: string) =>
-    setQuestions(prev =>
-      prev.map(q =>
+    setQuestions((prev) =>
+      prev.map((q) =>
         q.id !== questionId
           ? q
           : {
               ...q,
-              options: q.options.map(o => (o.id === optionId ? { ...o, text: newText } : o)),
+              options: q.options.map((o) => (o.id === optionId ? { ...o, text: newText } : o)),
             },
       ),
     )
-    
+
   const setCorrectAnswer = (questionId: string, optionId: string) =>
-    setQuestions(prev =>
-      prev.map(q =>
+    setQuestions((prev) =>
+      prev.map((q) =>
         q.id !== questionId
           ? q
           : {
               ...q,
-              options: q.options.map(o => ({ ...o, isCorrect: o.id === optionId })),
+              options: q.options.map((o) => ({ ...o, isCorrect: o.id === optionId })),
             },
       ),
     )
+
   const setQuestionType = (questionId: string, newType: QuestionType) =>
-    setQuestions(prev =>
-      prev.map(q => {
+    setQuestions((prev) =>
+      prev.map((q) => {
         if (q.id !== questionId) return q
         if (q.type === newType) return q
         if (newType === "true-false") {
@@ -133,18 +204,21 @@ export default function CreateQuizPage() {
         }
       }),
     )
+
   const setQuestionTimer = (questionId: string, seconds: number) =>
-    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, timerLimit: seconds } : q)))
+    setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, timerLimit: seconds } : q)))
+
   const setQuestionPoints = (questionId: string, points: number) =>
-    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, points } : q)))
+    setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, points } : q)))
+
   const setQuestionImage = (questionId: string, imageUrl: string) =>
-    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, imageUrl } : q)))
+    setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, imageUrl } : q)))
+
   const setCorrectAnswerTorF = (questionId: string, value: "true" | "false") =>
-    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, correctAnswer: value } : q)))
+    setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, correctAnswer: value } : q)))
 
   const submitQuiz = async () => {
-    if (isSubmittingQuiz) return
-    if (!userId) return alert("User not logged in")
+    if (isSubmitting) return
     if (!title) return alert("Quiz title cannot be empty")
     if (questions.length === 0) return alert("Add at least one question")
     if (
@@ -158,64 +232,48 @@ export default function CreateQuizPage() {
       return
     }
 
-    setIsSubmittingQuiz(true)
+    setIsSubmitting(true)
     try {
-      const normalizedQuestions: QuestionInput[] = questions.map((q) => {
-        if (q.type === "true-false") {
-          return {
-            text: q.text,
-            type: q.type,
-            timerLimit: q.timerLimit,
-            points: q.points ?? 1,
-            imageUrl: q.imageUrl,
-            options: [
-              { text: "True", isCorrect: q.correctAnswer === "true" },
-              { text: "False", isCorrect: q.correctAnswer === "false" },
-            ],
-          }
-        }
-        return {
-          text: q.text,
-          type: q.type,
-          timerLimit: q.timerLimit,
-          points: q.points ?? 1,
-          imageUrl: q.imageUrl,
-          options: q.options.map((opt) => ({ text: opt.text, isCorrect: opt.isCorrect })),
-        }
-      })
-
-      const quiz = await createQuiz(
-        userId,
+      const payload = {
         title,
-        normalizedQuestions,
         description,
-        blurQuestion
-      )
-
-      // Show a friendly success toast instead of browser alert
-      toast.success("Quiz created successfully!")
-      // Save join code for the on-page copy UI
-      setCreatedQuizCode(quiz.joinCode)
-      setTitle("")
-      setDescription("")
-      setQuestions([createEmptyQuestion()])
-      setBlurQuestion(false)
+        blurQuestion,
+        questions,
+      }
+      const res = await updateQuizAction(quizId, payload)
+      if (!res.success) {
+        toast.error(res.error ?? "Failed to update quiz")
+        return
+      }
+      toast.success("Quiz updated successfully!")
     } catch (err) {
       console.error(err)
-      // Use toast for errors to keep UX consistent
-      toast.error("Failed to create quiz")
+      toast.error("Failed to update quiz")
     } finally {
-      setIsSubmittingQuiz(false)
+      setIsSubmitting(false)
     }
+  }
+
+  if (isLoading) {
+    return <div className="p-6">Loading...</div>
+  }
+
+  if (loadError) {
+    return (
+      <div className="p-6 space-y-4">
+        <Link href={"/created-quiz"} className="text-2xl font-bold">← Back</Link>
+        <p className="text-foreground">{loadError}</p>
+      </div>
+    )
   }
 
   return (
     <div className="p-6 space-y-6">
       <div>
-          <Link href={"/dashboard"} className="text-4xl font-bold">←</Link>
+        <Link href={"/created-quiz"} className="text-4xl font-bold">←</Link>
       </div>
+
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); submitQuiz() }}>
-        {/* Quiz Info */}
         <div className="card p-5 space-y-4">
           <h2 className="text-2xl font-semibold">Quiz Information</h2>
           <div className="flex flex-col gap-2">
@@ -239,60 +297,6 @@ export default function CreateQuizPage() {
           </div>
         </div>
 
-        {/* Created quiz code modal */}
-        {createdQuizCode && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 backdrop-blur-sm p-4">
-            {/* Modal card */}
-            <div className="card w-full max-w-md p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Quiz Created</h2>
-                {/* Close modal */}
-                <button
-                  type="button"
-                  onClick={() => setCreatedQuizCode(null)}
-                  className="text-muted-foreground hover:text-foreground"
-                  aria-label="Close"
-                  title="Close"
-                >
-                  ✕
-                </button>
-              </div>
-              <p className="text-muted-foreground">
-                Share this join code with your students.
-              </p>
-              <div className="flex items-center gap-3">
-                <span className="bg-primary/20 text-primary px-3 py-2 rounded-[var(--radius-button)] font-semibold">
-                  {createdQuizCode}
-                </span>
-                {/* Copy button for quick sharing */}
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (isCopyingCode) return
-                    setIsCopyingCode(true)
-                    try {
-                      await navigator.clipboard.writeText(createdQuizCode)
-                      toast.success("Code copied")
-                    } catch (error) {
-                      console.error("Failed to copy code:", error)
-                      toast.error("Failed to copy code")
-                    } finally {
-                      setIsCopyingCode(false)
-                    }
-                  }}
-                  disabled={isCopyingCode}
-                  className="bg-secondary text-secondary-foreground px-3 py-2 rounded-[var(--radius-button)] hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed"
-                  aria-label="Copy quiz code"
-                  title="Copy quiz code"
-                >
-                  {isCopyingCode ? "Copying..." : <Copy size={16} />}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Proctoring */}
         <div className="card p-5 space-y-3">
           <h2 className="text-2xl font-semibold">Proctoring Features</h2>
           <div className="flex gap-2 items-center">
@@ -301,13 +305,11 @@ export default function CreateQuizPage() {
           </div>
         </div>
 
-        {/* Questions Section */}
         <div className="card p-5 space-y-4">
           <h2 className="text-2xl font-semibold">Questions</h2>
 
           {questions.map((question, index) => (
             <div key={question.id} className="bg-background p-4 rounded-md space-y-3">
-              {/* Header */}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h3>Question {index + 1}</h3>
                 <div className="flex flex-col gap-2 sm:flex-row">
@@ -320,18 +322,18 @@ export default function CreateQuizPage() {
                     <option value="true-false">True / False</option>
                   </select>
                   {questions.length >= 2 && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          removeQuestion(question.id);
-                        }}
-                        disabled={isSubmittingQuiz}
-                        className="bg-secondary py-1 px-2 rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
-                      >
-                        Remove
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        removeQuestion(question.id)
+                      }}
+                      disabled={isSubmitting}
+                      className="bg-secondary py-1 px-2 rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      Remove
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -340,7 +342,7 @@ export default function CreateQuizPage() {
                   userId={userId ?? ""}
                   question={question}
                   index={index}
-                  isSubmitting={isSubmittingQuiz}
+                  isSubmitting={isSubmitting}
                   onRemove={removeQuestion}
                   showRemove={false}
                   onQuestionTextChange={updateQuestionText}
@@ -354,7 +356,7 @@ export default function CreateQuizPage() {
                   userId={userId ?? ""}
                   question={question}
                   index={index}
-                  isSubmitting={isSubmittingQuiz}
+                  isSubmitting={isSubmitting}
                   onRemove={removeQuestion}
                   showRemove={false}
                   onQuestionTextChange={updateQuestionText}
@@ -370,8 +372,11 @@ export default function CreateQuizPage() {
 
           <button
             type="button"
-            onClick={(e) => { e.preventDefault(); addQuestion() }}
-            disabled={isSubmittingQuiz}
+            onClick={(e) => {
+              e.preventDefault()
+              addQuestion()
+            }}
+            disabled={isSubmitting}
             className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
           >
             + Add Question
@@ -380,10 +385,10 @@ export default function CreateQuizPage() {
 
         <button
           type="submit"
-          disabled={isSubmittingQuiz}
+          disabled={isSubmitting}
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isSubmittingQuiz ? "Creating..." : "Create Quiz"}
+          {isSubmitting ? "Saving..." : "Save Changes"}
         </button>
       </form>
     </div>

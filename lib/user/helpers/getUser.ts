@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { quiz, session, user } from "@/lib/schema";
 import { eq } from "drizzle-orm/expressions";
+import { decryptStudentNo } from "@/lib/crypto/studentNo";
 
 // sessionId could come from getSession() in Better Auth
 export async function getUserById(sessionId: string) {
@@ -14,7 +15,24 @@ export async function getUserById(sessionId: string) {
 
   if (!result || result.length === 0) return null
 
-  return result[0] // return the entire row
+  const row = result[0]
+  const encrypted = row.user.studentNoEncrypted
+  let studentNo: string | null = null
+  if (encrypted) {
+    try {
+      studentNo = decryptStudentNo(encrypted)
+    } catch {
+      studentNo = null
+    }
+  }
+
+  return {
+    ...row,
+    user: {
+      ...row.user,
+      studentNo,
+    },
+  }
 }
 
 

@@ -21,8 +21,8 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  studentNo: text("student_no"),       // NEW: student number
-  section: text("section"),            // NEW: section
+  studentNoEncrypted: text("student_no_encrypted"),
+  section: text("section"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -102,8 +102,6 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
 
   // Proctoring columns
   blurQuestion: boolean("blur_question").default(false).notNull(),
-  disableCopyPaste: boolean("disable_copy_paste").default(false).notNull(),
-  tabMonitoring: boolean("tab_monitoring").default(false).notNull(),  
 
   createdAt: timestamp("created_at").defaultNow(),
 });
