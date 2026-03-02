@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index , integer, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index , integer, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 
 
 // export const user = pgTable("user", {
@@ -23,6 +23,8 @@ export const user = pgTable("user", {
   image: text("image"),
   studentNoEncrypted: text("student_no_encrypted"),
   section: text("section"),
+  planId: text("plan_id").default("free"),
+  subscriptionStatus: text("subscription_status"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -243,6 +245,90 @@ export const quizEnrollment = pgTable( // table for tracking who joined in the q
   (table) => [
     index("enrollment_user_quiz_idx").on(table.userId, table.quizId), // this is for fast querying making the db already know who is our target
   ]
+);
+
+export const plan = pgTable("plan", {
+  id: text("id").primaryKey(), // "free", "early_access"
+  name: text("name").notNull(),
+  price: integer("price").notNull(), // cents
+  currency: text("currency").notNull(), // "PHP"
+  interval: text("interval").notNull(), // "month"
+  paymongoPlanId: text("paymongo_plan_id"),
+  features: jsonb("features").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const subscription = pgTable("subscription", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" })
+    .unique(),
+  planId: text("plan_id")
+    .notNull()
+    .references(() => plan.id),
+  status: text("status").notNull(), // active | past_due | canceled | inactive
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  paymongoCustomerId: text("paymongo_customer_id"),
+  paymongoSubscriptionId: text("paymongo_subscription_id"),
+  paymongoLinkId: text("paymongo_link_id"),
+  paymongoLinkReference: text("paymongo_link_reference"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const usage = pgTable(
+  "usage",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    periodStart: timestamp("period_start").notNull(),
+    periodEnd: timestamp("period_end").notNull(),
+    quizzesCreated: integer("quizzes_created").default(0).notNull(),
+    questionsCreated: integer("questions_created").default(0).notNull(),
+    imagesUsed: integer("images_used").default(0).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("usage_user_period_idx").on(
+      table.userId,
+      table.periodStart,
+      table.periodEnd
+    ),
+  ],
+);
+
+export const webhookEvent = pgTable(
+  "webhook_event",
+  {
+    id: text("id").primaryKey(),
+    provider: text("provider").notNull(),
+    eventId: text("event_id").notNull(),
+    type: text("type").notNull(),
+    payload: jsonb("payload").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("webhook_event_unique_idx").on(
+      table.provider,
+      table.eventId
+    ),
+  ],
 );
 
 

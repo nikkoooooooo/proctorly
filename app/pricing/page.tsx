@@ -1,12 +1,52 @@
 /* This page uses router.back, so it needs to be a client component */
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import { useRouter } from "next/navigation"
 // Pricing is still in development; keep this page as a creative placeholder.
 
 function Pricing() {
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const startEarlyAccess = async () => {
+    try {
+      setIsLoading(true)
+      const res = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ planId: "early_access" }),
+      })
+
+      let data: any = null
+      const contentType = res.headers.get("content-type") || ""
+      if (contentType.includes("application/json")) {
+        data = await res.json()
+      } else {
+        const text = await res.text()
+        data = text ? { error: text } : null
+      }
+      if (!res.ok) {
+        alert(data?.error || "Failed to start checkout. Please try again.")
+        return
+      }
+
+      const url = data?.checkoutUrl || data?.nextActionUrl
+      if (!url) {
+        alert("Payment link not available. Please try again.")
+        return
+      }
+
+      window.location.href = url
+    } catch (error) {
+      console.error("Checkout failed:", error)
+      alert("Could not start checkout. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <div className="min-h-screen bg-background px-4">
       <div className="max-w-5xl w-full mx-auto py-10">
@@ -46,9 +86,11 @@ function Pricing() {
             <div className="mt-6">
               <button
                 type="button"
+                onClick={startEarlyAccess}
+                disabled={isLoading}
                 className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
               >
-                Start Early Access
+                {isLoading ? "Redirecting..." : "Start Early Access"}
               </button>
             </div>
           </div>
