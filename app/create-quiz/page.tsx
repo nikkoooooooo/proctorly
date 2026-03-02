@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { v4 as uuid } from "uuid"
-import { createQuiz, QuestionInput } from "@/lib/quiz/helpers/createQuiz"
+import { QuestionInput } from "@/lib/quiz/helpers/createQuiz"
+import { createQuizAction } from "@/lib/quiz/actions/createQuizAction"
 import { authClient } from "@/client/auth-client"
 import Link from "next/link"
 import toast from "react-hot-toast"
@@ -38,8 +39,6 @@ export default function CreateQuizPage() {
   const { data } = authClient.useSession()
   const user = data?.user
   const session = data?.session
-
-  
 
   const [userId, setUserId] = useState<string | null>(null)
   const [title, setTitle] = useState("")
@@ -185,19 +184,24 @@ export default function CreateQuizPage() {
         }
       })
 
-      const quiz = await createQuiz(
-        userId,
+      const result = await createQuizAction(
         title,
         normalizedQuestions,
+        userId,
         description,
         blurQuestion,
         expiresAt ? new Date(expiresAt).toISOString() : null,
       )
 
+      if (!result.success || !result.quiz) {
+        toast.error(result.error || "Failed to create quiz")
+        return
+      }
+
       // Show a friendly success toast instead of browser alert
       toast.success("Quiz created successfully!")
       // Save join code for the on-page copy UI
-      setCreatedQuizCode(quiz.joinCode)
+      setCreatedQuizCode(result.quiz.joinCode)
       setTitle("")
       setDescription("")
       setQuestions([createEmptyQuestion()])
