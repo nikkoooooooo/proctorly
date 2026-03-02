@@ -3,8 +3,9 @@ import Link from "next/link"
 import LogoutButton from "./LogoutButton";
 import ThemeToggle from "./ThemeToggle";
 import { authClient } from "@/client/auth-client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { getUserBySessionIdAction } from "@/lib/user/actions/getUserName";
 
 
 function Navbar() {
@@ -13,10 +14,27 @@ function Navbar() {
   
     );
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
+    const [isPaid, setIsPaid] = useState(false)
     const pathname = usePathname()
     // Disable navbar navigation only on the student quiz-taking view
     const navDisabled = !!pathname && /^\/quiz\/[^/]+$/.test(pathname)
 
+    useEffect(() => {
+      const loadBadge = async () => {
+        const sessionId = session?.session?.id
+        if (!sessionId) {
+          setIsPaid(false)
+          return
+        }
+        const result = await getUserBySessionIdAction(sessionId)
+        const user = result?.data?.user
+        const isActive = user?.subscriptionStatus === "active"
+        const planId = user?.planId
+        setIsPaid(Boolean(isActive && planId && planId !== "free"))
+      }
+
+      loadBadge()
+    }, [session?.session?.id])
 
 
   return (
@@ -31,7 +49,7 @@ function Navbar() {
           >
             {/* Text-only wordmark with a quiet emphasis on the "X" */}
             <span className="font-semibold tracking-tight">Proctorly</span>
-            <span className="ml-0.5 font-medium text-primary">X</span>
+            <span className={`ml-0.5 font-medium ${isPaid ? "text-amber-500" : "text-primary"}`}>X</span>
           </Link>
 
           {/* Navigation Links */}

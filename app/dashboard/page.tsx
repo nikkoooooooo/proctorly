@@ -30,6 +30,7 @@ export default function Dashboard() {
 
 
   const [userName, setUserName] = useState<string>("username")
+  const [planBadge, setPlanBadge] = useState<string | null>(null)
 //   const [session, setSession] = useState<any>(null)
   const [code, setCode] = useState<string>("")
 
@@ -51,7 +52,17 @@ export default function Dashboard() {
     //   setSession(currentSession)
       if (session) {
           const userResult = await getUserBySessionIdAction(session.id)
-          if (userResult.success && userResult.data) setUserName(userResult.data.user.name)
+          if (userResult.success && userResult.data) {
+            const userData = userResult.data.user
+            setUserName(userData.name)
+            const isActive = userData.subscriptionStatus === "active"
+            const planId = userData.planId
+            if (isActive && planId && planId !== "free") {
+              setPlanBadge(planId === "early_access" ? "Early Access" : "Premium")
+            } else {
+              setPlanBadge(null)
+            }
+          }
       }
       
 
@@ -155,8 +166,15 @@ export default function Dashboard() {
       <div className="max-w-7xl w-full px-4">
         {/* Header */}
         <div className="mt-5 flex flex-col gap-2">
-          <div className="flex w-full justify-between">
-            <h2 className="text-foreground text-4xl font-bold">Dashboard</h2>
+          <div className="flex w-full justify-between items-center">
+            <div className="flex items-center gap-3 flex-col md:flex-row justify-center">
+              <h2 className="text-foreground text-4xl font-bold">Dashboard</h2>
+              {planBadge && (
+                <span className="inline-flex items-center rounded-full bg-amber-300/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-950 shadow-[0_0_0_1px_rgba(146,64,14,0.15)]">
+                  {planBadge}
+                </span>
+              )}
+            </div>
             {/* Theme-aware radius so the link still looks rounded in light mode */}
             <Link href="/create-quiz" className="bg-primary hover:bg-primary/90 active:bg-primary/80 cursor-pointer text-primary-foreground p-2 rounded-[var(--radius-button)] font-semibold shadow-sm">
               + Create Quiz
