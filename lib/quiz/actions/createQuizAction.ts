@@ -59,7 +59,7 @@ export async function createQuizAction(
       };
     }
 
-    const quiz = await createQuiz(
+    const createdQuiz = await createQuiz(
       creatorId,
       title,
       questions,
@@ -68,7 +68,7 @@ export async function createQuizAction(
       expiresAt
     );
 
-    return { success: true, quiz };
+    return { success: true, quiz: createdQuiz };
   } catch (error) {
     console.error("Failed to create quiz:", error);
     return {
