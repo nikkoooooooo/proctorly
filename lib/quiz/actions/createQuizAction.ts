@@ -1,7 +1,16 @@
 
 "use server";
 
+import { db } from "@/lib/db";
+import { quiz } from "@/lib/schema";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { createQuiz, QuestionInput } from "@/lib/quiz/helpers/createQuiz";
+import {
+  canCreateQuiz,
+  canCreateQuestion,
+  canUseImage,
+} from "@/lib/billing/entitlements";
+import { getManilaMonthBounds } from "@/lib/billing/period";
 
 export async function createQuizAction(
   title: string,
@@ -12,7 +21,45 @@ export async function createQuizAction(
   expiresAt?: string | null
 ) {
   try {
-    const quiz = await createQuiz(
+    const { start, end } = getManilaMonthBounds();
+    const [{ count: existingQuizCount }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(quiz)
+      .where(
+        and(
+          eq(quiz.creatorId, creatorId),
+          gte(quiz.createdAt, start),
+          lt(quiz.createdAt, end)
+        )
+      );
+
+    const canCreate = await canCreateQuiz(creatorId, existingQuizCount ?? 0);
+    if (!canCreate) {
+      return {
+        success: false,
+        error: "Quiz limit reached for your plan.",
+      };
+    }
+
+    const questionCount = questions.length;
+    const canAddQuestions = await canCreateQuestion(creatorId, questionCount);
+    if (!canAddQuestions) {
+      return {
+        success: false,
+        error: "Question limit reached for your plan.",
+      };
+    }
+
+    const imageCount = questions.filter((q) => Boolean(q.imageUrl)).length;
+    const canAddImages = await canUseImage(creatorId, imageCount);
+    if (!canAddImages) {
+      return {
+        success: false,
+        error: "Image question limit reached for your plan.",
+      };
+    }
+
+    const createdQuiz = await createQuiz(
       creatorId,
       title,
       questions,
@@ -21,7 +68,7 @@ export async function createQuizAction(
       expiresAt
     );
 
-    return { success: true, quiz };
+    return { success: true, quiz: createdQuiz };
   } catch (error) {
     console.error("Failed to create quiz:", error);
     return {
