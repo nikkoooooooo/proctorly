@@ -1,13 +1,43 @@
 /* This page uses router.back, so it needs to be a client component */
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from "next/navigation"
+import { authClient } from "@/client/auth-client"
+import { getUserBySessionIdAction } from "@/lib/user/actions/getUserName"
 // Pricing is still in development; keep this page as a creative placeholder.
 
 function Pricing() {
   const router = useRouter()
+  const { data: session } = authClient.useSession()
   const [isLoading, setIsLoading] = useState(false)
+  const [isPaid, setIsPaid] = useState(false)
+  const [paidLabel, setPaidLabel] = useState<string | null>(null)
+
+  useEffect(() => {
+    const loadPlan = async () => {
+      const sessionId = session?.session?.id
+      if (!sessionId) {
+        setIsPaid(false)
+        setPaidLabel(null)
+        return
+      }
+
+      const result = await getUserBySessionIdAction(sessionId)
+      const user = result?.data?.user
+      const active = user?.subscriptionStatus === "active"
+      const planId = user?.planId
+      if (active && planId && planId !== "free") {
+        setIsPaid(true)
+        setPaidLabel(planId === "early_access" ? "Early Access" : "Premium")
+      } else {
+        setIsPaid(false)
+        setPaidLabel(null)
+      }
+    }
+
+    loadPlan()
+  }, [session?.session?.id])
 
   const startEarlyAccess = async () => {
     try {
@@ -76,7 +106,7 @@ function Pricing() {
               Founding Educator Access
             </p>
             <div className="mt-4 flex items-baseline gap-3">
-              <span className="text-4xl font-semibold text-foreground">₱249</span>
+              <span className="text-4xl font-semibold text-foreground">₱299</span>
               <span className="text-sm text-muted-foreground">per month (early access)</span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
@@ -90,14 +120,23 @@ function Pricing() {
                 disabled={isLoading}
                 className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
               >
-                {isLoading ? "Redirecting..." : "Start Early Access"}
+                {isPaid
+                  ? "Premium Active"
+                  : isLoading
+                  ? "Redirecting..."
+                  : "Start Early Access"}
               </button>
+              {isPaid && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  You already have active access. Thank you for supporting ProctorlyX.
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-4">
             <h2 className="text-xl font-semibold text-foreground">Early access benefits</h2>
-            <div className="space-y-3 text-sm text-muted-foreground">
+            {/* <div className="space-y-3 text-sm text-muted-foreground">
               <div className="flex items-start gap-3">
                 <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
                 <span>Priority for feature suggestions and roadmap feedback.</span>
@@ -110,6 +149,25 @@ function Pricing() {
                 <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
                 <span>Advanced features as they launch, included in early access.</span>
               </div>
+            </div> */}
+
+            <div className="space-y-3 text-sm text-muted-foreground">
+              {[
+                "Locked-in ₱299 pricing for 12 months (protected from future price increases).",
+                "Priority for feature suggestions and roadmap feedback.",
+                "Direct support access from the ProctorlyX team (faster response).",
+                "Early access to new features before public release.",
+                "Founding Instructor badge inside your dashboard.",
+                "Priority onboarding help (guided setup for your first quizzes).",
+                "Ability to vote/input on what we build next.",
+                "Extended usage limits during early access (higher limits than future basic plan).",
+                "Beta access to experimental proctoring improvements.",
+              ].map((text, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
+                  <span>{text}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -11,7 +11,6 @@ import { authClient } from "@/client/auth-client";
 import { getUserBySessionIdAction, getUserNameFromQuizAction } from "@/lib/user/actions/getUserName"
 import { getUserQuizAction } from "@/lib/user/actions/getUserQuizAction"
 import getQuizThroughCodeAction from "@/lib/quiz/actions/getQuizThroughCodeAction"
-import { deleteQuizAction } from "@/lib/quiz/actions/deleteQuizAction"
 import { joinQuizAction } from "@/lib/quiz/actions/joinQuizAction"
 import { getUserJoinedQuizAction } from "@/lib/user/actions/getUserJoinedQuizAction"
 import QuizBox from "@/components/QuizBox";
