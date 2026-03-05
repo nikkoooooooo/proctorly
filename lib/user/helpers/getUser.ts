@@ -1,14 +1,19 @@
 import { db } from "@/lib/db";
-import { quiz, session, user } from "@/lib/schema";
+import { quiz, session, subscription, user } from "@/lib/schema";
 import { eq } from "drizzle-orm/expressions";
 import { decryptStudentNo } from "@/lib/crypto/studentNo";
 
 // sessionId could come from getSession() in Better Auth
 export async function getUserById(sessionId: string) {
   const result = await db
-    .select()
+    .select({
+      session,
+      user,
+      subscription,
+    })
     .from(session)
     .innerJoin(user, eq(user.id, session.userId))
+    .leftJoin(subscription, eq(subscription.userId, user.id))
     .where(eq(session.id, sessionId))
     .limit(1)
     .execute()
@@ -27,11 +32,12 @@ export async function getUserById(sessionId: string) {
   }
 
   return {
-    ...row,
+    session: row.session,
     user: {
       ...row.user,
       studentNo,
     },
+    subscription: row.subscription ?? null,
   }
 }
 

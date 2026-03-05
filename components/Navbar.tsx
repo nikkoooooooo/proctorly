@@ -27,10 +27,12 @@ function Navbar() {
           return
         }
         const result = await getUserBySessionIdAction(sessionId)
-        const user = result?.data?.user
-        const isActive = user?.subscriptionStatus === "active"
-        const planId = user?.planId
-        setIsPaid(Boolean(isActive && planId && planId !== "free"))
+        const subscriptionData = result?.data?.subscription
+        const isEarlyAccessActive =
+          subscriptionData?.status === "active" &&
+          subscriptionData?.planId === "early_access"
+
+        setIsPaid(isEarlyAccessActive)
       }
 
       loadBadge()

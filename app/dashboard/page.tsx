@@ -53,14 +53,13 @@ export default function Dashboard() {
           const userResult = await getUserBySessionIdAction(session.id)
           if (userResult.success && userResult.data) {
             const userData = userResult.data.user
+            const subscriptionData = userResult.data.subscription
             setUserName(userData.name)
-            const isActive = userData.subscriptionStatus === "active"
-            const planId = userData.planId
-            if (isActive && planId && planId !== "free") {
-              setPlanBadge(planId === "early_access" ? "Early Access" : "Premium")
-            } else {
-              setPlanBadge(null)
-            }
+            const isEarlyAccessActive =
+              subscriptionData?.status === "active" &&
+              subscriptionData?.planId === "early_access"
+
+            setPlanBadge(isEarlyAccessActive ? "Early Access" : null)
           }
       }
       

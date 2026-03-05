@@ -44,7 +44,7 @@ export default function Home() {
                   href="/login"
                   className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
                 >
-                  Get Started
+                  Create Your First Quiz
                 </a>
                 <a
                   href="/pricing"
@@ -53,7 +53,7 @@ export default function Home() {
                   View Pricing
                 </a>
               </div>
-              <p className="text-sm text-muted-foreground">Free users can create up to 3 quizzes.</p>
+              {/* <p className="text-sm text-muted-foreground">Free users can create up to 3 quizzes.</p> */}
             </div>
 
             <div className="space-y-3 text-sm text-muted-foreground">

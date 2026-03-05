@@ -3,41 +3,24 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from "next/navigation"
-import { authClient } from "@/client/auth-client"
-import { getUserBySessionIdAction } from "@/lib/user/actions/getUserName"
 // Pricing is still in development; keep this page as a creative placeholder.
 
 function Pricing() {
   const router = useRouter()
-  const { data: session } = authClient.useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [isPaid, setIsPaid] = useState(false)
   const [paidLabel, setPaidLabel] = useState<string | null>(null)
 
   useEffect(() => {
     const loadPlan = async () => {
-      const sessionId = session?.session?.id
-      if (!sessionId) {
-        setIsPaid(false)
-        setPaidLabel(null)
-        return
-      }
-
-      const result = await getUserBySessionIdAction(sessionId)
-      const user = result?.data?.user
-      const active = user?.subscriptionStatus === "active"
-      const planId = user?.planId
-      if (active && planId && planId !== "free") {
-        setIsPaid(true)
-        setPaidLabel(planId === "early_access" ? "Early Access" : "Premium")
-      } else {
-        setIsPaid(false)
-        setPaidLabel(null)
-      }
+      const res = await fetch("/api/billing/status")
+      const data = await res.json()
+      setIsPaid(Boolean(data?.isPaid))
+      setPaidLabel(data?.label ?? null)
     }
 
     loadPlan()
-  }, [session?.session?.id])
+  }, [])
 
   const startEarlyAccess = async () => {
     try {
