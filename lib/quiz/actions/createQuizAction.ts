@@ -3,14 +3,14 @@
 
 import { db } from "@/lib/db";
 import { quiz } from "@/lib/schema";
-import { and, eq, gte, lt, sql } from "drizzle-orm";
+import { and, eq, gte, sql } from "drizzle-orm";
 import { createQuiz, QuestionInput } from "@/lib/quiz/helpers/createQuiz";
 import {
   canCreateQuiz,
   canCreateQuestion,
   canUseImage,
 } from "@/lib/billing/entitlements";
-import { getManilaMonthBounds } from "@/lib/billing/period";
+const FREE_LIMIT_START = new Date("2026-03-01T00:00:00.000+08:00");
 
 export async function createQuizAction(
   title: string,
@@ -21,15 +21,13 @@ export async function createQuizAction(
   expiresAt?: string | null
 ) {
   try {
-    const { start, end } = getManilaMonthBounds();
     const [{ count: existingQuizCount }] = await db
       .select({ count: sql<number>`count(*)` })
       .from(quiz)
       .where(
         and(
           eq(quiz.creatorId, creatorId),
-          gte(quiz.createdAt, start),
-          lt(quiz.createdAt, end)
+          gte(quiz.createdAt, FREE_LIMIT_START)
         )
       );
 

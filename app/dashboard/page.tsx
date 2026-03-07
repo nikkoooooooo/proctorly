@@ -55,11 +55,13 @@ export default function Dashboard() {
             const userData = userResult.data.user
             const subscriptionData = userResult.data.subscription
             setUserName(userData.name)
-            const isEarlyAccessActive =
-              subscriptionData?.status === "active" &&
-              subscriptionData?.planId === "early_access"
-
-            setPlanBadge(isEarlyAccessActive ? "Early Access" : null)
+            const isActive = subscriptionData?.status === "active"
+            const planId = subscriptionData?.planId
+            if (isActive && planId && planId !== "free") {
+              setPlanBadge(planId === "pro_plus" ? "Pro Plus" : "Pro")
+            } else {
+              setPlanBadge(null)
+            }
           }
       }
       

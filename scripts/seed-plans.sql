@@ -8,15 +8,25 @@ VALUES
     'PHP',
     'month',
     NULL,
-    '{"maxQuizzesCreated":3,"maxQuestionsPerQuiz":30,"maxAttemptsPerQuiz":100,"maxImageQuestionsPerQuiz":5}'::jsonb,
+    '{"maxQuizzesCreated":5,"maxQuestionsPerQuiz":30,"maxAttemptsPerQuiz":100,"maxImageQuestionsPerQuiz":5}'::jsonb,
     true
   ),
   (
-    'early_access',
-    'Early Access',
-    24900,
+    'pro',
+    'Pro',
+    18900,
     'PHP',
     'month',
+    NULL,
+    '{"maxQuizzesCreated":999999,"maxQuestionsPerQuiz":999999,"maxAttemptsPerQuiz":999999,"maxImageQuestionsPerQuiz":999999}'::jsonb,
+    true
+  ),
+  (
+    'pro_plus',
+    'Pro Plus',
+    44900,
+    'PHP',
+    '3_months',
     NULL,
     '{"maxQuizzesCreated":999999,"maxQuestionsPerQuiz":999999,"maxAttemptsPerQuiz":999999,"maxImageQuestionsPerQuiz":999999}'::jsonb,
     true

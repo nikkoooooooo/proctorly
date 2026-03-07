@@ -112,12 +112,23 @@ export async function POST(req: Request) {
 
   if (mappedStatus) {
     const now = new Date();
-    const nextEnd =
-      eventType === "link.payment.paid" ? computePeriodEnd(now) : periodEnd;
 
     const target = subscriptionId
       ? eq(subscription.paymongoSubscriptionId, subscriptionId)
       : eq(subscription.paymongoLinkId, linkId || "");
+
+    const [updated] = await db
+      .select({ userId: subscription.userId, planId: subscription.planId })
+      .from(subscription)
+      .where(target);
+
+    const monthsToAdd = updated?.planId === "pro_plus" ? 3 : 1;
+    const nextEnd =
+      eventType === "link.payment.paid"
+        ? computePeriodEnd(
+            new Date(now.getFullYear(), now.getMonth() + monthsToAdd, 1)
+          )
+        : periodEnd;
 
     await db
       .update(subscription)
@@ -127,11 +138,6 @@ export async function POST(req: Request) {
           eventType === "link.payment.paid" ? now : periodStart,
         currentPeriodEnd: nextEnd,
       })
-      .where(target);
-
-    const [updated] = await db
-      .select({ userId: subscription.userId, planId: subscription.planId })
-      .from(subscription)
       .where(target);
 
     if (updated?.userId) {

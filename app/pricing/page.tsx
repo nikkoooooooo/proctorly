@@ -22,7 +22,7 @@ function Pricing() {
     loadPlan()
   }, [])
 
-  const startEarlyAccess = async () => {
+  const startCheckout = async (planId: string) => {
     try {
       setIsLoading(true)
       const res = await fetch("/api/billing/checkout", {
@@ -30,7 +30,7 @@ function Pricing() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ planId: "early_access" }),
+        body: JSON.stringify({ planId }),
       })
 
       let data: any = null
@@ -79,78 +79,104 @@ function Pricing() {
           </p>
           <h1 className="mt-4 text-4xl font-semibold text-foreground">Simple, instructor-first pricing.</h1>
           <p className="mt-3 text-sm text-muted-foreground max-w-2xl">
-            Founding Educator Access gives early supporters priority input and premium capabilities.
+            Pick a plan that fits your class size and schedule. Upgrade anytime.
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-start">
-          <div className="border border-border/60 rounded-[var(--radius-card)] bg-secondary/30 p-8">
+        <div className="grid gap-8 md:grid-cols-3">
+          <div className="border border-border/60 rounded-[var(--radius-card)] bg-secondary/20 p-6 flex flex-col">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-              Founding Educator Access
+              Free
             </p>
             <div className="mt-4 flex items-baseline gap-3">
-              <span className="text-4xl font-semibold text-foreground">₱299</span>
-              <span className="text-sm text-muted-foreground">per month (early access)</span>
+              <span className="text-4xl font-semibold text-foreground">₱0</span>
+              <span className="text-sm text-muted-foreground">forever</span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Pricing updates to <span className="text-foreground font-semibold">₱349</span> per month after early
-              access ends.
+              Best for trying ProctorlyX.
             </p>
+            <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+              <div>• Create up to 5 quizzes to try the platform</div>
+              <div>• Secure quiz environment (copy-paste restriction & tab monitoring)</div>
+              <div>• Students join using a quiz access code</div>
+              <div>• Built-in quiz timer for controlled assessments</div>
+              <div>• Works on phones, tablets, and laptops</div>
+              <div>• Quiz attempt tracking after assessments</div>
+            </div>
             <div className="mt-6">
               <button
                 type="button"
-                onClick={startEarlyAccess}
-                disabled={isLoading}
-                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
+                onClick={() => router.push("/dashboard")}
+                className="bg-secondary text-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-secondary/80"
               >
-                {isPaid
-                  ? "Premium Active"
-                  : isLoading
-                  ? "Redirecting..."
-                  : "Start Early Access"}
+                Start Free
               </button>
-              {isPaid && (
-                <p className="mt-2 text-xs text-muted-foreground">
-                  You already have active access. Thank you for supporting ProctorlyX.
-                </p>
-              )}
             </div>
           </div>
 
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">Early access benefits</h2>
-            {/* <div className="space-y-3 text-sm text-muted-foreground">
-              <div className="flex items-start gap-3">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
-                <span>Priority for feature suggestions and roadmap feedback.</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
-                <span>Premium dashboard with cleaner analytics and monitoring views.</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
-                <span>Advanced features as they launch, included in early access.</span>
-              </div>
-            </div> */}
+          <div className="border border-primary/50 rounded-[var(--radius-card)] bg-primary/10 p-6 flex flex-col">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Pro
+              </p>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-primary bg-primary/10 px-2 py-1 rounded-full">
+                Most Popular
+              </span>
+            </div>
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className="text-4xl font-semibold text-foreground">₱189</span>
+              <span className="text-sm text-muted-foreground">/ month</span>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              For teachers running quizzes regularly.
+            </p>
+            <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+              <div>• Unlimited quizzes for all your classes</div>
+              <div>• Priority teacher support</div>
+              <div>• Access to continuous improvements and new features</div>
+            </div>
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => startCheckout("pro")}
+                disabled={isLoading}
+                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
+              >
+                {isPaid ? "Premium Active" : isLoading ? "Redirecting..." : "Upgrade to Pro"}
+              </button>
+            </div>
+          </div>
 
-            <div className="space-y-3 text-sm text-muted-foreground">
-              {[
-                "Locked-in ₱299 pricing for 12 months (protected from future price increases).",
-                "Priority for feature suggestions and roadmap feedback.",
-                "Direct support access from the ProctorlyX team (faster response).",
-                "Early access to new features before public release.",
-                "Founding Instructor badge inside your dashboard.",
-                "Priority onboarding help (guided setup for your first quizzes).",
-                "Ability to vote/input on what we build next.",
-                "Extended usage limits during early access (higher limits than future basic plan).",
-                "Beta access to experimental proctoring improvements.",
-              ].map((text, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary" />
-                  <span>{text}</span>
-                </div>
-              ))}
+          <div className="border border-border/60 rounded-[var(--radius-card)] bg-secondary/20 p-6 flex flex-col">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                Pro Plus
+              </p>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-700 bg-amber-100 px-2 py-1 rounded-full">
+                Best Value
+              </span>
+            </div>
+            <div className="mt-4 flex items-baseline gap-3">
+              <span className="text-4xl font-semibold text-foreground">₱449</span>
+              <span className="text-sm text-muted-foreground">/ 3 months</span>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Best for teachers running quizzes throughout the semester.
+            </p>
+            <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+              <div>• Everything in Pro</div>
+              <div>• Save ₱118 compared to monthly pricing</div>
+              <div>• 3 months uninterrupted access for multiple quiz periods</div>
+            </div>
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => startCheckout("pro_plus")}
+                disabled={isLoading}
+                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
+              >
+                {isPaid ? "Premium Active" : isLoading ? "Redirecting..." : "Get Pro Plus"}
+              </button>
             </div>
           </div>
         </div>
