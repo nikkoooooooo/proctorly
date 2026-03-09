@@ -139,7 +139,7 @@ function Pricing() {
               <button
                 type="button"
                 onClick={() => startCheckout("pro")}
-                disabled={isLoading}
+                disabled={isLoading || isPaid}
                 className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
               >
                 {isPaid ? "Premium Active" : isLoading ? "Redirecting..." : "Upgrade to Pro"}
@@ -172,7 +172,7 @@ function Pricing() {
               <button
                 type="button"
                 onClick={() => startCheckout("pro_plus")}
-                disabled={isLoading}
+                disabled={isLoading || isPaid}
                 className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
               >
                 {isPaid ? "Premium Active" : isLoading ? "Redirecting..." : "Get Pro Plus"}

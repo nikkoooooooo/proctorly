@@ -28,11 +28,9 @@ function Navbar() {
         }
         const result = await getUserBySessionIdAction(sessionId)
         const subscriptionData = result?.data?.subscription
-        const isEarlyAccessActive =
-          subscriptionData?.status === "active" &&
-          subscriptionData?.planId === "early_access"
-
-        setIsPaid(isEarlyAccessActive)
+        const isActive = subscriptionData?.status === "active"
+        const planId = subscriptionData?.planId
+        setIsPaid(Boolean(isActive && planId && planId !== "free"))
       }
 
       loadBadge()

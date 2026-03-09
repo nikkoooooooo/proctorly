@@ -8,7 +8,7 @@ VALUES
     'PHP',
     'month',
     NULL,
-    '{"maxQuizzesCreated":5,"maxQuestionsPerQuiz":30,"maxAttemptsPerQuiz":100,"maxImageQuestionsPerQuiz":5}'::jsonb,
+    '{"maxQuizzesCreated":5,"maxQuestionsPerQuiz":999999,"maxAttemptsPerQuiz":999999,"maxImageQuestionsPerQuiz":999999}'::jsonb,
     true
   ),
   (

@@ -2,8 +2,7 @@
 
 import { db } from "@/lib/db"
 import { attempt, quiz } from "@/lib/schema"
-import { and, eq, sql } from "drizzle-orm"
-import { canAttemptQuiz } from "@/lib/billing/entitlements"
+import { and, eq } from "drizzle-orm"
 import { createAttempt } from "../helpers/createAttempt"
 
 export async function createAttemptAction({
@@ -30,16 +29,6 @@ export async function createAttemptAction({
 
     if (!quizRow) {
       return { success: false, error: "Quiz not found." }
-    }
-
-    const [{ count: totalAttempts }] = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(attempt)
-      .where(eq(attempt.quizId, quizId))
-
-    const canAttempt = await canAttemptQuiz(quizRow.creatorId, totalAttempts ?? 0)
-    if (!canAttempt) {
-      return { success: false, error: "Attempt limit reached for this quiz." }
     }
 
     const result = await createAttempt({ quizId, userId })

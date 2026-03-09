@@ -18,20 +18,38 @@ function applyTheme(theme: Theme) {
 }
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "dark"
-    const stored = window.localStorage.getItem(THEME_KEY)
-    return stored === "light" ? "light" : "dark"
-  })
+  const [theme, setTheme] = useState<Theme>("dark")
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    const stored = window.localStorage.getItem(THEME_KEY)
+    const nextTheme: Theme = stored === "light" ? "light" : "dark"
+    setTheme(nextTheme)
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isMounted) return
     applyTheme(theme)
     window.localStorage.setItem(THEME_KEY, theme)
-  }, [theme])
+  }, [theme, isMounted])
 
   const toggleTheme = () => {
     const next: Theme = theme === "dark" ? "light" : "dark"
     setTheme(next)
+  }
+
+  if (!isMounted) {
+    return (
+      <button
+        type="button"
+        className=" inline-flex h-9 w-9 items-center cursor-pointer justify-center rounded-[var(--radius-button)] border border-border bg-secondary text-foreground hover:bg-secondary/80"
+        aria-label="Switch theme"
+        title="Switch theme"
+      >
+        <Moon size={18} />
+      </button>
+    )
   }
 
   return (

@@ -5,11 +5,7 @@ import { db } from "@/lib/db";
 import { quiz } from "@/lib/schema";
 import { and, eq, gte, sql } from "drizzle-orm";
 import { createQuiz, QuestionInput } from "@/lib/quiz/helpers/createQuiz";
-import {
-  canCreateQuiz,
-  canCreateQuestion,
-  canUseImage,
-} from "@/lib/billing/entitlements";
+import { canCreateQuiz } from "@/lib/billing/entitlements";
 const FREE_LIMIT_START = new Date("2026-03-01T00:00:00.000+08:00");
 
 export async function createQuizAction(
@@ -36,24 +32,6 @@ export async function createQuizAction(
       return {
         success: false,
         error: "Quiz limit reached for your plan.",
-      };
-    }
-
-    const questionCount = questions.length;
-    const canAddQuestions = await canCreateQuestion(creatorId, questionCount);
-    if (!canAddQuestions) {
-      return {
-        success: false,
-        error: "Question limit reached for your plan.",
-      };
-    }
-
-    const imageCount = questions.filter((q) => Boolean(q.imageUrl)).length;
-    const canAddImages = await canUseImage(creatorId, imageCount);
-    if (!canAddImages) {
-      return {
-        success: false,
-        error: "Image question limit reached for your plan.",
       };
     }
 

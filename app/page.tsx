@@ -105,14 +105,13 @@ export default function Home() {
             </div>
             <div className="border border-border/60 rounded-[var(--radius-card)] p-6 bg-background/60">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Pricing</p>
-              <h3 className="mt-3 text-2xl font-semibold text-foreground">Founding Educator Access</h3>
+              <h3 className="mt-3 text-2xl font-semibold text-foreground">Pro Plan</h3>
               <div className="mt-4 flex items-baseline gap-3">
-                <span className="text-3xl font-semibold text-foreground">₱249</span>
-                <span className="text-sm text-muted-foreground">per month (early access)</span>
+                <span className="text-3xl font-semibold text-foreground">₱189</span>
+                <span className="text-sm text-muted-foreground">per month</span>
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
-                Increases to <span className="text-foreground font-semibold">₱349</span> per month after early access
-                ends.
+                Unlimited quizzes for regular classroom use.
               </p>
             </div>
           </div>
