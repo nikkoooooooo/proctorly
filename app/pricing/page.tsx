@@ -83,7 +83,7 @@ function Pricing() {
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-4">
           <div className="border border-border/60 rounded-[var(--radius-card)] bg-secondary/20 p-6 flex flex-col">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Free
@@ -176,6 +176,36 @@ function Pricing() {
                 className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
               >
                 {isPaid ? "Premium Active" : isLoading ? "Redirecting..." : "Get Pro Plus"}
+              </button>
+            </div>
+          </div>
+
+          <div className="border border-border/60 rounded-[var(--radius-card)] bg-secondary/10 p-6 flex flex-col">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                School Plan
+              </p>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-amber-800 bg-amber-100 px-2 py-1 rounded-full whitespace-nowrap">
+                Coming Soon
+              </span>
+            </div>
+            <div className="mt-3">
+              <p className="text-sm text-muted-foreground">For Schools & Institutions</p>
+            </div>
+            <div className="mt-6 space-y-2 text-sm text-muted-foreground">
+              <div>• Unlimited teacher accounts (Coming Soon)</div>
+              <div>• School admin dashboard (Coming Soon)</div>
+              <div>• System-wide analytics (Coming Soon)</div>
+              <div>• Centralized teacher management (Coming Soon)</div>
+              <div>• Advanced quiz monitoring (Coming Soon)</div>
+            </div>
+            <div className="mt-6">
+              <button
+                type="button"
+                disabled
+                className="bg-secondary text-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold opacity-60 cursor-not-allowed"
+              >
+                Contact Us
               </button>
             </div>
           </div>
