@@ -101,7 +101,7 @@ function Page() {
 
                         {/* Uniform button */}
                          <div className="flex gap-2">
-                            <Link href={`/quiz/${quiz.id}/creator`} className="bg-primary p-2 rounded-[var(--radius-button)] font-semibold cursor-pointer text-primary-foreground hover:bg-primary/80">
+                            <Link href={`/quiz/${quiz.id}/view?tab=overview`} className="bg-primary p-2 rounded-[var(--radius-button)] font-semibold cursor-pointer text-primary-foreground hover:bg-primary/80">
                                 View
                             </Link>
                             <Link
