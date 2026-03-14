@@ -224,15 +224,15 @@ export default function Dashboard() {
         )}
 
         {/* Stats */}
-        <div className="w-full flex justify-between flex-col lg:flex-row gap flex-wrap mt-6">
+        {/* <div className="w-full flex justify-between flex-col lg:flex-row gap flex-wrap mt-6">
           <QuizStatCard title="My Quizzes" value={totalQuizCreated} />
           <QuizStatCard title="Joined Quizzes" value={totalQuizJoined} />
           <QuizStatCard title="Total" value={totalQuizzes} />
-        </div>
+        </div> */}
 
         
-        <div className="w-full flex flex-col sm:flex-row 
-        items-center justify-between mt-5 gap-2 p-4">
+        <div className="w-full flex flex-col sm:flex-row
+        items-center justify-between mt-5 gap-2 ">
           <QuizBox
             path="/created-quiz"
             emoji="📝"
@@ -249,14 +249,23 @@ export default function Dashboard() {
             description="Quizzes you've joined"
           />
 
+
           <QuizBox
+            path=""
+            emoji="📊"
+            quizCount={totalQuizzes}
+            title="Total Quiz Activity"
+            description="Total Quizzes"
+          />
+
+          {/* <QuizBox
             path="/automation"
             emoji="🤖"
             // quizCount={totalQuizJoined}
             title="Automation"
             description="Automation for your manual works
              coming soon..."
-          />
+          /> */}
         </div>
       </div>
     </div>

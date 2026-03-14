@@ -7,6 +7,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import * as XLSX from "xlsx" // ✅ SheetJS for creating Excel
 import { saveAs } from "file-saver" // ✅ Save Blob as file in browser
 
@@ -26,21 +27,18 @@ interface Attempt {
   submittedAt?: string | Date | null
 }
 
-interface TeacherPageProps {
-  params: { quizId: string }
-}
-
 // =====================
 // Main TeacherPage
 // =====================
-export default function TeacherPage({ params }: TeacherPageProps) {
+export default function TeacherPage() {
 
   // 1️⃣ Store attempts in state
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
   const [quizTitle, setQuizTitle] = useState("Quiz")
   const [passingScore, setPassingScore] = useState<number | null>(null)
-  const { quizId } = params
+  const params = useParams<{ quizId: string }>()
+  const quizId = params?.quizId ?? ""
 
   const formatPHDateTime = (value?: string | Date | null) => {
     if (!value) return "N/A"
@@ -180,14 +178,21 @@ export default function TeacherPage({ params }: TeacherPageProps) {
         <p className="text-muted-foreground">No students have attempted this quiz yet.</p>
       ) : (
         <>
-          {/* Export button */}
-          <button
-            onClick={exportToExcel}
-            className="mb-4 px-4 py-2 bg-green-600 text-primary-foreground rounded-[var(--radius-button)] hover:bg-green-500 
-            focus:bg-green-300 font-semibold"
-          >
-            Export to Excel
-          </button>
+          {/* Action buttons */}
+          <div className="mb-4 flex flex-wrap gap-3">
+            <Link
+              href={`/quiz/${quizId}/monitor`}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
+            >
+              Open Live Monitor
+            </Link>
+            <button
+              onClick={exportToExcel}
+              className="px-4 py-2 bg-green-600 text-primary-foreground rounded-[var(--radius-button)] hover:bg-green-500 focus:bg-green-300 font-semibold"
+            >
+              Export to Excel
+            </button>
+          </div>
 
           {/* Attempts table */}
           <div className="card p-4">

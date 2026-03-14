@@ -14,6 +14,7 @@ import { useAnswerFlow } from "@/hooks/useAnswerFlow" // answer submission + fin
 import { useAttemptOrder } from "@/hooks/useAttemptOrder" // stable shuffled order loader
 import { useProctoring } from "@/hooks/useProctoring" // tab switch + blur tracking
 import { useQuestionTimer } from "@/hooks/useQuestionTimer" // per-question timer + persistence
+import { sendAttemptEvent } from "@/lib/attempt/client-events"
 
 interface Option { // answer option shape
   id: string // option id
@@ -187,6 +188,23 @@ export default function QuizMainPageClient({
     if (!questions.length) return // no reset needed when questions are not loaded
     setSelectedChoice(null) // clear selection when moving between questions
   }, [currentQuestion, questions]) // reset selection on index/order changes
+
+  useEffect(() => {
+    if (!attemptId || modal) return
+    const id = setInterval(() => {
+      void sendAttemptEvent(attemptId, "heartbeat")
+    }, 10000)
+    return () => clearInterval(id)
+  }, [attemptId, modal])
+
+  useEffect(() => {
+    if (!attemptId || modal) return
+    const handleUnload = () => {
+      void sendAttemptEvent(attemptId, "disconnect")
+    }
+    window.addEventListener("beforeunload", handleUnload)
+    return () => window.removeEventListener("beforeunload", handleUnload)
+  }, [attemptId, modal])
 
 
 

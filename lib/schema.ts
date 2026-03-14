@@ -163,8 +163,29 @@ export const attempt = pgTable("attempt", {
 
   startedAt: timestamp("started_at").defaultNow(), 
   updatedAt: timestamp("updated_at").defaultNow(),
+  lastSeenAt: timestamp("last_seen_at"),
+  lastActivityAt: timestamp("last_activity_at"),
   submittedAt: timestamp("submitted_at"),
 });
+
+export const attemptEvent = pgTable(
+  "attempt_event",
+  {
+    id: text("id").primaryKey(),
+
+    attemptId: text("attempt_id")
+      .notNull()
+      .references(() => attempt.id, { onDelete: "cascade" }),
+
+    type: text("type").notNull(), // answered | tab_blur | tab_focus | submit | disconnect | heartbeat
+    payload: jsonb("payload"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("attempt_event_attempt_idx").on(table.attemptId),
+    index("attempt_event_created_idx").on(table.createdAt),
+  ],
+);
 
 
 export const attemptAnswer = pgTable(

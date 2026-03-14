@@ -8,6 +8,7 @@ export default function Home() {
   const router = useRouter();
   const { data } = authClient.useSession(); // ✅ client-safe
   const user = data?.user;
+  const demoVideoUrl = "https://www.youtube.com/embed/i83nIEzGfUo"; // demo video
 
   useEffect(() => {
     if (user) {
@@ -37,7 +38,10 @@ export default function Home() {
                 <span className="ml-0.5 font-medium text-primary">X</span> keeps assessments focused, fair, and trusted.
               </h1>
               <p className="text-lg text-muted-foreground">
-                Launch secure quizzes fast with clean workflows, real-time signals, and clear analytics.
+                Create secure quizzes in minutes with real-time monitoring, tab-switch detection, and clear attempt tracking.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                300+ students · 4 courses · 10,000+ quiz attempts
               </p>
               <div className="flex flex-wrap gap-3">
                 <a
@@ -70,6 +74,66 @@ export default function Home() {
                 <span>Audit-ready review</span>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border/60 bg-secondary/10">
+        <div className="mx-auto w-full max-w-6xl px-4 py-12">
+          <p className="text-center text-sm text-muted-foreground">
+            Used by classrooms running secure online quizzes
+          </p>
+          <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
+            <div className="border border-border/60 rounded-[var(--radius-card)] px-4 py-5 bg-background/60">
+              <p className="text-2xl font-semibold text-foreground">300+</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Students</p>
+            </div>
+            <div className="border border-border/60 rounded-[var(--radius-card)] px-4 py-5 bg-background/60">
+              <p className="text-2xl font-semibold text-foreground">4</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Courses</p>
+            </div>
+            <div className="border border-border/60 rounded-[var(--radius-card)] px-4 py-5 bg-background/60">
+              <p className="text-2xl font-semibold text-foreground">10,000+</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Quiz Attempts</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-t border-border/60">
+        <div className="mx-auto w-full max-w-6xl px-4 py-16 text-center">
+          <h2 className="text-3xl font-semibold text-foreground">
+            See how{" "}
+            <span className="font-semibold tracking-tight">Proctorly</span>
+            <span className="ml-0.5 font-medium text-primary">X</span> works
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Watch a 5-minute demo of how teachers create and monitor secure quizzes.
+          </p>
+
+          <div className="mt-8 mx-auto max-w-4xl">
+            {demoVideoUrl ? (
+              <div className="relative aspect-video overflow-hidden rounded-[var(--radius-card)] border border-border/60 bg-black/80">
+                <iframe
+                  className="absolute inset-0 h-full w-full"
+                  src={demoVideoUrl}
+                  title="ProctorlyX demo"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : (
+              <div className="relative aspect-video overflow-hidden rounded-[var(--radius-card)] border border-border/60 bg-secondary/30">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex items-center gap-4 rounded-full border border-border/60 bg-background/60 px-5 py-2 text-sm text-muted-foreground">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                      ▶
+                    </span>
+                    Add a YouTube URL to show the demo video here.
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

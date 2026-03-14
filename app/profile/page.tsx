@@ -21,6 +21,7 @@ function Profile() {
     const [email, setEmail] = useState("username@gmail.com")
     const [studentNo, setStudentNo] = useState("")
     const [section, setSection] = useState("")
+    const [image, setImage] = useState<string | null>(null)
 
     const { data } = authClient.useSession()
 
@@ -39,6 +40,7 @@ function Profile() {
         }
         if (data.data?.user.studentNo) setStudentNo(data.data.user.studentNo)
         if (data.data?.user.section) setSection(data.data.user.section)
+        if (data.data?.user.image) setImage(data.data.user.image)
       } catch (error) {
         console.error(error)
       }
@@ -74,6 +76,24 @@ function Profile() {
                   Complete your profile by adding your Student No and Section.
                 </div>
               )}
+              <div className="flex items-center gap-4">
+                {image ? (
+                  <img
+                    src={image}
+                    alt={name}
+                    className="h-14 w-14 rounded-full object-cover border border-border"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center text-lg font-semibold text-muted-foreground">
+                    {name?.[0] ?? "U"}
+                  </div>
+                )}
+                <div>
+                  <p className="text-lg font-semibold text-foreground">{name}</p>
+                  <p className="text-sm text-muted-foreground">{email}</p>
+                </div>
+              </div>
               <div className="flex gap-2 flex-col">
                 <label htmlFor="name" className="font-semibold text-xl">Name</label>
                 <input 

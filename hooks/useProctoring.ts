@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from "react" // React utilities
 import { saveTabSwitchCountAction } from "@/lib/attempt/actions/saveTabSwitchCountAction" // server action for tab count
+import { sendAttemptEvent } from "@/lib/attempt/client-events"
 
 export function useProctoring(attemptId: string, enabled: boolean) { // custom hook signature
   const [tabSwitches, setTabSwitches] = useState(0) // state for tab switches
@@ -21,10 +22,12 @@ export function useProctoring(attemptId: string, enabled: boolean) { // custom h
       setTabSwitches((prev) => prev + 1) // increment tab switch count
       setBlurScreen(true) // show blur overlay
       setTimeout(() => setBlurScreen(false), 3000) // hide blur after 3s
+      void sendAttemptEvent(attemptId, "tab_blur")
     }
 
     const handleReturn = () => { // when user returns
       counted = false // allow counting again
+      void sendAttemptEvent(attemptId, "tab_focus")
     }
 
     const handleVisibility = () => { // when visibility changes
@@ -41,7 +44,7 @@ export function useProctoring(attemptId: string, enabled: boolean) { // custom h
       window.removeEventListener("focus", handleReturn) // remove focus listener
       document.removeEventListener("visibilitychange", handleVisibility) // remove visibility listener
     }
-  }, [enabled]) // only re-run if enabled changes
+  }, [enabled, attemptId]) // re-run if enabled or attempt changes
 
   useEffect(() => { // persist tab count
     if (!attemptId) return // skip if no attempt

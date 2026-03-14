@@ -2,6 +2,7 @@
 
 import { answerAttemptAction } from "@/lib/attempt/actions/answerAttemptAction" // server action to save answers
 import { calculateScoreAction } from "@/lib/attempt/actions/calculateScoreAction" // server action to finalize score
+import { sendAttemptEvent } from "@/lib/attempt/client-events"
 
 interface Option { // minimal option shape
   id: string // option id
@@ -41,6 +42,10 @@ export function useAnswerFlow({ // custom hook signature
       optionId: choice.id, // pass option id
       isCorrect: choice.isCorrect, // pass correctness
     })
+    void sendAttemptEvent(attemptId, "answered", {
+      questionId,
+      questionNo: currentQuestionIndex + 1,
+    })
   }
 
   const autoFail = async (questionId: string) => { // auto-fail helper
@@ -49,6 +54,10 @@ export function useAnswerFlow({ // custom hook signature
       attemptId, // pass attempt id
       questionId, // pass question id
       isAutoFail: true, // mark as auto-fail
+    })
+    void sendAttemptEvent(attemptId, "auto_fail", {
+      questionId,
+      questionNo: currentQuestionIndex + 1,
     })
   }
 
@@ -65,6 +74,7 @@ export function useAnswerFlow({ // custom hook signature
 
   const finishQuiz = async () => { // finish helper
     if (!attemptId) return // skip if no attempt
+    void sendAttemptEvent(attemptId, "submit")
     await calculateScoreAction(attemptId) // compute final score
     onFinish(attemptId) // trigger finish callback
   }

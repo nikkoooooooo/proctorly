@@ -47,9 +47,8 @@ function Navbar() {
             className={`text-4xl text-foreground ${navDisabled ? "pointer-events-none opacity-60" : ""}`}
             onCopy={(e) => e.preventDefault()}
           >
-            {/* Text-only wordmark with a quiet emphasis on the "X" */}
             <span className="font-semibold tracking-tight">Proctorly</span>
-            <span className={`ml-0.5 font-medium ${isPaid ? "text-amber-500" : "text-primary"}`}>X</span>
+            <span className={`font-medium ${isPaid ? "text-amber-500" : "text-primary"}`}>X</span>
           </Link>
 
           {/* Navigation Links */}
