@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { attempt, quiz } from "@/lib/schema"
+import { attempt, quiz, quizPayment } from "@/lib/schema"
 import { and, eq } from "drizzle-orm"
 import { createAttempt } from "../helpers/createAttempt"
 
@@ -23,12 +23,29 @@ export async function createAttemptAction({
     }
 
     const [quizRow] = await db
-      .select({ creatorId: quiz.creatorId })
+      .select({ creatorId: quiz.creatorId, isPaidQuiz: quiz.isPaidQuiz })
       .from(quiz)
       .where(eq(quiz.id, quizId))
 
     if (!quizRow) {
       return { success: false, error: "Quiz not found." }
+    }
+
+    if (quizRow.isPaidQuiz) {
+      const [paid] = await db
+        .select({ id: quizPayment.id })
+        .from(quizPayment)
+        .where(
+          and(
+            eq(quizPayment.quizId, quizId),
+            eq(quizPayment.userId, userId),
+            eq(quizPayment.status, "paid")
+          )
+        )
+
+      if (!paid) {
+        return { success: false, error: "Payment required before taking this quiz." }
+      }
     }
 
     const result = await createAttempt({ quizId, userId })
