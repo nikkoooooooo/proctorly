@@ -249,6 +249,7 @@ export const quizEnrollment = pgTable( // table for tracking who joined in the q
   },
   (table) => [
     index("enrollment_user_quiz_idx").on(table.userId, table.quizId), // this is for fast querying making the db already know who is our target
+    uniqueIndex("quiz_enrollment_unique_idx").on(table.userId, table.quizId),
   ]
 );
 
