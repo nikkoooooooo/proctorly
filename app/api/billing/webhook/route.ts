@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { subscription, webhookEvent, user as userTable } from "@/lib/schema";
+import { quizPayment, subscription, webhookEvent, user as userTable } from "@/lib/schema";
 import { verifyPaymongoSignature } from "@/lib/billing/paymongo";
 import { getManilaMonthBounds } from "@/lib/billing/period";
 
@@ -98,6 +98,13 @@ export async function POST(req: Request) {
   const linkId = payload.data?.attributes?.data?.id;
   if (!subscriptionId && !linkId) {
     return NextResponse.json({ ok: true });
+  }
+
+  if (eventType === "link.payment.paid" && linkId) {
+    await db
+      .update(quizPayment)
+      .set({ status: "paid", paidAt: new Date() })
+      .where(eq(quizPayment.paymongoLinkId, linkId));
   }
 
   const resource = payload.data?.attributes?.data;

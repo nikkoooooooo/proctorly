@@ -34,6 +34,7 @@ function Page() {
     const user = data?.user
 
     const [userJoinedQuiz, setUserJoinedQuiz] = useState<Quiz[]>([])
+    const [paymentStatus, setPaymentStatus] = useState<Record<string, "paid" | "unpaid" | "not_required">>({})
     
 
 
@@ -49,12 +50,43 @@ function Page() {
                   return bTime - aTime
                 })
                 setUserJoinedQuiz(sortedQuizzes)
+                const statusEntries = await Promise.all(
+                  sortedQuizzes.map(async (quiz) => {
+                    const res = await fetch(`/api/quiz-payment/status?quizId=${quiz.id}`)
+                    const data = await res.json()
+                    return [quiz.id, data.status as "paid" | "unpaid" | "not_required"] as const
+                  })
+                )
+                setPaymentStatus(Object.fromEntries(statusEntries))
             } catch (error) {
                 console.error(error)
             }
         }
         fetchQuiz()
     },[data])
+
+    const startPayment = async (quizId: string) => {
+      try {
+        const res = await fetch("/api/quiz-payment/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ quizId }),
+        })
+        if (!res.ok) {
+          console.error("Checkout failed with status:", res.status)
+          return
+        }
+
+        const text = await res.text()
+        if (!text) return
+        const data = JSON.parse(text)
+        if (data?.checkoutUrl) {
+          window.location.href = data.checkoutUrl
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
     
   return (
     <div className="bg-background min-h-screen flex flex-col items-center">
@@ -78,12 +110,29 @@ function Page() {
                         </div>
 
                         {/* Uniform button */}
-                        <Link
+                        {paymentStatus[quiz.id] === "unpaid" ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              disabled
+                              className="bg-secondary text-secondary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-not-allowed p-2"
+                            >
+                              Take Quiz
+                            </button>
+                            <button
+                              onClick={() => startPayment(quiz.id)}
+                              className="bg-primary text-primary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/80 transition-all"
+                            >
+                              Pay Now
+                            </button>
+                          </div>
+                        ) : (
+                          <Link
                             href={`/quiz/${quiz.id}`}
                             className="bg-primary text-primary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/80 transition-all"
-                        >
+                          >
                             Take Quiz
-                        </Link>
+                          </Link>
+                        )}
                     </div>
                     {/* Use muted-foreground for readable description text */}
                     {quiz.description && <p className="text-muted-foreground mt-2">{quiz.description}</p>}

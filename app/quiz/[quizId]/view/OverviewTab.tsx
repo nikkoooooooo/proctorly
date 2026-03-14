@@ -34,6 +34,12 @@ export default async function OverviewTab({ quizId }: { quizId: string }) {
           </div>
         </div>
         <div>
+          <div className="text-sm text-muted-foreground">Passing Score</div>
+          <div className="mt-1 font-medium">
+            {quiz.passingScore ?? "—"}
+          </div>
+        </div>
+        <div>
           <div className="text-sm text-muted-foreground">Expiry</div>
           <div className="mt-1 font-medium">
             {quiz.expiresAt ? String(quiz.expiresAt) : "No expiry"}

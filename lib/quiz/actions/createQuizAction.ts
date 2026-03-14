@@ -14,7 +14,10 @@ export async function createQuizAction(
   creatorId: string,
   description: string,
   blurQuestion = false,
-  expiresAt?: string | null
+  expiresAt?: string | null,
+  isPaidQuiz = false,
+  paidQuizFee?: number | null,
+  passingScore?: number | null
 ) {
   try {
     const [{ count: existingQuizCount }] = await db
@@ -35,13 +38,25 @@ export async function createQuizAction(
       };
     }
 
+    if (isPaidQuiz) {
+      if (!paidQuizFee || paidQuizFee < 10000) {
+        return { success: false, error: "Minimum quiz fee is 100." };
+      }
+      if (!passingScore || passingScore <= 0) {
+        return { success: false, error: "Passing score is required." };
+      }
+    }
+
     const createdQuiz = await createQuiz(
       creatorId,
       title,
       questions,
       description,
       blurQuestion,
-      expiresAt
+      expiresAt,
+      isPaidQuiz,
+      paidQuizFee ?? null,
+      passingScore ?? null
     );
 
     return { success: true, quiz: createdQuiz };

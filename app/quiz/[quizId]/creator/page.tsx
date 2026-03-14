@@ -39,6 +39,7 @@ export default function TeacherPage({ params }: TeacherPageProps) {
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
   const [quizTitle, setQuizTitle] = useState("Quiz")
+  const [passingScore, setPassingScore] = useState<number | null>(null)
   const { quizId } = params
 
   const formatPHDateTime = (value?: string | Date | null) => {
@@ -66,6 +67,7 @@ export default function TeacherPage({ params }: TeacherPageProps) {
         if (quizRes.success && quizRes.quiz?.title) {
           setQuizTitle(quizRes.quiz.title)
         }
+        setPassingScore(quizRes.success ? quizRes.quiz?.passingScore ?? null : null)
         const data = await getQuizAttemptsAction(quizId)
         if (data) {
           const sortedAttempts = [...(data.attempts ?? [])].sort((a, b) => {
@@ -197,6 +199,7 @@ export default function TeacherPage({ params }: TeacherPageProps) {
                     <th className="py-2 px-3">Student No</th>
                     <th className="py-2 px-3">Section</th>
                     <th className="py-2 px-3">Score</th>
+                    <th className="py-2 px-3">Passed</th>
                     <th className="py-2 px-3">Tab Switches</th>
                     <th className="py-2 px-3">Status</th>
                     <th className="py-2 px-3">Started (PH)</th>
@@ -211,6 +214,15 @@ export default function TeacherPage({ params }: TeacherPageProps) {
                       <td className="py-2 px-3">{a.studentNo ?? "N/A"}</td>
                       <td className="py-2 px-3">{a.section ?? "N/A"}</td>
                       <td className="py-2 px-3">{a.score ?? 0}</td>
+                      <td className="py-2 px-3">
+                        {passingScore == null || a.score == null ? (
+                          "—"
+                        ) : a.score >= passingScore ? (
+                          <span className="text-emerald-500 font-semibold">Passed</span>
+                        ) : (
+                          <span className="text-rose-500 font-semibold">Failed</span>
+                        )}
+                      </td>
                       <td className="py-2 px-3 text-red-500 font-semibold">{a.tabSwitchCount}</td>
                       <td className="py-2 px-3">
                         <span

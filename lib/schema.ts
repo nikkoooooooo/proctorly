@@ -107,6 +107,11 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
 
   expiresAt: timestamp("expires_at"),
 
+  // Paid quiz columns
+  isPaidQuiz: boolean("is_paid_quiz").default(false).notNull(),
+  paidQuizFee: integer("paid_quiz_fee"), // cents
+  passingScore: integer("passing_score"), // raw points
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -279,6 +284,26 @@ export const subscription = pgTable("subscription", {
   paymongoSubscriptionId: text("paymongo_subscription_id"),
   paymongoLinkId: text("paymongo_link_id"),
   paymongoLinkReference: text("paymongo_link_reference"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export const quizPayment = pgTable("quiz_payment", {
+  id: text("id").primaryKey(),
+  quizId: text("quiz_id")
+    .notNull()
+    .references(() => quiz.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  status: text("status").notNull(), // pending | paid | failed | expired
+  source: text("source").notNull(), // paymongo | manual
+  paymongoLinkId: text("paymongo_link_id"),
+  paymongoLinkReference: text("paymongo_link_reference"),
+  paidAt: timestamp("paid_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

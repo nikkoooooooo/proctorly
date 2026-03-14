@@ -51,6 +51,9 @@ export default function CreateQuizPage() {
 
   // Proctoring settings
   const [blurQuestion, setBlurQuestion] = useState(false)
+  const [isPaidQuiz, setIsPaidQuiz] = useState(false)
+  const [paidQuizFee, setPaidQuizFee] = useState("")
+  const [passingScore, setPassingScore] = useState("")
 
 
   useEffect(() => {
@@ -157,6 +160,16 @@ export default function CreateQuizPage() {
       toast.error("Each question must have text or an image")
       return
     }
+    if (isPaidQuiz) {
+      if (!paidQuizFee || Number(paidQuizFee) < 100) {
+        toast.error("Minimum quiz fee is 100")
+        return
+      }
+      if (!passingScore || Number(passingScore) <= 0) {
+        toast.error("Passing score is required for paid quizzes")
+        return
+      }
+    }
 
     setIsSubmittingQuiz(true)
     try {
@@ -191,6 +204,9 @@ export default function CreateQuizPage() {
         description,
         blurQuestion,
         expiresAt ? new Date(expiresAt).toISOString() : null,
+        isPaidQuiz,
+        isPaidQuiz ? Math.round(Number(paidQuizFee) * 100) : null,
+        passingScore ? Number(passingScore) : null,
       )
 
       if (!result.success || !result.quiz) {
@@ -207,6 +223,9 @@ export default function CreateQuizPage() {
       setQuestions([createEmptyQuestion()])
       setBlurQuestion(false)
       setExpiresAt("")
+      setIsPaidQuiz(false)
+      setPaidQuizFee("")
+      setPassingScore("")
     } catch (err) {
       console.error(err)
       // Use toast for errors to keep UX consistent
@@ -243,6 +262,18 @@ export default function CreateQuizPage() {
               rows={2}
               placeholder="Quiz description"
             />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold">Passing score</label>
+            <input
+              type="number"
+              min="1"
+              value={passingScore}
+              onChange={(e) => setPassingScore(e.target.value)}
+              className="bg-background p-3 rounded-md"
+              placeholder="Set a passing score"
+            />
+            <p className="text-sm text-muted-foreground">Leave blank if not required.</p>
           </div>
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Expiry (creator local time)</label>
@@ -393,6 +424,38 @@ export default function CreateQuizPage() {
           >
             + Add Question
           </button>
+        </div>
+
+        {/* Paid Quiz */}
+        <div className="card p-5 space-y-3">
+          <h2 className="text-2xl font-semibold">Paid Quiz</h2>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isPaidQuiz}
+              onChange={(e) => setIsPaidQuiz(e.target.checked)}
+            />
+            Paid Quiz (Require payment before taking quiz)
+          </label>
+
+          {isPaidQuiz && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span>Quiz fee:</span>
+                <div className="flex items-center">
+                  <span className="bg-background border border-border rounded-l-md px-2 py-2">₱</span>
+                  <input
+                    type="number"
+                    min="100"
+                    value={paidQuizFee}
+                    onChange={(e) => setPaidQuizFee(e.target.value)}
+                    className="bg-background p-2 rounded-r-md w-32 border border-border border-l-0"
+                  />
+                </div>
+                <span className="text-sm text-muted-foreground">Minimum ₱100 (PayMongo)</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <button

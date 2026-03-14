@@ -37,7 +37,10 @@ export async function createQuiz(
   questionsData: QuestionInput[],
   description: string,
   blurQuestion = false,
-  expiresAt?: string | null
+  expiresAt?: string | null,
+  isPaidQuiz = false,
+  paidQuizFee?: number | null,
+  passingScore?: number | null
 ) {
   const quizId = uuid()
   const joinCode = generateJoinCode()
@@ -51,6 +54,9 @@ export async function createQuiz(
     joinCode,
     blurQuestion,
     expiresAt: expiresAt ? new Date(expiresAt) : null,
+    isPaidQuiz,
+    paidQuizFee: isPaidQuiz ? paidQuizFee : null,
+    passingScore: passingScore ?? null,
   })
 
   // Loop through questions
@@ -89,6 +95,9 @@ export async function createQuiz(
     creatorId,
     blurQuestion,
     expiresAt: expiresAt ?? null,
+    isPaidQuiz,
+    paidQuizFee: isPaidQuiz ? paidQuizFee : null,
+    passingScore: passingScore ?? null,
     questions: questionsData,
   }
 }
