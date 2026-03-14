@@ -1,6 +1,6 @@
 import { db } from "@/lib/db"
 import { quiz, quizEnrollment, quizPayment, user } from "@/lib/schema"
-import { and, eq } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 import { decryptStudentNo } from "@/lib/crypto/studentNo"
 import { markQuizPaymentPaidAction } from "@/lib/quiz-payment/actions/markQuizPaymentPaidAction"
 
@@ -17,15 +17,25 @@ export default async function ParticipantsTab({ quizId }: { quizId: string }) {
       email: user.email,
       studentNoEncrypted: user.studentNoEncrypted,
       section: user.section,
-      paymentStatus: quizPayment.status,
     })
     .from(quizEnrollment)
     .innerJoin(user, eq(user.id, quizEnrollment.userId))
-    .leftJoin(
-      quizPayment,
-      and(eq(quizPayment.quizId, quizId), eq(quizPayment.userId, user.id))
-    )
     .where(eq(quizEnrollment.quizId, quizId))
+
+  const paymentRows = await db
+    .select({ userId: quizPayment.userId, status: quizPayment.status })
+    .from(quizPayment)
+    .where(eq(quizPayment.quizId, quizId))
+
+  const paymentStatusByUser = new Map<string, "paid" | "unpaid">()
+  for (const row of paymentRows) {
+    const prev = paymentStatusByUser.get(row.userId)
+    if (row.status === "paid") {
+      paymentStatusByUser.set(row.userId, "paid")
+    } else if (!prev) {
+      paymentStatusByUser.set(row.userId, "unpaid")
+    }
+  }
 
   const participants = rawParticipants.map((p) => {
     let studentNo: string | null = null
@@ -37,7 +47,11 @@ export default async function ParticipantsTab({ quizId }: { quizId: string }) {
       }
     }
     const { studentNoEncrypted, ...rest } = p
-    return { ...rest, studentNo }
+    return {
+      ...rest,
+      studentNo,
+      paymentStatus: paymentStatusByUser.get(p.userId) ?? "unpaid",
+    }
   })
 
   if (participants.length === 0) return <p>No participants yet.</p>
