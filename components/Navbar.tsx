@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import Image from "next/image"
 import LogoutButton from "./LogoutButton";
 import ThemeToggle from "./ThemeToggle";
 import { authClient } from "@/client/auth-client";
@@ -10,16 +11,16 @@ import { getUserBySessionIdAction } from "@/lib/user/actions/getUserName";
 
 function Navbar() {
   //  const session = await getSession();
-    const {data: session} = authClient.useSession(
-  
-    );
+    const {data: session} = authClient.useSession();
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
     const [isPaid, setIsPaid] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const pathname = usePathname()
     // Disable navbar navigation only on the student quiz-taking view
     const navDisabled = !!pathname && /^\/quiz\/[^/]+$/.test(pathname)
 
     useEffect(() => {
+      setMounted(true)
       const loadBadge = async () => {
         const sessionId = session?.session?.id
         if (!sessionId) {
@@ -33,8 +34,10 @@ function Navbar() {
         setIsPaid(Boolean(isActive && planId && planId !== "free"))
       }
 
-      loadBadge()
-    }, [session?.session?.id])
+      if (mounted) {
+        loadBadge()
+      }
+    }, [session?.session?.id, mounted])
 
 
   return (
@@ -44,16 +47,27 @@ function Navbar() {
           {/* Logo */}
           <Link
             href='/dashboard'
-            className={`text-4xl text-foreground ${navDisabled ? "pointer-events-none opacity-60" : ""}`}
+            className={`flex items-center  text-foreground ${navDisabled ? "pointer-events-none opacity-60" : ""}`}
             onCopy={(e) => e.preventDefault()}
           >
-            <span className="font-semibold tracking-tight">Proctorly</span>
-            <span className={`font-medium ${isPaid ? "text-amber-500" : "text-primary"}`}>X</span>
+              {/* <Image
+                src="/image/fav - Edited.png"
+                alt="ProctorlyX"
+                width={50}
+                height={50}
+                className="rounded-md"
+                priority
+              /> */}
+           
+            <span className="text-4xl">
+              <span className="font-semibold tracking-tight">Proctorly</span>
+              <span className="font-medium text-primary">X</span>
+            </span>
           </Link>
 
           {/* Navigation Links */}
           <div className='hidden md:flex items-center '>
-            {session ? (
+            {mounted && session ? (
               <div className="flex items-center justify-end w-96 gap-5">
                 <Link
                   href='/dashboard'
@@ -86,7 +100,7 @@ function Navbar() {
                 <LogoutButton/>
                
               </div>
-            ) : (
+            ) : mounted ? (
               <div className="flex items-center gap-5">
                 {/* Keep theme toggle visible even without a session */}
                 <ThemeToggle />
@@ -96,6 +110,10 @@ function Navbar() {
                 >
                   Sign in with Google
                 </Link>
+              </div>
+            ) : (
+              <div className="flex items-center gap-5">
+                <ThemeToggle />
               </div>
             )}
           </div>
@@ -127,7 +145,7 @@ function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden pb-4">
             <div className="flex flex-col gap-2 border-t border-border pt-4">
-              {session ? (
+              {mounted && session ? (
                 <>
                   <Link
                     href="/dashboard"
@@ -158,7 +176,7 @@ function Navbar() {
                   </Link>
                   <LogoutButton />
                 </>
-              ) : (
+              ) : mounted ? (
                 <>
                   <Link
                     href="/login"
@@ -167,6 +185,10 @@ function Navbar() {
                   >
                     Sign in with Google
                   </Link>
+                </>
+              ) : (
+                <>
+                  <ThemeToggle />
                 </>
               )}
             </div>

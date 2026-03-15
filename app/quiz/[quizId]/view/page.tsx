@@ -35,7 +35,7 @@ export default async function ViewQuizPage({
 
       {activeTab === "overview" && <OverviewTab quizId={quizId} />}
       {activeTab === "participants" && <ParticipantsTab quizId={quizId} />}
-      {activeTab === "attempts" && <AttemptsTab quizId={quizId} />}
+      {activeTab === "attempts" && <AttemptsTab />}
     </div>
   )
 }

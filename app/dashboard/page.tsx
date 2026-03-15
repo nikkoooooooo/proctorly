@@ -232,7 +232,7 @@ export default function Dashboard() {
 
         
         <div className="w-full flex flex-col sm:flex-row
-        items-center justify-between mt-5 gap-2 ">
+        items-center justify-between mt-4 mb-2 gap-2 ">
           <QuizBox
             path="/created-quiz"
             emoji="📝"
