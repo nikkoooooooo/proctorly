@@ -58,7 +58,7 @@ export default async function RootLayout({
 }>) {
   
   return (
-    <html lang="en" className="theme-dark">
+    <html lang="en" className="theme-light">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >

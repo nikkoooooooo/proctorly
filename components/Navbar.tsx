@@ -43,21 +43,29 @@ function Navbar() {
   return (
     <div className='w-full border-b border-border shadow-large bg-secondary'>
       <div className='max-w-7xl mx-auto px-4'>
-        <div className='flex items-center justify-between h-20'>
+        <div className='flex items-center justify-between h-auto'>
           {/* Logo */}
           <Link
             href='/dashboard'
             className={`flex items-center  text-foreground ${navDisabled ? "pointer-events-none opacity-60" : ""}`}
             onCopy={(e) => e.preventDefault()}
           >
-              {/* <Image
-                src="/image/fav - Edited.png"
+              <Image
+                src="/image/dark.png"
                 alt="ProctorlyX"
-                width={50}
-                height={50}
-                className="rounded-md"
+                width={55}
+                height={55}
+                className="rounded-md hidden dark:block"
                 priority
-              /> */}
+              />
+              <Image
+                src="/image/lightmode-logo.png"
+                alt="ProctorlyX"
+                width={55}
+                height={55}
+                className="rounded-md block dark:hidden"
+                priority
+              />
            
             <span className="text-4xl">
               <span className="font-semibold tracking-tight">Proctorly</span>

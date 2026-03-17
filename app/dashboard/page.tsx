@@ -14,6 +14,7 @@ import getQuizThroughCodeAction from "@/lib/quiz/actions/getQuizThroughCodeActio
 import { joinQuizAction } from "@/lib/quiz/actions/joinQuizAction"
 import { getUserJoinedQuizAction } from "@/lib/user/actions/getUserJoinedQuizAction"
 import QuizBox from "@/components/QuizBox";
+import { BarChart3, FileText, Users } from "lucide-react";
 
 interface Quiz {
   id: string
@@ -235,7 +236,7 @@ export default function Dashboard() {
         items-center justify-between mt-4 mb-2 gap-2 ">
           <QuizBox
             path="/created-quiz"
-            emoji="📝"
+            icon={FileText}
             quizCount={totalQuizCreated}
             title="Created Quizzes"
             description="Quizzes you've created"
@@ -243,7 +244,7 @@ export default function Dashboard() {
 
           <QuizBox
             path="/joined-quiz"
-            emoji="🤝"
+            icon={Users}
             quizCount={totalQuizJoined}
             title="Joined Quizzes"
             description="Quizzes you've joined"
@@ -252,7 +253,7 @@ export default function Dashboard() {
 
           <QuizBox
             path=""
-            emoji="📊"
+            icon={BarChart3}
             quizCount={totalQuizzes}
             title="Total Quiz Activity"
             description="Total Quizzes"

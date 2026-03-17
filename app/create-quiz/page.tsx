@@ -249,7 +249,7 @@ export default function CreateQuizPage() {
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-background p-3 rounded-md"
+              className="bg-background p-3 rounded-[var(--radius-button)]"
               placeholder="Quiz title"
             />
           </div>
@@ -258,7 +258,7 @@ export default function CreateQuizPage() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="bg-background p-3 rounded-md"
+              className="bg-background p-3 rounded-[var(--radius-button)]"
               rows={2}
               placeholder="Quiz description"
             />
@@ -270,7 +270,7 @@ export default function CreateQuizPage() {
               min="1"
               value={passingScore}
               onChange={(e) => setPassingScore(e.target.value)}
-              className="bg-background p-3 rounded-md"
+              className="bg-background p-3 rounded-[var(--radius-button)]"
               placeholder="Set a passing score"
             />
             <p className="text-sm text-muted-foreground">Leave blank if not required.</p>
@@ -281,7 +281,7 @@ export default function CreateQuizPage() {
               type="datetime-local"
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
-              className="bg-background p-3 rounded-md datetime-white"
+              className="bg-background p-3 rounded-[var(--radius-button)] datetime-white"
             />
             <p className="text-sm text-muted-foreground">Leave blank for no expiry.</p>
           </div>
