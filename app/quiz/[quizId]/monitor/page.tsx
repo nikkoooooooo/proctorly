@@ -271,7 +271,13 @@ export default function LiveMonitorPage() {
         <div className="grid gap-6 mt-8 lg:grid-cols-[2fr_1fr] items-start">
           <div className="card p-4 min-h-[360px]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-foreground">Student Activity</h2>
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500/80 opacity-80"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 ring-1 ring-emerald-600/70"></span>
+                </span>
+                <h2 className="text-lg font-semibold text-foreground">Student Activity</h2>
+              </div>
               <span className="text-xs text-muted-foreground">Top 5 most recent</span>
             </div>
 
@@ -338,7 +344,13 @@ export default function LiveMonitorPage() {
 
           <div className="card p-4 min-h-[360px]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold text-foreground">Live Activity</h2>
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500/80 opacity-80"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 ring-1 ring-emerald-600/70"></span>
+                </span>
+                <h2 className="text-lg font-semibold text-foreground">Live Activity</h2>
+              </div>
               <button
                 type="button"
                 onClick={() =>

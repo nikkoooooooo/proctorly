@@ -66,6 +66,10 @@ export default function Home() {
                 <span>Window/Tab switches</span>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-3">
+                <span className="text-foreground">Live monitoring</span>
+                <span>Real-time proctoring</span>
+              </div>
+              <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-3">
                 <span className="text-foreground">Timed quizzes</span>
                 <span>Per-question control</span>
               </div>
@@ -205,13 +209,17 @@ export default function Home() {
                 <span>Templates, timers, randomization</span>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-3">
+                <span className="text-foreground">Live monitoring</span>
+                <span>Real-time proctoring</span>
+              </div>
+              <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-3">
                 <span className="text-foreground">Signals Panel</span>
                 <span>Tab switches, idle time</span>
               </div>
-              <div className="flex items-start justify-between gap-4">
-                <span className="text-foreground">Attempt Review</span>
-                <span>Answers, flags, and score summaries</span>
-              </div>
+            <div className="flex items-start justify-between gap-4">
+              <span className="text-foreground">Attempt Review</span>
+              <span>Flags and score summaries</span>
+            </div>
             </div>
           </div>
         </div>
