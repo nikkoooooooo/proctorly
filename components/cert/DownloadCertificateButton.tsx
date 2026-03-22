@@ -37,6 +37,10 @@ export default function DownloadCertificateButton({
         }
         return
       }
+      if (!result.url) {
+        toast.error("Certificate link unavailable.")
+        return
+      }
       window.location.href = result.url
     } catch (error) {
       console.error(error)
