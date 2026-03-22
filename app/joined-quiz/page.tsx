@@ -117,9 +117,18 @@ function Page() {
                 <div className="card w-full h-auto p-5 mb-4" key={i}>
                     <div className="flex justify-between items-center gap-10">
                         <div className="flex flex-col gap-2 items-start w-72">
+                            {/*
+                              Some older records may have isPaidQuiz unset even if a fee exists,
+                              so we treat paidQuizFee as the source of truth for display.
+                            */}
+                            {(() => {
+                              const hasPaidFee = (quiz.paidQuizFee ?? 0) > 0
+                              const isPaid = Boolean(quiz.isPaidQuiz) || hasPaidFee
+                              return (
+                                <>
                             <span className="bg-primary/20 text-primary p-1 font-semibold rounded-[var(--radius-button)]">{quiz.joinCode}</span>
                             <h3 className="text-foreground text-lg font-semibold">
-                              {quiz.isPaidQuiz ? (
+                              {isPaid ? (
                                 <span className="flex items-center gap-2">
                                   <span>🔒</span>
                                   <span>{quiz.title}</span>
@@ -128,7 +137,7 @@ function Page() {
                                 quiz.title
                               )}
                             </h3>
-                            {quiz.isPaidQuiz && (
+                            {isPaid && (
                               <>
                                 <p className="text-foreground font-semibold">💰 {formatPHP(quiz.paidQuizFee)}</p>
                                 <p className="text-muted-foreground text-sm">
@@ -139,6 +148,9 @@ function Page() {
                             <p className="text-muted-foreground text-sm">
                               Created (PH): {formatPHDateTime(quiz.createdAt)}
                             </p>
+                                </>
+                              )
+                            })()}
                         </div>
 
                         {/* Uniform button */}
