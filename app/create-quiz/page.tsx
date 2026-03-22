@@ -41,10 +41,6 @@ export default function CreateQuizPage() {
   const session = data?.session
 
   const [userId, setUserId] = useState<string | null>(null)
-  const isPaidUser =
-    user?.subscriptionStatus === "active" ||
-    user?.subscriptionStatus === "paid" ||
-    (user?.planId ? user.planId !== "free" : false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [questions, setQuestions] = useState<Question[]>([createEmptyQuestion()])
