@@ -111,6 +111,7 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
   isPaidQuiz: boolean("is_paid_quiz").default(false).notNull(),
   paidQuizFee: integer("paid_quiz_fee"), // cents
   passingScore: integer("passing_score"), // raw points
+  certificateEnabled: boolean("certificate_enabled").default(false).notNull(),
 
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -166,6 +167,23 @@ export const attempt = pgTable("attempt", {
   lastSeenAt: timestamp("last_seen_at"),
   lastActivityAt: timestamp("last_activity_at"),
   submittedAt: timestamp("submitted_at"),
+});
+
+export const certificate = pgTable("certificate", {
+  id: text("id").primaryKey(),
+  attemptId: text("attempt_id")
+    .notNull()
+    .references(() => attempt.id, { onDelete: "cascade" }),
+  studentId: text("student_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  quizId: text("quiz_id")
+    .notNull()
+    .references(() => quiz.id, { onDelete: "cascade" }),
+  serialNumber: text("serial_number").notNull(),
+  s3Key: text("s3_key"),
+  status: text("status").default("PENDING").notNull(), // PENDING | READY | INELIGIBLE
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const attemptEvent = pgTable(

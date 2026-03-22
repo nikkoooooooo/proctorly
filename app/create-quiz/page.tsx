@@ -41,6 +41,10 @@ export default function CreateQuizPage() {
   const session = data?.session
 
   const [userId, setUserId] = useState<string | null>(null)
+  const isPaidUser =
+    user?.subscriptionStatus === "active" ||
+    user?.subscriptionStatus === "paid" ||
+    (user?.planId ? user.planId !== "free" : false)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [questions, setQuestions] = useState<Question[]>([createEmptyQuestion()])
@@ -54,14 +58,13 @@ export default function CreateQuizPage() {
   const [isPaidQuiz, setIsPaidQuiz] = useState(false)
   const [paidQuizFee, setPaidQuizFee] = useState("")
   const [passingScore, setPassingScore] = useState("")
+  const [certificateEnabled, setCertificateEnabled] = useState(false)
 
 
   useEffect(() => {
     if (!user) return
-    setUserId(user.id)
+    setUserId(user.id ?? null)
   }, [user])
-
- 
 
   function createEmptyQuestion(): Question {
     return {
@@ -162,7 +165,7 @@ export default function CreateQuizPage() {
     }
     if (isPaidQuiz) {
       if (!paidQuizFee || Number(paidQuizFee) < 100) {
-        toast.error("Minimum quiz fee is 100")
+        toast.error("Minimum quiz fee is 20")
         return
       }
       if (!passingScore || Number(passingScore) <= 0) {
@@ -207,6 +210,7 @@ export default function CreateQuizPage() {
         isPaidQuiz,
         isPaidQuiz ? Math.round(Number(paidQuizFee) * 100) : null,
         passingScore ? Number(passingScore) : null,
+        certificateEnabled,
       )
 
       if (!result.success || !result.quiz) {
@@ -226,6 +230,7 @@ export default function CreateQuizPage() {
       setIsPaidQuiz(false)
       setPaidQuizFee("")
       setPassingScore("")
+      setCertificateEnabled(false)
     } catch (err) {
       console.error(err)
       // Use toast for errors to keep UX consistent
@@ -340,6 +345,25 @@ export default function CreateQuizPage() {
           </div>
         )}
 
+        {/* Certification */}
+        <div className="card p-5 space-y-3">
+          <h2 className="text-2xl font-semibold">Certification</h2>
+          <p className="text-sm text-muted-foreground">
+            Enable certificates for students who complete this quiz.
+          </p>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={certificateEnabled}
+              onChange={(e) => setCertificateEnabled(e.target.checked)}
+            />
+            Enable Certificate
+          </label>
+          <p className="text-sm text-muted-foreground">
+            Uses the ProctorlyX default certificate template.
+          </p>
+        </div>
+
         {/* Proctoring */}
         <div className="card p-5 space-y-3">
           <h2 className="text-2xl font-semibold">Proctoring Features</h2>
@@ -446,13 +470,13 @@ export default function CreateQuizPage() {
                   <span className="bg-background border border-border rounded-l-md px-2 py-2">₱</span>
                   <input
                     type="number"
-                    min="100"
+              min="20"
                     value={paidQuizFee}
                     onChange={(e) => setPaidQuizFee(e.target.value)}
                     className="bg-background p-2 rounded-r-md w-32 border border-border border-l-0"
                   />
                 </div>
-                <span className="text-sm text-muted-foreground">Minimum ₱100 (PayMongo)</span>
+                <span className="text-sm text-muted-foreground">Minimum ₱20</span>
               </div>
             </div>
           )}

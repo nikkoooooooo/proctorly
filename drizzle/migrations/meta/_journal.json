@@ -15,6 +15,20 @@
       "when": 1767554204534,
       "tag": "0001_omniscient_vertigo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773994500421,
+      "tag": "0002_natural_kat_farrell",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774209320129,
+      "tag": "0003_gray_switch",
+      "breakpoints": true
     }
   ]
 }
