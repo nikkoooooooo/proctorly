@@ -58,5 +58,9 @@ export async function renderCertificatePdfBytes(params: {
     })
   }
 
+  pdfDoc.setTitle("ProctorlyX Certificate")
+  pdfDoc.setSubject("Certificate of Achievement")
+  pdfDoc.setProducer("ProctorlyX")
+
   return pdfDoc.save()
 }
