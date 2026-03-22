@@ -61,6 +61,16 @@ export async function generateCertificateAction(attemptId: string, options?: { f
       .where(eq(user.id, attemptRow.userId))
       .execute()
 
+    const buildFilename = (value: string) =>
+      value
+        .replace(/[^a-z0-9-_ ]/gi, "")
+        .trim()
+        .replace(/\s+/g, "-")
+
+    const studentLabel = buildFilename(student?.name ?? "Student")
+    const quizLabel = buildFilename(quizRow.title ?? "Quiz")
+    const downloadName = `ProctorlyX-Certificate-${studentLabel}-${quizLabel}.pdf`
+
     const eligibility = getCertificateEligibility({
       score: attemptRow.score ?? 0,
       passingScore: quizRow.passingScore ?? null,
@@ -82,7 +92,7 @@ export async function generateCertificateAction(attemptId: string, options?: { f
     if (existing.length > 0 && !force) {
       const cert = existing[0]
       if (cert.status === "READY" && cert.s3Key) {
-        const url = await presignRead(cert.s3Key)
+        const url = await presignRead(cert.s3Key, downloadName)
         return { success: true, url }
       }
       if (cert.status === "INELIGIBLE") {
@@ -145,7 +155,7 @@ export async function generateCertificateAction(attemptId: string, options?: { f
       await db.insert(certificate).values({ id: uuid(), ...readyPayload })
     }
 
-    const url = await presignRead(key)
+    const url = await presignRead(key, downloadName)
     return { success: true, url }
   } catch (error) {
     console.error("Failed to generate certificate:", error)

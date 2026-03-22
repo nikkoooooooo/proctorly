@@ -16,10 +16,13 @@ export async function presignUpload(key: string, contentType: string) {
   return getSignedUrl(s3, cmd, { expiresIn: 60 })
 }
 
-export async function presignRead(key: string) {
+export async function presignRead(key: string, filename?: string) {
   const cmd = new GetObjectCommand({
     Bucket: bucket,
     Key: key,
+    ResponseContentDisposition: filename
+      ? `attachment; filename="${filename}"`
+      : undefined,
   })
   return getSignedUrl(s3, cmd, { expiresIn: 300 })
 }
