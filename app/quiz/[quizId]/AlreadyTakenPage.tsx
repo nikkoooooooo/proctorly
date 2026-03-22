@@ -2,6 +2,7 @@
 import { getQuizByIdAction } from "@/lib/quiz/actions/getQuizByIdAction"
 import { getFinalResultsAction } from "@/lib/attempt/actions/getFinalResultsAction"
 import Link from "next/link"
+import DownloadCertificateButton from "@/components/cert/DownloadCertificateButton"
 
 interface AlreadyTakenPageProps {
   quizId: string
@@ -26,15 +27,28 @@ export default async function AlreadyTakenPage({ quizId, attemptId }: AlreadyTak
           Retaking is not allowed. You can view your results if available.
           {}
         </p>
-        {result?.success && (
-          <p className="text-lg font-semibold mb-6">
-            Score: {result.score} / {result.totalPoints}
-          </p>
+        {result?.success && attemptId && (
+          <>
+            <p className="text-lg font-semibold mb-4">
+              Score: {result.score} / {result.totalPoints}
+            </p>
+            {result.certificateEnabled ? (
+              <DownloadCertificateButton
+                attemptId={attemptId}
+                isEligible={result.certificateEligible}
+                ineligibleReason={result.certificateIneligibleReason}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground mb-4">
+                Certificates are disabled for this quiz.
+              </p>
+            )}
+          </>
         )}
 
         <Link
             href={"/dashboard"}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90 transition"
+            className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90 transition inline-flex justify-center"
             >
             Go Back to Dashboard
         </Link>

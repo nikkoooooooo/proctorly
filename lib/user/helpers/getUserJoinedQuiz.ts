@@ -15,9 +15,13 @@ export async function getUserJoinedQuiz(userId: string) {
       joinCode: quiz.joinCode,
       description: quiz.description,
       createdAt: quiz.createdAt,
+      isPaidQuiz: quiz.isPaidQuiz,
+      paidQuizFee: quiz.paidQuizFee,
+      creatorName: user.name,
     })
     .from(quizEnrollment)
     .innerJoin(quiz, eq(quizEnrollment.quizId, quiz.id))
+    .innerJoin(user, eq(user.id, quiz.creatorId))
     .where(eq(quizEnrollment.userId, userId))
     .execute()
 

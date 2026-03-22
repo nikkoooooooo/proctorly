@@ -3,6 +3,7 @@
 
 import { db } from "@/lib/db";
 import { attempt, quiz, user as userTable, question } from "@/lib/schema";
+import { getCertificateEligibility } from "@/lib/certificate/helpers/eligibility";
 import { eq } from "drizzle-orm";
 
 export async function getFinalResultsAction(attemptId: string) {
@@ -25,7 +26,12 @@ export async function getFinalResultsAction(attemptId: string) {
 
     // 2️⃣ Fetch quiz title and creator
     const [quizData] = await db
-      .select({ title: quiz.title, creatorId: quiz.creatorId })
+      .select({
+        title: quiz.title,
+        creatorId: quiz.creatorId,
+        passingScore: quiz.passingScore,
+        certificateEnabled: quiz.certificateEnabled,
+      })
       .from(quiz)
       .where(eq(quiz.id, userAttempt.quizId))
       .execute();
@@ -49,6 +55,12 @@ export async function getFinalResultsAction(attemptId: string) {
       .execute();
 
     const totalPoints = questions.reduce((sum, q) => sum + (q.points ?? 1), 0);
+    const eligibility = getCertificateEligibility({
+      score: userAttempt.score ?? 0,
+      passingScore: quizData.passingScore ?? null,
+      tabSwitchCount: userAttempt.tabSwitchCount ?? 0,
+      certificateEnabled: quizData.certificateEnabled ?? false,
+    });
 
     return {
       success: true,
@@ -57,6 +69,10 @@ export async function getFinalResultsAction(attemptId: string) {
       tabSwitchCount: userAttempt.tabSwitchCount ?? 0,
       quizTitle: quizData.title,
       quizAuthor: creator?.name ?? "Unknown",
+      passingScore: quizData.passingScore ?? null,
+      certificateEnabled: quizData.certificateEnabled ?? false,
+      certificateEligible: eligibility.eligible,
+      certificateIneligibleReason: eligibility.reason,
     };
   } catch (error) {
     console.error("Failed to get final results:", error);

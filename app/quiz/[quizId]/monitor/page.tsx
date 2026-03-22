@@ -155,7 +155,7 @@ export default function LiveMonitorPage() {
   );
 
   const getStatus = (row: AttemptRow) => {
-    if (row.completed) return { label: "Finished", className: "text-blue-400" };
+    if (row.completed) return { label: "Finished", className: "text-blue-700 dark:text-blue-400" };
     if (row.tabSwitchCount >= monitorConfig.warningTabSwitches) {
       return { label: "Warning", className: "text-amber-400" };
     }
@@ -372,7 +372,7 @@ export default function LiveMonitorPage() {
                 {events.map((event, idx) => (
                   <div key={`${event.createdAt}-${idx}`} className="relative border-b border-muted-foreground/40 pb-3">
                     <span
-                      className={`absolute -left-[14px] top-1.5 h-2.5 w-2.5 rounded-full ${getEventDotClass(event.type)} ring-2 ring-background`}
+                      className={`absolute-left-[14px] top-1.5 h-2.5 w-2.5 rounded-full ${getEventDotClass(event.type)} ring-2 ring-background`}
                     />
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <span>{formatPHTime(event.createdAt)}</span>

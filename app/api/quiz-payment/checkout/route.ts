@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       .where(eq(quiz.id, quizId))
 
     if (!quizRow?.paidQuizFee || quizRow.paidQuizFee < 10000) {
-      return Response.json({ error: "Minimum quiz fee is 100" }, { status: 400 })
+      return Response.json({ error: "Minimum quiz fee is 20" }, { status: 400 })
     }
 
     const checkout = await createPaymongoLink({

@@ -199,7 +199,7 @@ export default function AttemptsTab() {
                       <span
                         className={`px-2 py-1 rounded-[var(--radius-button)] font-semibold text-xs ${
                           a.completed
-                            ? "bg-emerald-500/15 text-emerald-200 border border-emerald-500/30"
+                            ? "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 dark:text-emerald-200"
                             : "bg-secondary text-secondary-foreground"
                         }`}
                       >

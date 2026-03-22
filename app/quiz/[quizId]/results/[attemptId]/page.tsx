@@ -1,6 +1,7 @@
 // app/quiz/[quizId]/results/[attemptId]/page.tsx
 import { getFinalResultsAction } from "@/lib/attempt/actions/getFinalResultsAction"
 import Link from "next/link"
+import DownloadCertificateButton from "@/components/cert/DownloadCertificateButton"
 
 interface ResultPageProps {
   params: {
@@ -35,13 +36,26 @@ export default async function ResultPage(props: ResultPageProps) {
       <p className="text-lg text-red-500">Tab Switches: {result.tabSwitchCount}</p>
 
       <div className="mt-6 w-full max-w-md text-center">
-        <p className="mb-8">🎉 Congratulations on completing the quiz!</p>
-        <Link
+        <p className="mb-6">🎉 Congratulations on completing the quiz!</p>
+        <div className="flex flex-col items-center gap-3">
+          {result.certificateEnabled ? (
+            <DownloadCertificateButton
+              attemptId={attemptId}
+              isEligible={result.certificateEligible}
+              ineligibleReason={result.certificateIneligibleReason}
+            />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Certificates are disabled for this quiz.
+            </p>
+          )}
+          <Link
             href={"/dashboard"}
-            className="mt-10 bg-primary p-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold"
-        >
+            className="bg-primary p-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold"
+          >
             Go Back to Dashboard
-        </Link>
+          </Link>
+        </div>
       </div>
     </div>
   )

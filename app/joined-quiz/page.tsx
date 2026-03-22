@@ -11,6 +11,9 @@ interface Quiz {
   joinCode: string
   description?: string | null
   createdAt?: string | Date | null
+  isPaidQuiz?: boolean | null
+  paidQuizFee?: number | null
+  creatorName?: string | null
 }
 
 function formatPHDateTime(value?: string | Date | null) {
@@ -26,6 +29,15 @@ function formatPHDateTime(value?: string | Date | null) {
     minute: "2-digit",
     hour12: true,
   }).format(date)
+}
+
+function formatPHP(amountInCents?: number | null) {
+  if (!amountInCents || amountInCents <= 0) return "₱0"
+  return new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    maximumFractionDigits: 0,
+  }).format(amountInCents / 100)
 }
 
 function Page() {
@@ -104,20 +116,34 @@ function Page() {
                 userJoinedQuiz.map((quiz, i) => (
                 <div className="card w-full h-auto p-5 mb-4" key={i}>
                     <div className="flex justify-between items-center gap-10">
-                        <div className="flex flex-col gap-2 items-start w-36">
-                            <h3 className="text-foreground text-lg font-semibold">{quiz.title}</h3>
+                        <div className="flex flex-col gap-2 items-start w-72">
                             <span className="bg-primary/20 text-primary p-1 font-semibold rounded-[var(--radius-button)]">{quiz.joinCode}</span>
+                            <h3 className="text-foreground text-lg font-semibold">
+                              {quiz.isPaidQuiz ? (
+                                <span className="flex items-center gap-2">
+                                  <span>🔒</span>
+                                  <span>{quiz.title}</span>
+                                </span>
+                              ) : (
+                                quiz.title
+                              )}
+                            </h3>
+                            {quiz.isPaidQuiz && (
+                              <>
+                                <p className="text-foreground font-semibold">💰 {formatPHP(quiz.paidQuizFee)}</p>
+                                <p className="text-muted-foreground text-sm">
+                                  Price set by {quiz.creatorName || "Instructor"}
+                                </p>
+                              </>
+                            )}
+                            <p className="text-muted-foreground text-sm">
+                              Created (PH): {formatPHDateTime(quiz.createdAt)}
+                            </p>
                         </div>
 
                         {/* Uniform button */}
                         {paymentStatus[quiz.id] === "unpaid" ? (
                           <div className="flex items-center gap-2">
-                            <button
-                              disabled
-                              className="bg-secondary text-secondary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-not-allowed p-2"
-                            >
-                              Take Quiz
-                            </button>
                             <button
                               onClick={() => startPayment(quiz.id)}
                               className="bg-primary text-primary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/80 transition-all"
@@ -136,9 +162,6 @@ function Page() {
                     </div>
                     {/* Use muted-foreground for readable description text */}
                     {quiz.description && <p className="text-muted-foreground mt-2">{quiz.description}</p>}
-                    <p className="text-muted-foreground mt-2 text-sm">
-                      Created (PH): {formatPHDateTime(quiz.createdAt)}
-                    </p>
                 </div>
                 ))
             ) : (
