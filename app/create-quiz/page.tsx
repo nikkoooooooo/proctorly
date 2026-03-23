@@ -160,8 +160,8 @@ export default function CreateQuizPage() {
       return
     }
     if (isPaidQuiz) {
-      if (!paidQuizFee || Number(paidQuizFee) < 20) {
-        toast.error("Minimum quiz fee is 20")
+      if (!paidQuizFee || Number(paidQuizFee) < 100) {
+        toast.error("Minimum quiz fee is 100")
         return
       }
       if (!passingScore || Number(passingScore) <= 0) {
@@ -466,13 +466,13 @@ export default function CreateQuizPage() {
                   <span className="bg-background border border-border rounded-l-md px-2 py-2">₱</span>
                   <input
                     type="number"
-              min="20"
+                    min="100"
                     value={paidQuizFee}
                     onChange={(e) => setPaidQuizFee(e.target.value)}
                     className="bg-background p-2 rounded-r-md w-32 border border-border border-l-0"
                   />
                 </div>
-                <span className="text-sm text-muted-foreground">Minimum ₱20</span>
+                <span className="text-sm text-muted-foreground">Minimum ₱100 (PayMongo)</span>
               </div>
             </div>
           )}
