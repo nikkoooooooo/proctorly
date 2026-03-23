@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       .from(quiz)
       .where(eq(quiz.id, quizId))
 
-    if (!quizRow?.paidQuizFee || quizRow.paidQuizFee < 10000) {
+    if (!quizRow?.paidQuizFee || quizRow.paidQuizFee < 2000) {
       return Response.json({ error: "Minimum quiz fee is 20" }, { status: 400 })
     }
 

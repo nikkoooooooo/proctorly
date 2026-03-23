@@ -158,7 +158,7 @@ function Page() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => startPayment(quiz.id)}
-                              className="bg-primary text-primary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/80 transition-all"
+                              className="bg-emerald-500 text-white flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-emerald-600 transition-all"
                             >
                               Pay Now
                             </button>

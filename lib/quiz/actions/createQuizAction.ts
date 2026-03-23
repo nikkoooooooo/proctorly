@@ -40,7 +40,7 @@ export async function createQuizAction(
     }
 
     if (isPaidQuiz) {
-      if (!paidQuizFee || paidQuizFee < 10000) {
+      if (!paidQuizFee || paidQuizFee < 2000) {
       return { success: false, error: "Minimum quiz fee is 20." };
       }
       if (!passingScore || passingScore <= 0) {

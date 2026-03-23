@@ -160,7 +160,7 @@ export default function CreateQuizPage() {
       return
     }
     if (isPaidQuiz) {
-      if (!paidQuizFee || Number(paidQuizFee) < 100) {
+      if (!paidQuizFee || Number(paidQuizFee) < 20) {
         toast.error("Minimum quiz fee is 20")
         return
       }
