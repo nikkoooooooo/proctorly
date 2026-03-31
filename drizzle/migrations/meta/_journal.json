@@ -29,6 +29,13 @@
       "when": 1774209320129,
       "tag": "0003_gray_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1774894645738,
+      "tag": "0004_nifty_joseph",
+      "breakpoints": true
     }
   ]
 }

@@ -8,11 +8,28 @@ import { getCertificateKey } from "@/lib/certificate/helpers/s3Keys"
 import { getCertificateEligibility } from "@/lib/certificate/helpers/eligibility"
 import { buildSerialNumber } from "@/lib/certificate/helpers/serial"
 import { defaultTemplateFields } from "@/lib/certificate/helpers/defaultFields"
-import { uploadPdfToS3 } from "@/lib/certificate/helpers/s3Objects"
+import { downloadObjectFromS3, uploadPdfToS3 } from "@/lib/certificate/helpers/s3Objects"
 import { renderCertificatePdfBytes } from "@/lib/certificate/certificateRenderer"
 import { v4 as uuid } from "uuid"
+import QRCode from "qrcode"
 import fs from "node:fs"
 import path from "node:path"
+
+const detectImageType = (bytes: Uint8Array): "png" | "jpg" => {
+  if (bytes.length >= 4) {
+    // PNG signature: 89 50 4E 47
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+      return "png"
+    }
+  }
+  if (bytes.length >= 3) {
+    // JPEG signature: FF D8 FF
+    if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+      return "jpg"
+    }
+  }
+  return "png"
+}
 
 export async function generateCertificateAction(attemptId: string, options?: { force?: boolean }) {
   try {
@@ -40,6 +57,10 @@ export async function generateCertificateAction(attemptId: string, options?: { f
         passingScore: quiz.passingScore,
         certificateEnabled: quiz.certificateEnabled,
         creatorId: quiz.creatorId,
+        certificateDescription: quiz.certificateDescription,
+        certificateLogoKey: quiz.certificateLogoKey,
+        certificateSignatureKey: quiz.certificateSignatureKey,
+        certificateSignatureText: quiz.certificateSignatureText,
       })
       .from(quiz)
       .where(eq(quiz.id, attemptRow.quizId))
@@ -123,19 +144,46 @@ export async function generateCertificateAction(attemptId: string, options?: { f
     const issuedAt = new Date()
     const serialNumber = buildSerialNumber(issuedAt, attemptRow.id)
 
+    const description =
+      quizRow.certificateDescription?.trim() ||
+      `has successfully completed the ${quizRow.title}, conducted under ProctorlyX's monitored assessment system.`
+
+    const signatureText = quizRow.certificateSignatureKey
+      ? ""
+      : (quizRow.certificateSignatureText ?? "").trim()
+
     const values = {
       student_name: student?.name ?? "Student",
-      description: `has successfully completed the ${quizRow.title}, conducted under ProctorlyX's monitored assessment system.`,
-      description_line_1: `has successfully completed the ${quizRow.title},`,
-      description_line_2: "conducted under ProctorlyX's monitored assessment system.",
+      description,
       serial_number: serialNumber,
       instructor_name: creator?.name ?? "Instructor",
+      signature_text: signatureText,
+    }
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, "") || "https://proctorlyx.com"
+    const verifyUrl = `${baseUrl}/cert/verify/${serialNumber}`
+    const qrPng = await QRCode.toBuffer(verifyUrl, { width: 220, margin: 1 })
+
+    const images: Record<string, { bytes: Uint8Array; type: "png" | "jpg" }> = {
+      qr_code: { bytes: qrPng, type: "png" },
+    }
+
+    if (quizRow.certificateLogoKey) {
+      const logoBytes = await downloadObjectFromS3(quizRow.certificateLogoKey)
+      images.logo_image = { bytes: logoBytes, type: detectImageType(logoBytes) }
+    }
+
+    if (quizRow.certificateSignatureKey) {
+      const sigBytes = await downloadObjectFromS3(quizRow.certificateSignatureKey)
+      images.signature_image = { bytes: sigBytes, type: detectImageType(sigBytes) }
     }
 
     const pdfBytes = await renderCertificatePdfBytes({
       templatePdfBytes: templateBytes,
       values,
       fields,
+      images,
     })
 
     const key = getCertificateKey(attemptRow.userId, attemptRow.quizId, attemptRow.id)

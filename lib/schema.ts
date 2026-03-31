@@ -112,6 +112,10 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
   paidQuizFee: integer("paid_quiz_fee"), // cents
   passingScore: integer("passing_score"), // raw points
   certificateEnabled: boolean("certificate_enabled").default(false).notNull(),
+  certificateDescription: text("certificate_description"),
+  certificateLogoKey: text("certificate_logo_key"),
+  certificateSignatureKey: text("certificate_signature_key"),
+  certificateSignatureText: text("certificate_signature_text"),
 
   createdAt: timestamp("created_at").defaultNow(),
 });

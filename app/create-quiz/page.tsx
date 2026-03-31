@@ -10,6 +10,7 @@ import toast from "react-hot-toast"
 import { Copy } from "lucide-react"
 import CreateQuestionMCQ from "@/components/create-quiz/CreateQuestionMCQ"
 import CreateQuestionTorF from "@/components/create-quiz/CreateQuestionTorF"
+import { saveQuizCertificateCustomizationAction } from "@/lib/certificate/actions/saveQuizCertificateCustomizationAction"
 
 // Question type options
 type QuestionType = "mcq" | "true-false"
@@ -48,6 +49,7 @@ export default function CreateQuizPage() {
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false)
   const [isCopyingCode, setIsCopyingCode] = useState(false)
   const [expiresAt, setExpiresAt] = useState("")
+  const [createdQuizId, setCreatedQuizId] = useState<string | null>(null)
 
   // Proctoring settings
   const [blurQuestion, setBlurQuestion] = useState(false)
@@ -55,6 +57,11 @@ export default function CreateQuizPage() {
   const [paidQuizFee, setPaidQuizFee] = useState("")
   const [passingScore, setPassingScore] = useState("")
   const [certificateEnabled, setCertificateEnabled] = useState(false)
+  const [certificateDescription, setCertificateDescription] = useState("")
+  const [certificateSignatureText, setCertificateSignatureText] = useState("")
+  const [certificateLogoFile, setCertificateLogoFile] = useState<File | null>(null)
+  const [certificateSignatureFile, setCertificateSignatureFile] = useState<File | null>(null)
+  const [pendingCertificateSave, setPendingCertificateSave] = useState(false)
 
 
   useEffect(() => {
@@ -218,6 +225,33 @@ export default function CreateQuizPage() {
       toast.success("Quiz created successfully!")
       // Save join code for the on-page copy UI
       setCreatedQuizCode(result.quiz.joinCode)
+      setCreatedQuizId(result.quiz.quizId)
+
+      if (certificateEnabled && pendingCertificateSave) {
+        const customizationData = new FormData()
+        if (certificateDescription) {
+          customizationData.set("certificateDescription", certificateDescription)
+        }
+        if (certificateSignatureText) {
+          customizationData.set("certificateSignatureText", certificateSignatureText)
+        }
+        if (certificateLogoFile) {
+          customizationData.set("certificateLogo", certificateLogoFile)
+        }
+        if (certificateSignatureFile) {
+          customizationData.set("certificateSignature", certificateSignatureFile)
+        }
+        const customizationResult = await saveQuizCertificateCustomizationAction(
+          result.quiz.quizId,
+          customizationData
+        )
+        if (!customizationResult.success) {
+          toast.error(customizationResult.error || "Failed to save certificate settings.")
+        } else {
+          toast.success("Certificate settings saved.")
+          setPendingCertificateSave(false)
+        }
+      }
       setTitle("")
       setDescription("")
       setQuestions([createEmptyQuestion()])
@@ -226,7 +260,6 @@ export default function CreateQuizPage() {
       setIsPaidQuiz(false)
       setPaidQuizFee("")
       setPassingScore("")
-      setCertificateEnabled(false)
     } catch (err) {
       console.error(err)
       // Use toast for errors to keep UX consistent
@@ -250,7 +283,7 @@ export default function CreateQuizPage() {
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="bg-background p-3 rounded-[var(--radius-button)]"
+              className="bg-background p-3 rrounded-(--radius-button)"
               placeholder="Quiz title"
             />
           </div>
@@ -259,7 +292,7 @@ export default function CreateQuizPage() {
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="bg-background p-3 rounded-[var(--radius-button)]"
+              className="bg-background p-3 rounded-(--radius-button)"
               rows={2}
               placeholder="Quiz description"
             />
@@ -271,7 +304,7 @@ export default function CreateQuizPage() {
               min="1"
               value={passingScore}
               onChange={(e) => setPassingScore(e.target.value)}
-              className="bg-background p-3 rounded-[var(--radius-button)]"
+              className="bg-background p-3 rounded-(--radius-button)"
               placeholder="Set a passing score"
             />
             <p className="text-sm text-muted-foreground">Leave blank if not required.</p>
@@ -282,7 +315,7 @@ export default function CreateQuizPage() {
               type="datetime-local"
               value={expiresAt}
               onChange={(e) => setExpiresAt(e.target.value)}
-              className="bg-background p-3 rounded-[var(--radius-button)] datetime-white"
+              className="bg-background p-3 rounded-(--radius-button) datetime-white"
             />
             <p className="text-sm text-muted-foreground">Leave blank for no expiry.</p>
           </div>
@@ -310,7 +343,7 @@ export default function CreateQuizPage() {
                 Share this join code with your students.
               </p>
               <div className="flex items-center gap-3">
-                <span className="bg-primary/20 text-primary px-3 py-2 rounded-[var(--radius-button)] font-semibold">
+                <span className="bg-primary/20 text-primary px-3 py-2 rounded-(--radius-button) font-semibold">
                   {createdQuizCode}
                 </span>
                 {/* Copy button for quick sharing */}
@@ -330,7 +363,7 @@ export default function CreateQuizPage() {
                     }
                   }}
                   disabled={isCopyingCode}
-                  className="bg-secondary text-secondary-foreground px-3 py-2 rounded-[var(--radius-button)] hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="bg-secondary text-secondary-foreground px-3 py-2 rounded-(--radius-button)hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed"
                   aria-label="Copy quiz code"
                   title="Copy quiz code"
                 >
@@ -358,6 +391,90 @@ export default function CreateQuizPage() {
           <p className="text-sm text-muted-foreground">
             Uses the ProctorlyX default certificate template.
           </p>
+          {certificateEnabled && (
+            <div className="space-y-3">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Certificate Description (optional)</label>
+                <textarea
+                  value={certificateDescription}
+                  onChange={(e) => setCertificateDescription(e.target.value)}
+                  className="bg-background p-3 rounded-[var(--radius-button)]"
+                  rows={2}
+                  placeholder="Shown under the student name. Leave blank for the default description."
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Logo (optional)</label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg"
+                  onChange={(e) => setCertificateLogoFile(e.target.files?.[0] ?? null)}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Signature Image (optional)</label>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg"
+                  onChange={(e) => setCertificateSignatureFile(e.target.files?.[0] ?? null)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  If you upload a signature image, signature text will be ignored.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Signature Text (optional)</label>
+                <input
+                  value={certificateSignatureText}
+                  onChange={(e) => setCertificateSignatureText(e.target.value)}
+                  className="bg-background p-3 rounded-[var(--radius-button)]"
+                  placeholder="Printed name under the signature line."
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  className="px-4 py-2 rounded-[var(--radius-button)] bg-primary text-primary-foreground font-semibold disabled:opacity-60"
+                  onClick={async () => {
+                    if (!createdQuizId) {
+                      setPendingCertificateSave(true)
+                      toast.success("Certificate settings queued. Create the quiz to apply them.")
+                      return
+                    }
+                    const customizationData = new FormData()
+                    if (certificateDescription) {
+                      customizationData.set("certificateDescription", certificateDescription)
+                    }
+                    if (certificateSignatureText) {
+                      customizationData.set("certificateSignatureText", certificateSignatureText)
+                    }
+                    if (certificateLogoFile) {
+                      customizationData.set("certificateLogo", certificateLogoFile)
+                    }
+                    if (certificateSignatureFile) {
+                      customizationData.set("certificateSignature", certificateSignatureFile)
+                    }
+                    const customizationResult = await saveQuizCertificateCustomizationAction(
+                      createdQuizId,
+                      customizationData
+                    )
+                    if (!customizationResult.success) {
+                      toast.error(customizationResult.error || "Failed to save certificate settings.")
+                      return
+                    }
+                    toast.success("Certificate settings saved.")
+                  }}
+                >
+                  Save Certificate Settings
+                </button>
+                {!createdQuizId && pendingCertificateSave && (
+                  <span className="text-xs text-muted-foreground">
+                    Will save after quiz creation.
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Proctoring */}
@@ -395,7 +512,7 @@ export default function CreateQuizPage() {
                           removeQuestion(question.id);
                         }}
                         disabled={isSubmittingQuiz}
-                        className="bg-secondary py-1 px-2 rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="bg-secondary py-1 px-2 rounded-(--radius-button) disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         Remove
                       </button>
@@ -440,7 +557,7 @@ export default function CreateQuizPage() {
             type="button"
             onClick={(e) => { e.preventDefault(); addQuestion() }}
             disabled={isSubmittingQuiz}
-            className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-(--radius-button) disabled:opacity-60 disabled:cursor-not-allowed"
           >
             + Add Question
           </button>
@@ -481,7 +598,7 @@ export default function CreateQuizPage() {
         <button
           type="submit"
           disabled={isSubmittingQuiz}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-(--radius-button) disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmittingQuiz ? "Creating..." : "Create Quiz"}
         </button>
