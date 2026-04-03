@@ -1,13 +1,29 @@
 import { db } from "@/lib/db"
 import { certificate, quiz, user } from "@/lib/schema"
 import { eq } from "drizzle-orm"
+import { headers } from "next/headers"
 
 interface PageProps {
   params: { serialNumber: string }
 }
 
 export default async function VerifyCertificatePage({ params }: PageProps) {
-  const serialNumber = decodeURIComponent(params.serialNumber)
+  const rawParam = params?.serialNumber ?? ""
+  let serialNumber =
+    rawParam && rawParam !== "undefined" ? decodeURIComponent(rawParam) : ""
+
+  if (!serialNumber) {
+    const hdrs = headers()
+    const path =
+      hdrs.get("x-invoke-path") ||
+      hdrs.get("x-forwarded-uri") ||
+      hdrs.get("next-url") ||
+      ""
+    const match = path.match(/\/cert\/verify\/([^/?#]+)/i)
+    if (match?.[1]) {
+      serialNumber = decodeURIComponent(match[1])
+    }
+  }
 
   const [row] = await db
     .select({
