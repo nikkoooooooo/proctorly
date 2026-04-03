@@ -13,7 +13,7 @@ export default async function VerifyCertificatePage({ params }: PageProps) {
     rawParam && rawParam !== "undefined" ? decodeURIComponent(rawParam) : ""
 
   if (!serialNumber) {
-    const hdrs = headers()
+    const hdrs = await headers()
     const path =
       hdrs.get("x-invoke-path") ||
       hdrs.get("x-forwarded-uri") ||
