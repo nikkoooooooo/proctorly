@@ -47,10 +47,10 @@ export default async function OverviewTab({ quizId }: { quizId: string }) {
           </div>
           <div className="rounded-[var(--radius-card)] border border-border/60 p-4">
             <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Passing Score
+              Passing Percentage
             </div>
             <div className="mt-2 text-xl font-semibold text-foreground">
-              {quiz.passingScore ?? "—"}
+              {quiz.passingPercentage != null ? `${quiz.passingPercentage}%` : "—"}
             </div>
           </div>
           <div className="rounded-[var(--radius-card)] border border-border/60 p-4">

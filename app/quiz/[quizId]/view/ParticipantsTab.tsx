@@ -59,7 +59,7 @@ export default async function ParticipantsTab({ quizId }: { quizId: string }) {
   return (
     <div className="card p-4">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] border border-muted-foreground/30 rounded-[var(--radius-button)] overflow-hidden">
+        <table className="w-full min-w-[640px] border border-muted-foreground/30 rounded-(--radius-button) overflow-hidden">
           <thead>
             <tr className="text-left border-b border-muted-foreground/20">
               <th className="py-2 px-3">Student</th>

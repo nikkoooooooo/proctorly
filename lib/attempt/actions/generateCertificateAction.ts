@@ -1,7 +1,7 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { attempt, certificate, quiz, user } from "@/lib/schema"
+import { attempt, certificate, quiz, user, question } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 import { presignRead } from "@/lib/storage/presign"
 import { getCertificateKey } from "@/lib/certificate/helpers/s3Keys"
@@ -54,7 +54,7 @@ export async function generateCertificateAction(attemptId: string, options?: { f
       .select({
         id: quiz.id,
         title: quiz.title,
-        passingScore: quiz.passingScore,
+        passingPercentage: quiz.passingPercentage,
         certificateEnabled: quiz.certificateEnabled,
         creatorId: quiz.creatorId,
         certificateDescription: quiz.certificateDescription,
@@ -92,9 +92,18 @@ export async function generateCertificateAction(attemptId: string, options?: { f
     const quizLabel = buildFilename(quizRow.title ?? "Quiz")
     const downloadName = `ProctorlyX-Certificate-${studentLabel}-${quizLabel}.pdf`
 
+    const questions = await db
+      .select({ points: question.points })
+      .from(question)
+      .where(eq(question.quizId, attemptRow.quizId))
+      .execute()
+
+    const totalPoints = questions.reduce((sum, q) => sum + (q.points ?? 1), 0)
+
     const eligibility = getCertificateEligibility({
       score: attemptRow.score ?? 0,
-      passingScore: quizRow.passingScore ?? null,
+      totalPoints,
+      passingPercentage: quizRow.passingPercentage ?? null,
       tabSwitchCount: attemptRow.tabSwitchCount ?? 0,
       certificateEnabled: quizRow.certificateEnabled ?? false,
     })

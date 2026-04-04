@@ -31,7 +31,7 @@ export default async function ResultPage(props: ResultPageProps) {
       <h1 className="text-3xl font-bold">{result.quizTitle}</h1>
       <p className="text-lg">Created By: {result.quizAuthor}</p>
       <p className="text-2xl font-semibold">
-        Score: {result.score} / {result.totalPoints}
+        Score: {result.score} / {result.totalPoints} ({result.percentage.toFixed(2)}%)
       </p>
       <p className="text-lg text-red-500">Tab Switches: {result.tabSwitchCount}</p>
 

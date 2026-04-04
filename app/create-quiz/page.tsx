@@ -55,7 +55,7 @@ export default function CreateQuizPage() {
   const [blurQuestion, setBlurQuestion] = useState(false)
   const [isPaidQuiz, setIsPaidQuiz] = useState(false)
   const [paidQuizFee, setPaidQuizFee] = useState("")
-  const [passingScore, setPassingScore] = useState("")
+  const [passingPercentage, setPassingPercentage] = useState("")
   const [certificateEnabled, setCertificateEnabled] = useState(false)
   const [certificateDescription, setCertificateDescription] = useState("")
   const [certificateSignatureText, setCertificateSignatureText] = useState("")
@@ -166,13 +166,18 @@ export default function CreateQuizPage() {
       toast.error("Each question must have text or an image")
       return
     }
+    const passingValue = passingPercentage ? Number(passingPercentage) : null
+    if (passingValue === null) {
+      toast.error("Passing percentage is required")
+      return
+    }
+    if (Number.isNaN(passingValue) || passingValue <= 0 || passingValue > 100) {
+      toast.error("Passing percentage must be between 1 and 100")
+      return
+    }
     if (isPaidQuiz) {
       if (!paidQuizFee || Number(paidQuizFee) < 100) {
         toast.error("Minimum quiz fee is 100")
-        return
-      }
-      if (!passingScore || Number(passingScore) <= 0) {
-        toast.error("Passing score is required for paid quizzes")
         return
       }
     }
@@ -212,7 +217,7 @@ export default function CreateQuizPage() {
         expiresAt ? new Date(expiresAt).toISOString() : null,
         isPaidQuiz,
         isPaidQuiz ? Math.round(Number(paidQuizFee) * 100) : null,
-        passingScore ? Number(passingScore) : null,
+        passingPercentage ? Number(passingPercentage) : null,
         certificateEnabled,
       )
 
@@ -259,7 +264,7 @@ export default function CreateQuizPage() {
       setExpiresAt("")
       setIsPaidQuiz(false)
       setPaidQuizFee("")
-      setPassingScore("")
+      setPassingPercentage("")
     } catch (err) {
       console.error(err)
       // Use toast for errors to keep UX consistent
@@ -298,14 +303,15 @@ export default function CreateQuizPage() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="font-semibold">Passing score</label>
+            <label className="font-semibold">Passing percentage</label>
             <input
               type="number"
               min="1"
-              value={passingScore}
-              onChange={(e) => setPassingScore(e.target.value)}
+              max="100"
+              value={passingPercentage}
+              onChange={(e) => setPassingPercentage(e.target.value)}
               className="bg-background p-3 rounded-(--radius-button)"
-              placeholder="Set a passing score"
+              placeholder="Set a passing percentage (1–100)"
             />
             <p className="text-sm text-muted-foreground">Leave blank if not required.</p>
           </div>

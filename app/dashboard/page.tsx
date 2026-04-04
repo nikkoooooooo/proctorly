@@ -77,13 +77,13 @@ export default function Dashboard() {
   }, [user])
 
   // ----------------------
-  // FIND QUIZ BY CODE
+  // FIND ASSESSMENT BY CODE
   // ----------------------
   const findQuizThroughCode = async () => {
     try {
       const quizResult = await getQuizThroughCodeAction(code)
       if (!quizResult?.quiz) {
-        toast.error("Quiz not found!", {
+        toast.error("Assessment not found!", {
           icon: "⚠️",
           style: { background: "#ffffff", color: "#b91c1c", fontWeight: "bold" },
           duration: 5000,
@@ -111,11 +111,11 @@ export default function Dashboard() {
   }
 
   // ----------------------
-  // DELETE QUIZ
+  // DELETE ASSESSMENT
   // ----------------------
 
   // ----------------------
-  // JOIN QUIZ
+  // JOIN ASSESSMENT
   // ----------------------
   const handleJoinQuiz = async () => {
     if (!joinQuiz || !session) return
@@ -167,8 +167,8 @@ export default function Dashboard() {
       <div className="max-w-7xl w-full px-4">
         {/* Header */}
         <div className="mt-5 flex flex-col gap-2">
-          <div className="flex w-full justify-between items-center">
-            <div className="flex items-center gap-3 flex-col md:flex-row justify-center">
+          <div className="flex w-full flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
               <h2 className="text-foreground text-4xl font-bold">Dashboard</h2>
               {planBadge && (
                 <span className="inline-flex items-center rounded-full bg-amber-300/80 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-950 shadow-[0_0_0_1px_rgba(146,64,14,0.15)]">
@@ -177,18 +177,21 @@ export default function Dashboard() {
               )}
             </div>
             {/* Theme-aware radius so the link still looks rounded in light mode */}
-            <Link href="/create-quiz" className="bg-primary hover:bg-primary/90 active:bg-primary/80 cursor-pointer text-primary-foreground p-2 rounded-[var(--radius-button)] font-semibold shadow-sm">
-              + Create Quiz
+            <Link href="/create-quiz" className="bg-primary hover:bg-primary/90 active:bg-primary/80 cursor-pointer text-primary-foreground p-2 rounded-[var(--radius-button)] font-semibold shadow-sm w-full md:w-auto">
+              + Create Assessment
             </Link>
           </div>
           <p className="text-foreground text-xl">Welcome back, {userName}</p>
+          <p className="text-muted-foreground">
+            Run monitored assessments with real-time visibility
+          </p>
         </div>
 
-        {/* Join Quiz */}
+        {/* Join Assessment */}
         <div className="mt-5 w-full">
           <div className="card p-4">
-            <h2 className="font-semibold text-2xl">Join Quiz</h2>
-            <p className="text-muted-foreground">Enter a 6-character quiz code to join</p>
+            <h2 className="font-semibold text-2xl">Join Assessment</h2>
+            <p className="text-muted-foreground">Enter a 6-character assessment code to join</p>
             <form
               className="w-full flex gap-4 pt-4"
               onSubmit={e => { e.preventDefault(); findQuizThroughCode() }}
@@ -199,17 +202,17 @@ export default function Dashboard() {
                 value={code}
                 onChange={e => setCode(e.target.value)}
                 /* Theme-aware border so it shows in light mode */
-                className="bg-background border border-border rounded-[var(--radius-button)] w-full py-2 px-2 text-xl"
+                className="bg-background border border-border rounded-(--radius-button) w-full py-2 px-2 text-xl"
                 placeholder="ABC123"
               />
-              <button type="submit" className="bg-primary text-primary-foreground py-2 px-6 rounded-[var(--radius-button)] font-semibold w-32 cursor-pointer hover:bg-primary/90 active:bg-primary/80">
-                Find Quiz
+              <button type="submit" className="bg-primary text-primary-foreground py-2 px-6 rounded-(--radius-button) font-semibold w-32 cursor-pointer hover:bg-primary/90 active:bg-primary/80">
+                Find Assessment
               </button>
             </form>
           </div>
         </div>
 
-        {/* Quiz to join */}
+        {/* Assessment to join */}
         {joinQuiz && (
           <div className="p-4 mt-4 border rounded flex justify-between">
             <div>
@@ -218,8 +221,8 @@ export default function Dashboard() {
               <p>By: {quizCreatorName}</p>
               {joinQuiz.description && <p className="text-muted-foreground">{joinQuiz.description}</p>}
             </div>
-            <button onClick={handleJoinQuiz} className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer active:bg-primary/80 p-2 rounded-[var(--radius-button)] font-semibold">
-              Join Quiz
+            <button onClick={handleJoinQuiz} className="bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer active:bg-primary/80 p-2 rounded-(--radius-button) font-semibold">
+              Join Assessment
             </button>
           </div>
         )}
@@ -238,16 +241,16 @@ export default function Dashboard() {
             path="/created-quiz"
             icon={FileText}
             quizCount={totalQuizCreated}
-            title="Created Quizzes"
-            description="Quizzes you've created"
+            title="Created Assessments"
+            description="Assessments you've created"
           />
 
           <QuizBox
             path="/joined-quiz"
             icon={Users}
             quizCount={totalQuizJoined}
-            title="Joined Quizzes"
-            description="Quizzes you've joined"
+            title="Joined Assessments"
+            description="Assessments you've joined"
           />
 
 
@@ -255,8 +258,8 @@ export default function Dashboard() {
             path=""
             icon={BarChart3}
             quizCount={totalQuizzes}
-            title="Total Quiz Activity"
-            description="Total Quizzes"
+            title="Total Assessment Activity"
+            description="Total Assessments"
           />
 
           {/* <QuizBox

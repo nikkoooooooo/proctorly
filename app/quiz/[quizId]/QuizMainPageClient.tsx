@@ -290,7 +290,7 @@ export default function QuizMainPageClient({
               <button
                 onClick={handleStart} // start quiz flow
                 disabled={isPreparingStart || !questions.length || (isExpired && !hasActiveAttempt)} // disable while preparing, loading, or expired
-                className="bg-primary cursor-pointer hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-[var(--radius-button)] text-primary-foreground font-semibold" // button style
+                className="bg-primary cursor-pointer hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-(--radius-button) text-primary-foreground font-semibold" // button style
               >
                 {isPreparingStart ? "Preparing..." : isExpired && !hasActiveAttempt ? "Quiz Expired" : "Start Quiz"} {/* button text by loading state */}
               </button>
@@ -319,7 +319,7 @@ export default function QuizMainPageClient({
           <button
             disabled={!selectedChoice || isSubmittingAnswer} // block next until an option is selected and not submitting
             onClick={() => void runHandleNext()} // submit current and move next
-            className={`mt-4 p-2 rounded-[var(--radius-button)] font-semibold w-full ${
+            className={`mt-4 p-2 rounded-(--radius-button) font-semibold w-full ${
               currentQuestion === questions.length - 1
                 ? "bg-green-600 text-primary-foreground hover:bg-green-700 active:bg-green-300" // finish style on last question
                 : "bg-primary text-primary-foreground hover:bg-primary/90  active:bg-primary/80" // next style otherwise

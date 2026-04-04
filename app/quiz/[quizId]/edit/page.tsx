@@ -365,7 +365,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
                           e.preventDefault()
                           removeQuestion(question.id)
                         }}
-                        className="bg-secondary py-1 px-2 rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="bg-secondary py-1 px-2 rounded-(--radius-button) disabled:opacity-60 disabled:cursor-not-allowed"
                       >
                         Remove
                       </button>
@@ -412,7 +412,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
                 e.preventDefault()
                 addQuestion()
               }}
-              className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full p-2 border border-gray-400 border-dashed cursor-pointer rounded-(--radius-button) disabled:opacity-60 disabled:cursor-not-allowed"
             >
               + Add Question
             </button>
@@ -422,7 +422,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-[var(--radius-button)] disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-(--radius-button) disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Saving..." : "Save Changes"}
         </button>

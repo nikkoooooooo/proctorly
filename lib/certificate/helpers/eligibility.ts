@@ -1,6 +1,7 @@
 interface EligibilityInput {
   score: number | null
-  passingScore: number | null
+  totalPoints: number | null
+  passingPercentage: number | null
   tabSwitchCount: number | null
   certificateEnabled: boolean
 }
@@ -15,10 +16,12 @@ export function getCertificateEligibility(input: EligibilityInput) {
     return { eligible: false, reason: "Too many tab switches." }
   }
 
-  if (input.passingScore !== null && input.passingScore !== undefined) {
+  if (input.passingPercentage !== null && input.passingPercentage !== undefined) {
     const score = input.score ?? 0
-    if (score < input.passingScore) {
-      return { eligible: false, reason: "Passing score not met." }
+    const total = input.totalPoints ?? 0
+    const percentage = total > 0 ? (score / total) * 100 : 0
+    if (percentage < input.passingPercentage) {
+      return { eligible: false, reason: "Passing percentage not met." }
     }
   }
 

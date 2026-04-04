@@ -1,20 +1,21 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { eq } from "drizzle-orm/expressions";
-import { quiz, session, user, quizEnrollment } from "@/lib/schema";
+import { desc, eq, inArray } from "drizzle-orm";
+import { attempt, quiz, user, quizEnrollment } from "@/lib/schema";
 
 
 
 
 export async function getUserJoinedQuiz(userId: string) {
-    const result = await db
+  const joined = await db
     .select({
       id: quiz.id,
       title: quiz.title,
       joinCode: quiz.joinCode,
       description: quiz.description,
       createdAt: quiz.createdAt,
+      expiresAt: quiz.expiresAt,
       isPaidQuiz: quiz.isPaidQuiz,
       paidQuizFee: quiz.paidQuizFee,
       creatorName: user.name,
@@ -23,19 +24,50 @@ export async function getUserJoinedQuiz(userId: string) {
     .innerJoin(quiz, eq(quizEnrollment.quizId, quiz.id))
     .innerJoin(user, eq(user.id, quiz.creatorId))
     .where(eq(quizEnrollment.userId, userId))
-    .execute()
+    .execute();
 
+  if (!joined.length) return joined;
 
-    return result
+  const quizIds = joined.map((row) => row.id);
+  const attempts = await db
+    .select({
+      quizId: attempt.quizId,
+      attemptId: attempt.id,
+      isCompleted: attempt.isCompleted,
+      updatedAt: attempt.updatedAt,
+    })
+    .from(attempt)
+    .where(inArray(attempt.quizId, quizIds))
+    .orderBy(desc(attempt.updatedAt))
+    .execute();
 
+  const latestByQuiz = new Map<
+    string,
+    { attemptId: string; isCompleted: boolean }
+  >();
+  for (const row of attempts) {
+    if (!latestByQuiz.has(row.quizId)) {
+      latestByQuiz.set(row.quizId, {
+        attemptId: row.attemptId,
+        isCompleted: row.isCompleted,
+      });
+    }
+  }
+
+  return joined.map((row) => {
+    const latest = latestByQuiz.get(row.id);
+    const attemptStatus = !latest
+      ? "not_started"
+      : latest.isCompleted
+        ? "completed"
+        : "in_progress";
+
+    return {
+      ...row,
+      attemptStatus,
+      attemptId: latest?.attemptId ?? null,
+    };
+  });
 }
 
 
-// TODO:
-
-
-// CREATE HELPER FOR GETTING THE USER JOINED QUIZ 
-// CREATE SERVER ACTION FOR THAT HELPER
-// MAKE THAT RUN IN THE DASHBOARD
-// CREATE THE QUIZ PAGE 
-// MAKE THIS CORE

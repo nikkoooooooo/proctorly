@@ -40,7 +40,7 @@ export async function createQuiz(
   expiresAt?: string | null,
   isPaidQuiz = false,
   paidQuizFee?: number | null,
-  passingScore?: number | null,
+  passingPercentage?: number | null,
   certificateEnabled = false
 ) {
   const quizId = uuid()
@@ -57,7 +57,7 @@ export async function createQuiz(
     expiresAt: expiresAt ? new Date(expiresAt) : null,
     isPaidQuiz,
     paidQuizFee: isPaidQuiz ? paidQuizFee : null,
-    passingScore: passingScore ?? null,
+    passingPercentage: passingPercentage ?? null,
     certificateEnabled,
   })
 
@@ -99,7 +99,7 @@ export async function createQuiz(
     expiresAt: expiresAt ?? null,
     isPaidQuiz,
     paidQuizFee: isPaidQuiz ? paidQuizFee : null,
-    passingScore: passingScore ?? null,
+    passingPercentage: passingPercentage ?? null,
     certificateEnabled,
     questions: questionsData,
   }

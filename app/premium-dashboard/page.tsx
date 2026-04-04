@@ -15,7 +15,7 @@ const classes = [
 ]
 
 const progressSignals = [
-  { student: "Ariana N.", status: "Needs follow-up", detail: "Missed 2 quizzes" },
+  { student: "Ariana N.", status: "Needs follow-up", detail: "Missed 2 assessments" },
   { student: "Chris T.", status: "On track", detail: "Completed 4/4 modules" },
   { student: "Mei L.", status: "Improving", detail: "+12% score this week" },
   { student: "Jordan P.", status: "Needs support", detail: "Low engagement" },
@@ -31,7 +31,7 @@ const automations = [
     detail: "Remind students after 48 hours of inactivity.",
   },
   {
-    title: "Quiz Mastery Alerts",
+    title: "Assessment Mastery Alerts",
     detail: "Notify when mastery drops below 70%.",
   },
 ]
@@ -61,7 +61,7 @@ export default function PremiumDashboardPage() {
                 href="/create-quiz"
                 className="bg-primary text-primary-foreground px-5 py-2 font-semibold shadow-sm hover:bg-primary/90"
               >
-                + New Quiz
+                + New Assessment
               </Link>
               <Link
                 href="/automation"
@@ -197,7 +197,7 @@ export default function PremiumDashboardPage() {
                 </p>
               </div>
               <div className="rounded-[var(--radius-card)] border border-border p-4">
-                <p className="font-semibold text-foreground">Publish next quiz</p>
+                <p className="font-semibold text-foreground">Publish next assessment</p>
                 <p className="text-sm text-muted-foreground mt-2">
                   Recommended window: Wednesday 9:00 AM for World History.
                 </p>

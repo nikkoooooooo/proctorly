@@ -12,12 +12,12 @@ export async function createQuizAction(
   title: string,
   questions: QuestionInput[],
   creatorId: string,
-  description: string,
+  description: string, 
   blurQuestion = false,
   expiresAt?: string | null,
   isPaidQuiz = false,
   paidQuizFee?: number | null,
-  passingScore?: number | null,
+  passingPercentage?: number | null,
   certificateEnabled = false
 ) {
   try {
@@ -39,12 +39,16 @@ export async function createQuizAction(
       };
     }
 
+    if (passingPercentage === null || passingPercentage === undefined) {
+      return { success: false, error: "Passing percentage is required." };
+    }
+    if (Number.isNaN(passingPercentage) || passingPercentage <= 0 || passingPercentage > 100) {
+      return { success: false, error: "Passing percentage must be between 1 and 100." };
+    }
+
     if (isPaidQuiz) {
       if (!paidQuizFee || paidQuizFee < 10000) {
-      return { success: false, error: "Minimum quiz fee is 100." };
-      }
-      if (!passingScore || passingScore <= 0) {
-        return { success: false, error: "Passing score is required." };
+        return { success: false, error: "Minimum quiz fee is 100." };
       }
     }
 
@@ -57,7 +61,7 @@ export async function createQuizAction(
       expiresAt,
       isPaidQuiz,
       paidQuizFee ?? null,
-      passingScore ?? null,
+      passingPercentage ?? null,
       certificateEnabled
     );
 

@@ -29,7 +29,7 @@ export async function getFinalResultsAction(attemptId: string) {
       .select({
         title: quiz.title,
         creatorId: quiz.creatorId,
-        passingScore: quiz.passingScore,
+        passingPercentage: quiz.passingPercentage,
         certificateEnabled: quiz.certificateEnabled,
       })
       .from(quiz)
@@ -55,21 +55,25 @@ export async function getFinalResultsAction(attemptId: string) {
       .execute();
 
     const totalPoints = questions.reduce((sum, q) => sum + (q.points ?? 1), 0);
+    const score = userAttempt.score ?? 0
+    const percentage = totalPoints > 0 ? (score / totalPoints) * 100 : 0
     const eligibility = getCertificateEligibility({
-      score: userAttempt.score ?? 0,
-      passingScore: quizData.passingScore ?? null,
+      score,
+      totalPoints,
+      passingPercentage: quizData.passingPercentage ?? null,
       tabSwitchCount: userAttempt.tabSwitchCount ?? 0,
       certificateEnabled: quizData.certificateEnabled ?? false,
     });
 
     return {
       success: true,
-      score: userAttempt.score ?? 0,
+      score,
+      percentage,
       totalPoints,
       tabSwitchCount: userAttempt.tabSwitchCount ?? 0,
       quizTitle: quizData.title,
       quizAuthor: creator?.name ?? "Unknown",
-      passingScore: quizData.passingScore ?? null,
+      passingPercentage: quizData.passingPercentage ?? null,
       certificateEnabled: quizData.certificateEnabled ?? false,
       certificateEligible: eligibility.eligible,
       certificateIneligibleReason: eligibility.reason,

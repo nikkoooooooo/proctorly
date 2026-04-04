@@ -21,6 +21,7 @@ interface Attempt {
   studentNo?: string | null
   section?: string | null
   score: number | null
+  totalPoints?: number | null
   tabSwitchCount: number
   completed: boolean
   startedAt?: string | Date | null
@@ -36,7 +37,7 @@ export default function TeacherPage() {
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
   const [quizTitle, setQuizTitle] = useState("Quiz")
-  const [passingScore, setPassingScore] = useState<number | null>(null)
+  const [passingPercentage, setPassingPercentage] = useState<number | null>(null)
   const params = useParams<{ quizId: string }>()
   const quizId = params?.quizId ?? ""
 
@@ -65,7 +66,7 @@ export default function TeacherPage() {
         if (quizRes.success && quizRes.quiz?.title) {
           setQuizTitle(quizRes.quiz.title)
         }
-        setPassingScore(quizRes.success ? quizRes.quiz?.passingScore ?? null : null)
+        setPassingPercentage(quizRes.success ? quizRes.quiz?.passingPercentage ?? null : null)
         const data = await getQuizAttemptsAction(quizId)
         if (data) {
           const sortedAttempts = [...(data.attempts ?? [])].sort((a, b) => {
@@ -220,12 +221,18 @@ export default function TeacherPage() {
                       <td className="py-2 px-3">{a.section ?? "N/A"}</td>
                       <td className="py-2 px-3">{a.score ?? 0}</td>
                       <td className="py-2 px-3">
-                        {passingScore == null || a.score == null ? (
+                        {passingPercentage == null || a.score == null ? (
                           "—"
-                        ) : a.score >= passingScore ? (
-                          <span className="text-emerald-500 font-semibold">Passed</span>
                         ) : (
-                          <span className="text-rose-500 font-semibold">Failed</span>
+                          (() => {
+                            const total = a.totalPoints ?? 0
+                            const percentage = total > 0 ? (a.score / total) * 100 : 0
+                            return percentage >= passingPercentage ? (
+                              <span className="text-emerald-500 font-semibold">Passed</span>
+                            ) : (
+                              <span className="text-rose-500 font-semibold">Failed</span>
+                            )
+                          })()
                         )}
                       </td>
                       <td className="py-2 px-3 text-red-500 font-semibold">{a.tabSwitchCount}</td>

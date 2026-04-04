@@ -46,13 +46,13 @@ export default function Home() {
               <div className="flex flex-wrap gap-3">
                 <a
                   href="/login"
-                  className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
+                  className="bg-primary text-primary-foreground px-5 py-2.5 rounded-(--radius-button) font-semibold hover:bg-primary/90"
                 >
                   Create Your First Quiz
                 </a>
                 <a
                   href="/pricing"
-                  className="border border-border text-foreground px-5 py-2.5 rounded-[var(--radius-button)] hover:bg-secondary"
+                  className="border border-border text-foreground px-5 py-2.5 rounded-(--radius-button) hover:bg-secondary"
                 >
                   View Pricing
                 </a>
@@ -88,15 +88,15 @@ export default function Home() {
             Used by classrooms running secure online quizzes
           </p>
           <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
-            <div className="border border-border/60 rounded-[var(--radius-card)] px-4 py-5 bg-background/60">
+            <div className="border border-border/60 rounded-(--radius-button) px-4 py-5 bg-background/60">
               <p className="text-2xl font-semibold text-foreground">300+</p>
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Students</p>
             </div>
-            <div className="border border-border/60 rounded-[var(--radius-card)] px-4 py-5 bg-background/60">
+            <div className="border border-border/60 rounded-(--radius-button) px-4 py-5 bg-background/60">
               <p className="text-2xl font-semibold text-foreground">4</p>
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Courses</p>
             </div>
-            <div className="border border-border/60 rounded-[var(--radius-card)] px-4 py-5 bg-background/60">
+            <div className="border border-border/60 rounded-(--radius-button) px-4 py-5 bg-background/60">
               <p className="text-2xl font-semibold text-foreground">10,000+</p>
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Quiz Attempts</p>
             </div>
@@ -281,13 +281,13 @@ export default function Home() {
             <div className="flex flex-wrap gap-3">
               <a
                 href="/login"
-                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90"
+                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-(--radius-button) font-semibold hover:bg-primary/90"
               >
                 Start Free
               </a>
               <a
                 href="/pricing"
-                className="border border-border text-foreground px-5 py-2.5 rounded-[var(--radius-button)] hover:bg-secondary"
+                className="border border-border text-foreground px-5 py-2.5 rounded-(--radius-button) hover:bg-secondary"
               >
                 See Plans
               </a>

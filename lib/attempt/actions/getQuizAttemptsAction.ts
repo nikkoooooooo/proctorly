@@ -2,7 +2,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { attempt, user as userTable } from "@/lib/schema";
+import { attempt, user as userTable, question } from "@/lib/schema";
 import { eq, desc } from "drizzle-orm";
 import { decryptStudentNo } from "@/lib/crypto/studentNo";
 
@@ -28,6 +28,14 @@ export async function getQuizAttemptsAction(quizId: string) {
       .orderBy(desc(attempt.startedAt))
       .execute();
 
+    const questions = await db
+      .select({ points: question.points })
+      .from(question)
+      .where(eq(question.quizId, quizId))
+      .execute()
+
+    const totalPoints = questions.reduce((sum, q) => sum + (q.points ?? 1), 0)
+
     const attempts = results.map((a) => {
       let studentNo: string | null = null
       if (a.studentNoEncrypted) {
@@ -38,7 +46,7 @@ export async function getQuizAttemptsAction(quizId: string) {
         }
       }
       const { studentNoEncrypted, ...rest } = a
-      return { ...rest, studentNo }
+      return { ...rest, studentNo, totalPoints }
     })
 
     return { success: true, attempts };

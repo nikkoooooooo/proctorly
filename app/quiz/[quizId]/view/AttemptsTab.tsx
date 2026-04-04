@@ -16,6 +16,7 @@ interface Attempt {
   studentNo?: string | null
   section?: string | null
   score: number | null
+  totalPoints?: number | null
   tabSwitchCount: number
   completed: boolean
   startedAt?: string | Date | null
@@ -29,6 +30,7 @@ export default function AttemptsTab() {
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
   const [quizTitle, setQuizTitle] = useState("Quiz")
+  const [passingPercentage, setPassingPercentage] = useState<number | null>(null)
 
   const formatPHDateTime = (value?: string | Date | null) => {
     if (!value) return "N/A"
@@ -54,6 +56,7 @@ export default function AttemptsTab() {
         if (quizRes.success && quizRes.quiz?.title) {
           setQuizTitle(quizRes.quiz.title)
         }
+        setPassingPercentage(quizRes.success ? quizRes.quiz?.passingPercentage ?? null : null)
         const data = await getQuizAttemptsAction(quizId)
         if (data) {
           const sortedAttempts = [...(data.attempts ?? [])].sort((a, b) => {
@@ -84,6 +87,8 @@ export default function AttemptsTab() {
       "Student No",
       "Section",
       "Score",
+      "Percentage",
+      "Passed",
       "Tab Switches",
       "Status",
       "Started (PH)",
@@ -98,17 +103,29 @@ export default function AttemptsTab() {
       headers,
     ])
 
-    const dataRows = attempts.map((a) => [
-      a.name ?? "Unknown",
-      a.email ?? "Unknown",
-      a.studentNo ?? "N/A",
-      a.section ?? "N/A",
-      a.completed ? (a.score ?? 0) : null,
-      a.tabSwitchCount,
-      a.completed ? "Completed" : "Ongoing",
-      formatPHDateTime(a.startedAt),
-      formatPHDateTime(a.submittedAt),
-    ])
+    const dataRows = attempts.map((a) => {
+      const total = a.totalPoints ?? 0
+      const percentage = total > 0 ? ((a.score ?? 0) / total) * 100 : 0
+      const passed =
+        passingPercentage == null || a.score == null
+          ? "—"
+          : percentage >= passingPercentage
+            ? "Passed"
+            : "Failed"
+      return [
+        a.name ?? "Unknown",
+        a.email ?? "Unknown",
+        a.studentNo ?? "N/A",
+        a.section ?? "N/A",
+        a.completed ? (a.score ?? 0) : null,
+        a.completed ? `${percentage.toFixed(2)}%` : null,
+        passed,
+        a.tabSwitchCount,
+        a.completed ? "Completed" : "Ongoing",
+        formatPHDateTime(a.startedAt),
+        formatPHDateTime(a.submittedAt),
+      ]
+    })
 
     XLSX.utils.sheet_add_aoa(worksheet, dataRows, { origin: "A6" })
 
@@ -118,17 +135,19 @@ export default function AttemptsTab() {
       { wch: 16 },
       { wch: 16 },
       { wch: 10 },
+      { wch: 12 },
+      { wch: 12 },
       { wch: 14 },
       { wch: 14 },
       { wch: 24 },
       { wch: 24 },
     ]
     worksheet["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 8 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 10 } },
     ]
-    worksheet["!autofilter"] = { ref: "A5:I5" }
+    worksheet["!autofilter"] = { ref: "A5:K5" }
     worksheet["!freeze"] = { xSplit: 0, ySplit: 5 }
 
     const workbook = XLSX.utils.book_new()
@@ -151,14 +170,14 @@ export default function AttemptsTab() {
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/quiz/${quizId}/monitor`}
-            className="inline-flex items-center justify-center bg-primary text-primary-foreground px-4 py-2 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90 active:bg-primary/80"
+            className="inline-flex items-center justify-center bg-primary text-primary-foreground px-4 py-2 rounded-(--radius-button) font-semibold hover:bg-primary/90 active:bg-primary/80"
           >
             Open Live Monitor
           </Link>
           <button
             type="button"
             onClick={exportToExcel}
-            className="inline-flex items-center justify-center bg-emerald-500/90 text-white px-4 py-2 rounded-[var(--radius-button)] font-semibold hover:bg-emerald-500"
+            className="inline-flex items-center justify-center bg-emerald-500/90 text-white px-4 py-2 rounded-(--radius-button) font-semibold hover:bg-emerald-500"
           >
             Export to Excel
           </button>
@@ -172,7 +191,7 @@ export default function AttemptsTab() {
       ) : (
         <div className="card p-4">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[960px] border border-muted-foreground/30 rounded-[var(--radius-button)] overflow-hidden">
+            <table className="w-full min-w-[960px] border border-muted-foreground/30 rounded-(--radius-button) overflow-hidden">
               <thead>
                 <tr className="text-left border-b border-muted-foreground/20">
                   <th className="py-2 px-3">Student</th>
@@ -180,6 +199,8 @@ export default function AttemptsTab() {
                   <th className="py-2 px-3">Section</th>
                   <th className="py-2 px-3">Email</th>
                   <th className="py-2 px-3">Score</th>
+                  <th className="py-2 px-3">Percentage</th>
+                  <th className="py-2 px-3">Passed</th>
                   <th className="py-2 px-3">Tab Switches</th>
                   <th className="py-2 px-3">Status</th>
                   <th className="py-2 px-3">Started (PH)</th>
@@ -194,10 +215,32 @@ export default function AttemptsTab() {
                     <td className="py-2 px-3">{a.section ?? "—"}</td>
                     <td className="py-2 px-3 text-muted-foreground">{a.email ?? "Unknown"}</td>
                     <td className="py-2 px-3 font-semibold">{a.score ?? 0}</td>
+                    <td className="py-2 px-3 text-muted-foreground">
+                      {(() => {
+                        const total = a.totalPoints ?? 0
+                        const percentage = total > 0 ? ((a.score ?? 0) / total) * 100 : 0
+                        return `${percentage.toFixed(2)}%`
+                      })()}
+                    </td>
+                    <td className="py-2 px-3">
+                      {passingPercentage == null || a.score == null ? (
+                        "—"
+                      ) : (
+                        (() => {
+                          const total = a.totalPoints ?? 0
+                          const percentage = total > 0 ? (a.score / total) * 100 : 0
+                          return percentage >= passingPercentage ? (
+                            <span className="text-emerald-500 font-semibold">Passed</span>
+                          ) : (
+                            <span className="text-rose-500 font-semibold">Failed</span>
+                          )
+                        })()
+                      )}
+                    </td>
                     <td className="py-2 px-3 text-red-400 font-semibold">{a.tabSwitchCount}</td>
                     <td className="py-2 px-3">
                       <span
-                        className={`px-2 py-1 rounded-[var(--radius-button)] font-semibold text-xs ${
+                        className={`px-2 py-1 rounded-(--radius-button) font-semibold text-xs ${
                           a.completed
                             ? "bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 dark:text-emerald-200"
                             : "bg-secondary text-secondary-foreground"

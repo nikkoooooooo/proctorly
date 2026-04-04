@@ -2,18 +2,6 @@ import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, boolean, index , integer, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 
 
-// export const user = pgTable("user", {
-//   id: text("id").primaryKey(),
-//   name: text("name").notNull(),
-//   email: text("email").notNull().unique(),
-//   emailVerified: boolean("email_verified").default(false).notNull(),
-//   image: text("image"),
-//   createdAt: timestamp("created_at").defaultNow().notNull(),
-//   updatedAt: timestamp("updated_at")
-//     .defaultNow()
-//     .$onUpdate(() => /* @__PURE__ */ new Date())
-//     .notNull(),
-// });
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -110,7 +98,7 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
   // Paid quiz columns
   isPaidQuiz: boolean("is_paid_quiz").default(false).notNull(),
   paidQuizFee: integer("paid_quiz_fee"), // cents
-  passingScore: integer("passing_score"), // raw points
+  passingPercentage: integer("passing_percentage"), // 1–100
   certificateEnabled: boolean("certificate_enabled").default(false).notNull(),
   certificateDescription: text("certificate_description"),
   certificateLogoKey: text("certificate_logo_key"),

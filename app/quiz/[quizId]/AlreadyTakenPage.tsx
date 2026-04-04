@@ -30,7 +30,7 @@ export default async function AlreadyTakenPage({ quizId, attemptId }: AlreadyTak
         {result?.success && attemptId && (
           <>
             <p className="text-lg font-semibold mb-4">
-              Score: {result.score} / {result.totalPoints}
+              Score: {result.score} / {result.totalPoints} ({result.percentage.toFixed(2)}%)
             </p>
             {result.certificateEnabled ? (
               <DownloadCertificateButton
@@ -48,7 +48,7 @@ export default async function AlreadyTakenPage({ quizId, attemptId }: AlreadyTak
 
         <Link
             href={"/dashboard"}
-            className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-[var(--radius-button)] font-semibold hover:bg-primary/90 transition inline-flex justify-center"
+            className="mt-4 bg-primary text-primary-foreground px-4 py-2 rounded-(--radius-button) font-semibold hover:bg-primary/90 transition inline-flex justify-center"
             >
             Go Back to Dashboard
         </Link>
