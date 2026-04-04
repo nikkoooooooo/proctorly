@@ -30,7 +30,8 @@ export default async function AlreadyTakenPage({ quizId, attemptId }: AlreadyTak
         {result?.success && attemptId && (
           <>
             <p className="text-lg font-semibold mb-4">
-              Score: {result.score} / {result.totalPoints} ({result.percentage.toFixed(2)}%)
+              Score: {result.score} / {result.totalPoints} (
+              {(result.percentage ?? 0).toFixed(2)}%)
             </p>
             {result.certificateEnabled ? (
               <DownloadCertificateButton
