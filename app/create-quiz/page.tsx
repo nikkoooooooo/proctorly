@@ -58,6 +58,7 @@ export default function CreateQuizPage() {
   const [passingPercentage, setPassingPercentage] = useState("")
   const [certificateEnabled, setCertificateEnabled] = useState(false)
   const [certificateDescription, setCertificateDescription] = useState("")
+  const descriptionLimit = 160
   const [certificateInstructorLabel, setCertificateInstructorLabel] = useState("")
   const [certificateInstructorValue, setCertificateInstructorValue] = useState("")
   const [certificateLogoFile, setCertificateLogoFile] = useState<File | null>(null)
@@ -407,11 +408,15 @@ export default function CreateQuizPage() {
                 <label className="text-sm font-medium">Certificate Description (optional)</label>
                 <textarea
                   value={certificateDescription}
-                  onChange={(e) => setCertificateDescription(e.target.value)}
+                  onChange={(e) => setCertificateDescription(e.target.value.slice(0, descriptionLimit))}
                   className="bg-background p-3 rounded-[var(--radius-button)]"
                   rows={2}
                   placeholder="Shown under the student name. Leave blank for the default description."
+                  maxLength={descriptionLimit}
                 />
+                <div className="text-xs text-muted-foreground text-right">
+                  {certificateDescription.length}/{descriptionLimit}
+                </div>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Logo (optional)</label>
