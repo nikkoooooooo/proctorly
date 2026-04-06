@@ -24,7 +24,14 @@ export const defaultTemplateFields = {
     fontSize: 9,
     font: "Helvetica",
   },
-  instructor_name: {
+  instructor_label: {
+    x: 585.0,
+    y: 132.0,
+    align: "center" as const,
+    fontSize: 11,
+    font: "Helvetica",
+  },
+  instructor_value: {
     x: 585.0,
     y: 150.0,
     align: "center" as const,
@@ -48,12 +55,5 @@ export const defaultTemplateFields = {
     y: 170.0,
     width: 140,
     height: 55,
-  },
-  signature_text: {
-    x: 585.0,
-    y: 165.0,
-    align: "center" as const,
-    fontSize: 14,
-    font: "TimesRomanItalic",
   },
 }

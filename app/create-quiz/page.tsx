@@ -44,7 +44,7 @@ export default function CreateQuizPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [questions, setQuestions] = useState<Question[]>([createEmptyQuestion()])
+  const [questions, setQuestions] = useState<Question[]>([createEmptyQuestion(), createEmptyQuestion(), createEmptyQuestion(), createEmptyQuestion(), createEmptyQuestion()])
   const [createdQuizCode, setCreatedQuizCode] = useState<string | null>(null)
   const [isSubmittingQuiz, setIsSubmittingQuiz] = useState(false)
   const [isCopyingCode, setIsCopyingCode] = useState(false)
@@ -58,7 +58,8 @@ export default function CreateQuizPage() {
   const [passingPercentage, setPassingPercentage] = useState("")
   const [certificateEnabled, setCertificateEnabled] = useState(false)
   const [certificateDescription, setCertificateDescription] = useState("")
-  const [certificateSignatureText, setCertificateSignatureText] = useState("")
+  const [certificateInstructorLabel, setCertificateInstructorLabel] = useState("")
+  const [certificateInstructorValue, setCertificateInstructorValue] = useState("")
   const [certificateLogoFile, setCertificateLogoFile] = useState<File | null>(null)
   const [certificateSignatureFile, setCertificateSignatureFile] = useState<File | null>(null)
   const [pendingCertificateSave, setPendingCertificateSave] = useState(false)
@@ -237,8 +238,11 @@ export default function CreateQuizPage() {
         if (certificateDescription) {
           customizationData.set("certificateDescription", certificateDescription)
         }
-        if (certificateSignatureText) {
-          customizationData.set("certificateSignatureText", certificateSignatureText)
+        if (certificateInstructorLabel) {
+          customizationData.set("certificateInstructorLabel", certificateInstructorLabel)
+        }
+        if (certificateInstructorValue) {
+          customizationData.set("certificateInstructorValue", certificateInstructorValue)
         }
         if (certificateLogoFile) {
           customizationData.set("certificateLogo", certificateLogoFile)
@@ -411,30 +415,50 @@ export default function CreateQuizPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Logo (optional)</label>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg"
-                  onChange={(e) => setCertificateLogoFile(e.target.files?.[0] ?? null)}
-                />
+                <label className="flex items-center justify-between gap-3 border border-dashed border-muted-foreground/40 p-3 rounded-[var(--radius-button)] cursor-pointer hover:border-muted-foreground/70 transition-colors">
+                  <span className="text-sm text-muted-foreground">
+                    {certificateLogoFile?.name || "Click to upload logo (PNG/JPG)"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">Choose file</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    className="hidden"
+                    onChange={(e) => setCertificateLogoFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Signature Image (optional)</label>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg"
-                  onChange={(e) => setCertificateSignatureFile(e.target.files?.[0] ?? null)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  If you upload a signature image, signature text will be ignored.
-                </p>
+                <label className="flex items-center justify-between gap-3 border border-dashed border-muted-foreground/40 p-3 rounded-[var(--radius-button)] cursor-pointer hover:border-muted-foreground/70 transition-colors">
+                  <span className="text-sm text-muted-foreground">
+                    {certificateSignatureFile?.name || "Click to upload signature (PNG/JPG)"}
+                  </span>
+                  <span className="text-xs text-muted-foreground">Choose file</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    className="hidden"
+                    onChange={(e) => setCertificateSignatureFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium">Signature Text (optional)</label>
+                <label className="text-sm font-medium">Instructor Label (optional)</label>
                 <input
-                  value={certificateSignatureText}
-                  onChange={(e) => setCertificateSignatureText(e.target.value)}
+                  value={certificateInstructorLabel}
+                  onChange={(e) => setCertificateInstructorLabel(e.target.value)}
                   className="bg-background p-3 rounded-[var(--radius-button)]"
-                  placeholder="Printed name under the signature line."
+                  placeholder="Default: AUTHORIZED INSTRUCTOR"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium">Instructor Name (optional)</label>
+                <input
+                  value={certificateInstructorValue}
+                  onChange={(e) => setCertificateInstructorValue(e.target.value)}
+                  className="bg-background p-3 rounded-[var(--radius-button)]"
+                  placeholder="Default: quiz creator name"
                 />
               </div>
               <div className="flex items-center gap-3">
@@ -451,8 +475,11 @@ export default function CreateQuizPage() {
                     if (certificateDescription) {
                       customizationData.set("certificateDescription", certificateDescription)
                     }
-                    if (certificateSignatureText) {
-                      customizationData.set("certificateSignatureText", certificateSignatureText)
+                    if (certificateInstructorLabel) {
+                      customizationData.set("certificateInstructorLabel", certificateInstructorLabel)
+                    }
+                    if (certificateInstructorValue) {
+                      customizationData.set("certificateInstructorValue", certificateInstructorValue)
                     }
                     if (certificateLogoFile) {
                       customizationData.set("certificateLogo", certificateLogoFile)

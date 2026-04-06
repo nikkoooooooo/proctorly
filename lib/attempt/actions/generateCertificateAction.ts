@@ -60,7 +60,8 @@ export async function generateCertificateAction(attemptId: string, options?: { f
         certificateDescription: quiz.certificateDescription,
         certificateLogoKey: quiz.certificateLogoKey,
         certificateSignatureKey: quiz.certificateSignatureKey,
-        certificateSignatureText: quiz.certificateSignatureText,
+        certificateInstructorLabel: quiz.certificateInstructorLabel,
+        certificateInstructorValue: quiz.certificateInstructorValue,
       })
       .from(quiz)
       .where(eq(quiz.id, attemptRow.quizId))
@@ -157,16 +158,17 @@ export async function generateCertificateAction(attemptId: string, options?: { f
       quizRow.certificateDescription?.trim() ||
       `has successfully completed the ${quizRow.title}, conducted under ProctorlyX's monitored assessment system.`
 
-    const signatureText = quizRow.certificateSignatureKey
-      ? ""
-      : (quizRow.certificateSignatureText ?? "").trim()
+    const instructorLabel =
+      quizRow.certificateInstructorLabel?.trim() || "AUTHORIZED INSTRUCTOR"
+    const instructorValue =
+      quizRow.certificateInstructorValue?.trim() || (creator?.name ?? "Instructor")
 
     const values = {
       student_name: student?.name ?? "Student",
       description,
       serial_number: serialNumber,
-      instructor_name: creator?.name ?? "Instructor",
-      signature_text: signatureText,
+      instructor_label: instructorLabel,
+      instructor_value: instructorValue,
     }
 
     const baseUrl =

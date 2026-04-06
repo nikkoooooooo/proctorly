@@ -103,7 +103,8 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
   certificateDescription: text("certificate_description"),
   certificateLogoKey: text("certificate_logo_key"),
   certificateSignatureKey: text("certificate_signature_key"),
-  certificateSignatureText: text("certificate_signature_text"),
+  certificateInstructorLabel: text("certificate_instructor_label"),
+  certificateInstructorValue: text("certificate_instructor_value"),
 
   createdAt: timestamp("created_at").defaultNow(),
 });
