@@ -38,13 +38,6 @@ export const defaultTemplateFields = {
     fontSize: 20,
     font: "TimesRomanItalic",
   },
-  instructor_label_mask: {
-    x: 585.0,
-    y: 130.0,
-    width: 180,
-    height: 24,
-    color: { r: 1, g: 1, b: 1 },
-  },
   qr_code: {
     x: 255.0,
     y: 200.0,

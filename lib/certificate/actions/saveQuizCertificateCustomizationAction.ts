@@ -11,8 +11,7 @@ export async function saveQuizCertificateCustomizationAction(
   formData: FormData
 ) {
   try {
-    const rawDescription = (formData.get("certificateDescription") as string | null)?.trim() || null
-    const description = rawDescription ? rawDescription.slice(0, 160) : null
+    const description = (formData.get("certificateDescription") as string | null)?.trim() || null
     const instructorLabel = (formData.get("certificateInstructorLabel") as string | null)?.trim() || null
     const instructorValue = (formData.get("certificateInstructorValue") as string | null)?.trim() || null
     const logoFile = formData.get("certificateLogo") as File | null

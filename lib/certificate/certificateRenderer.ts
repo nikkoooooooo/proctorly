@@ -13,7 +13,6 @@ interface FieldStyle {
   lineHeight?: number
   width?: number
   height?: number
-  color?: { r: number; g: number; b: number }
 }
 
 export async function renderCertificatePdfBytes(params: {
@@ -64,18 +63,6 @@ export async function renderCertificatePdfBytes(params: {
         y: style.y - style.height / 2,
         width: style.width,
         height: style.height,
-      })
-      continue
-    }
-
-    if (style.width && style.height && key.endsWith("_mask")) {
-      const fill = style.color ?? { r: 1, g: 1, b: 1 }
-      page.drawRectangle({
-        x: style.x - style.width / 2,
-        y: style.y - style.height / 2,
-        width: style.width,
-        height: style.height,
-        color: rgb(fill.r, fill.g, fill.b),
       })
       continue
     }
