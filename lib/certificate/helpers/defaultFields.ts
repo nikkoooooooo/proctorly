@@ -39,13 +39,13 @@ export const defaultTemplateFields = {
   },
   logo_image: {
     x: 421.125,
-    y: 190.0,
+    y: 170.0,
     width: 90,
     height: 90,
   },
   signature_image: {
     x: 585.0,
-    y: 190.0,
+    y: 170.0,
     width: 140,
     height: 55,
   },
