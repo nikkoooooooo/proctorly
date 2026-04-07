@@ -15,6 +15,7 @@ export async function createQuizAction(
   description: string, 
   blurQuestion = false,
   expiresAt?: string | null,
+  retakeLimit = 0,
   isPaidQuiz = false,
   paidQuizFee?: number | null,
   passingPercentage?: number | null,
@@ -47,6 +48,10 @@ export async function createQuizAction(
       return { success: false, error: "Passing percentage must be between 1 and 100." };
     }
 
+    if (retakeLimit == null || Number.isNaN(retakeLimit) || retakeLimit < 0) {
+      return { success: false, error: "Retake limit must be 0 or higher." };
+    }
+
     if (isPaidQuiz) {
       if (!paidQuizFee || paidQuizFee < 10000) {
         return { success: false, error: "Minimum quiz fee is 100." };
@@ -60,6 +65,7 @@ export async function createQuizAction(
       description,
       blurQuestion,
       expiresAt,
+      retakeLimit,
       isPaidQuiz,
       paidQuizFee ?? null,
       passingPercentage ?? null,

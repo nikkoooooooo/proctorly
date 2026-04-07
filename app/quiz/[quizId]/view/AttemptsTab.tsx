@@ -17,6 +17,7 @@ interface Attempt {
   section?: string | null
   score: number | null
   totalPoints?: number | null
+  attemptCount?: number
   tabSwitchCount: number
   completed: boolean
   startedAt?: string | Date | null
@@ -86,6 +87,7 @@ export default function AttemptsTab() {
       "Email",
       "Student No",
       "Section",
+      "Attempts",
       "Score",
       "Percentage",
       "Passed",
@@ -117,6 +119,7 @@ export default function AttemptsTab() {
         a.email ?? "Unknown",
         a.studentNo ?? "N/A",
         a.section ?? "N/A",
+        a.attemptCount ?? 1,
         a.completed ? (a.score ?? 0) : null,
         a.completed ? `${percentage.toFixed(2)}%` : null,
         passed,
@@ -135,6 +138,7 @@ export default function AttemptsTab() {
       { wch: 16 },
       { wch: 16 },
       { wch: 10 },
+      { wch: 10 },
       { wch: 12 },
       { wch: 12 },
       { wch: 14 },
@@ -143,11 +147,11 @@ export default function AttemptsTab() {
       { wch: 24 },
     ]
     worksheet["!merges"] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 10 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 10 } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 10 } },
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 11 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 11 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 11 } },
     ]
-    worksheet["!autofilter"] = { ref: "A5:K5" }
+    worksheet["!autofilter"] = { ref: "A5:L5" }
     worksheet["!freeze"] = { xSplit: 0, ySplit: 5 }
 
     const workbook = XLSX.utils.book_new()
@@ -198,6 +202,7 @@ export default function AttemptsTab() {
                   <th className="py-2 px-3">Student No</th>
                   <th className="py-2 px-3">Section</th>
                   <th className="py-2 px-3">Email</th>
+                  <th className="py-2 px-3">Attempts</th>
                   <th className="py-2 px-3">Score</th>
                   <th className="py-2 px-3">Percentage</th>
                   <th className="py-2 px-3">Passed</th>
@@ -214,6 +219,7 @@ export default function AttemptsTab() {
                     <td className="py-2 px-3">{a.studentNo ?? "—"}</td>
                     <td className="py-2 px-3">{a.section ?? "—"}</td>
                     <td className="py-2 px-3 text-muted-foreground">{a.email ?? "Unknown"}</td>
+                    <td className="py-2 px-3 font-semibold">{a.attemptCount ?? 1}</td>
                     <td className="py-2 px-3 font-semibold">{a.score ?? 0}</td>
                     <td className="py-2 px-3 text-muted-foreground">
                       {(() => {

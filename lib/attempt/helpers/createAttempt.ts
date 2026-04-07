@@ -1,23 +1,9 @@
 import { db } from "@/lib/db";
 import { attempt, quiz } from "@/lib/schema";
-import { eq, and } from "drizzle-orm/expressions";
+import { eq } from "drizzle-orm/expressions";
 import { randomUUID } from "crypto";
 
 export async function createAttempt({ quizId, userId }: {quizId: string, userId: string}) {
-  // 1️⃣ Check if attempt already exists
-  const [existingAttempt] = await db
-    .select()
-    .from(attempt)
-    .where(and(eq(attempt.quizId, quizId), eq(attempt.userId, userId)))
-    .execute();
-
-  if (existingAttempt) {
-    return {
-      status: "exists",
-      attempt: existingAttempt,
-    };
-  }
-
   const [quizData] = await db
     .select({ expiresAt: quiz.expiresAt })
     .from(quiz)

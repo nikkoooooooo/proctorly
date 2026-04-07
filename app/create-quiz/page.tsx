@@ -56,6 +56,7 @@ export default function CreateQuizPage() {
   const [isPaidQuiz, setIsPaidQuiz] = useState(false)
   const [paidQuizFee, setPaidQuizFee] = useState("")
   const [passingPercentage, setPassingPercentage] = useState("")
+  const [retakeLimit, setRetakeLimit] = useState(0)
   const [certificateEnabled, setCertificateEnabled] = useState(false)
   const [certificateDescription, setCertificateDescription] = useState("")
   const [certificateInstructorLabel, setCertificateInstructorLabel] = useState("")
@@ -178,6 +179,10 @@ export default function CreateQuizPage() {
       toast.error("Passing percentage must be between 1 and 100")
       return
     }
+    if (Number.isNaN(retakeLimit) || retakeLimit < 0) {
+      toast.error("Retake limit must be 0 or higher")
+      return
+    }
     if (isPaidQuiz) {
       if (!paidQuizFee || Number(paidQuizFee) < 100) {
         toast.error("Minimum quiz fee is 100")
@@ -218,6 +223,7 @@ export default function CreateQuizPage() {
         description,
         blurQuestion,
         expiresAt ? new Date(expiresAt).toISOString() : null,
+        retakeLimit,
         isPaidQuiz,
         isPaidQuiz ? Math.round(Number(paidQuizFee) * 100) : null,
         passingPercentage ? Number(passingPercentage) : null,
@@ -273,6 +279,7 @@ export default function CreateQuizPage() {
       setIsPaidQuiz(false)
       setPaidQuizFee("")
       setPassingPercentage("")
+      setRetakeLimit(0)
     } catch (err) {
       console.error(err)
       // Use toast for errors to keep UX consistent
@@ -322,6 +329,20 @@ export default function CreateQuizPage() {
               placeholder="Set a passing percentage (1–100)"
             />
             <p className="text-sm text-muted-foreground">Leave blank if not required.</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="font-semibold">Retake limit</label>
+            <input
+              type="number"
+              min="0"
+              value={retakeLimit}
+              onChange={(e) => setRetakeLimit(Number(e.target.value))}
+              className="bg-background p-3 rounded-(--radius-button)"
+              placeholder="0"
+            />
+            <p className="text-sm text-muted-foreground">
+              0 = no retake. 1 = allow one retake (2 total attempts).
+            </p>
           </div>
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Expiry (creator local time)</label>
