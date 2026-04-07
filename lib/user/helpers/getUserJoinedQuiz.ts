@@ -1,8 +1,9 @@
 "use server"
 
 import { db } from "@/lib/db"
-import { desc, eq, inArray } from "drizzle-orm";
-import { attempt, quiz, user, quizEnrollment } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+import { quiz, user, quizEnrollment } from "@/lib/schema";
+import { getRetakeSummaries } from "@/lib/attempt/helpers/getRetakeSummary";
 
 
 
@@ -18,6 +19,7 @@ export async function getUserJoinedQuiz(userId: string) {
       expiresAt: quiz.expiresAt,
       isPaidQuiz: quiz.isPaidQuiz,
       paidQuizFee: quiz.paidQuizFee,
+      retakeLimit: quiz.retakeLimit,
       creatorName: user.name,
     })
     .from(quizEnrollment)
@@ -29,45 +31,21 @@ export async function getUserJoinedQuiz(userId: string) {
   if (!joined.length) return joined;
 
   const quizIds = joined.map((row) => row.id);
-  const attempts = await db
-    .select({
-      quizId: attempt.quizId,
-      attemptId: attempt.id,
-      isCompleted: attempt.isCompleted,
-      updatedAt: attempt.updatedAt,
-    })
-    .from(attempt)
-    .where(inArray(attempt.quizId, quizIds))
-    .orderBy(desc(attempt.updatedAt))
-    .execute();
-
-  const latestByQuiz = new Map<
-    string,
-    { attemptId: string; isCompleted: boolean }
-  >();
-  for (const row of attempts) {
-    if (!latestByQuiz.has(row.quizId)) {
-      latestByQuiz.set(row.quizId, {
-        attemptId: row.attemptId,
-        isCompleted: row.isCompleted,
-      });
-    }
-  }
+  const summaries = await getRetakeSummaries({ userId, quizIds })
 
   return joined.map((row) => {
-    const latest = latestByQuiz.get(row.id);
-    const attemptStatus = !latest
+    const summary = summaries[row.id]
+    const attemptStatus = !summary
       ? "not_started"
-      : latest.isCompleted
+      : summary.latestAttemptCompleted
         ? "completed"
         : "in_progress";
 
     return {
       ...row,
       attemptStatus,
-      attemptId: latest?.attemptId ?? null,
+      attemptId: summary?.latestAttemptId ?? null,
+      attemptCount: summary?.attemptCount ?? 0,
     };
   });
 }
-
-

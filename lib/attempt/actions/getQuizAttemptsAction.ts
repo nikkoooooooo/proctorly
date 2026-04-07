@@ -49,7 +49,23 @@ export async function getQuizAttemptsAction(quizId: string) {
       return { ...rest, studentNo, totalPoints }
     })
 
-    return { success: true, attempts };
+    const latestByUser = new Map<string, { count: number; latest: (typeof attempts)[number] }>()
+    for (const row of attempts) {
+      if (!row.userId) continue
+      const existing = latestByUser.get(row.userId)
+      if (!existing) {
+        latestByUser.set(row.userId, { count: 1, latest: row })
+      } else {
+        latestByUser.set(row.userId, { count: existing.count + 1, latest: existing.latest })
+      }
+    }
+
+    const latestAttempts = Array.from(latestByUser.values()).map((entry) => ({
+      ...entry.latest,
+      attemptCount: entry.count,
+    }))
+
+    return { success: true, attempts: latestAttempts };
   } catch (error) {
     console.error("Failed to fetch quiz attempts:", error);
     return {

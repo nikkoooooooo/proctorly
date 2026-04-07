@@ -18,6 +18,8 @@ interface Quiz {
   creatorName?: string | null
   attemptStatus?: "completed" | "in_progress" | "not_started"
   attemptId?: string | null
+  attemptCount?: number | null
+  retakeLimit?: number | null
 }
 
 function formatPHDateTime(value?: string | Date | null) {
@@ -183,12 +185,29 @@ function Page() {
                             </button>
                           </div>
                         ) : quiz.attemptStatus === "completed" && quiz.attemptId ? (
-                          <Link
-                            href={`/quiz/${quiz.id}/results/${quiz.attemptId}`}
-                            className="border border-primary/60 text-primary flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/10 transition-all w-full sm:w-auto"
-                          >
-                            View Result
-                          </Link>
+                          <div className="flex flex-col gap-2 w-full sm:w-auto">
+                            <Link
+                              href={`/quiz/${quiz.id}/results/${quiz.attemptId}`}
+                              className="border border-primary/60 text-primary flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/10 transition-all w-full sm:w-auto"
+                            >
+                              View Result
+                            </Link>
+                            {(() => {
+                              const attemptsUsed = quiz.attemptCount ?? 0
+                              const retakeLimit = quiz.retakeLimit ?? 0
+                              const maxAttempts = 1 + retakeLimit
+                              const canRetake = attemptsUsed < maxAttempts
+                              if (!canRetake) return null
+                              return (
+                                <Link
+                                  href={`/quiz/${quiz.id}`}
+                                  className="bg-primary text-primary-foreground flex items-center justify-center rounded-[var(--radius-button)] font-semibold cursor-pointer p-2 hover:bg-primary/80 transition-all w-full sm:w-auto"
+                                >
+                                  Retake
+                                </Link>
+                              )
+                            })()}
+                          </div>
                         ) : quiz.attemptStatus === "in_progress" ? (
                           <Link
                             href={`/quiz/${quiz.id}`}

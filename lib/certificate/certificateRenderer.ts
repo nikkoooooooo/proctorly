@@ -123,7 +123,6 @@ export async function renderCertificatePdfBytes(params: {
         y: style.y - height / 2,
         width,
         height,
-        borderRadius: borderRadius ?? 0,
         borderWidth: borderWidth ?? 1,
         borderColor: borderColor ? rgb(borderColor.r, borderColor.g, borderColor.b) : undefined,
         color: fillColor ? rgb(fillColor.r, fillColor.g, fillColor.b) : undefined,

@@ -95,6 +95,9 @@ export const quiz = pgTable("quiz", { // TABLE QUIZ
 
   expiresAt: timestamp("expires_at"),
 
+  // Retake limit (0 = no retake, 1 = allow one retake, etc.)
+  retakeLimit: integer("retake_limit").default(0).notNull(),
+
   // Paid quiz columns
   isPaidQuiz: boolean("is_paid_quiz").default(false).notNull(),
   paidQuizFee: integer("paid_quiz_fee"), // cents
