@@ -16,7 +16,6 @@ interface FieldStyle {
   box?: {
     width: number
     height: number
-    borderRadius?: number
     borderWidth?: number
     borderColor?: { r: number; g: number; b: number }
     fillColor?: { r: number; g: number; b: number }
@@ -117,13 +116,12 @@ export async function renderCertificatePdfBytes(params: {
   for (const [key, style] of Object.entries(params.fields)) {
     const value = params.values[key]
     if (style.box && value) {
-      const { width, height, borderRadius, borderWidth, borderColor, fillColor } = style.box
+      const { width, height, borderWidth, borderColor, fillColor } = style.box
       page.drawRectangle({
         x: style.x - width / 2,
         y: style.y - height / 2,
         width,
         height,
-        borderRadius: borderRadius ?? 0,
         borderWidth: borderWidth ?? 1,
         borderColor: borderColor ? rgb(borderColor.r, borderColor.g, borderColor.b) : undefined,
         color: fillColor ? rgb(fillColor.r, fillColor.g, fillColor.b) : undefined,
