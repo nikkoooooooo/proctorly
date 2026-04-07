@@ -13,6 +13,15 @@ interface FieldStyle {
   lineHeight?: number
   width?: number
   height?: number
+  box?: {
+    width: number
+    height: number
+    borderRadius?: number
+    borderWidth?: number
+    borderColor?: { r: number; g: number; b: number }
+    fillColor?: { r: number; g: number; b: number }
+  }
+  renderText?: boolean
 }
 
 export async function renderCertificatePdfBytes(params: {
@@ -33,22 +42,96 @@ export async function renderCertificatePdfBytes(params: {
     return fontCache.get(resolved)
   }
 
+  const sanitizeText = (text: string) =>
+    text
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .replace(/[^\x09\x0A\x20-\x7E]/g, "")
+
+  const splitLongWord = (word: string, font: any, size: number, maxWidth: number) => {
+    if (font.widthOfTextAtSize(word, size) <= maxWidth) return [word]
+    const parts: string[] = []
+    let current = ""
+    for (const char of word) {
+      const next = current + char
+      if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+        current = next
+      } else {
+        if (current) parts.push(current)
+        current = char
+      }
+    }
+    if (current) parts.push(current)
+    return parts
+  }
+
   const wrapText = (text: string, font: any, size: number, maxWidth: number, maxLines?: number) => {
     const words = text.split(/\s+/).filter(Boolean)
     const lines: string[] = []
     let current = ""
     for (const word of words) {
-      const next = current ? `${current} ${word}` : word
-      if (font.widthOfTextAtSize(next, size) <= maxWidth) {
-        current = next
-      } else {
-        if (current) lines.push(current)
-        current = word
+      const wordParts = splitLongWord(word, font, size, maxWidth)
+      for (const part of wordParts) {
+        const next = current ? `${current} ${part}` : part
+        if (font.widthOfTextAtSize(next, size) <= maxWidth) {
+          current = next
+        } else {
+          if (current) lines.push(current)
+          current = part
+        }
+        if (maxLines && lines.length >= maxLines) break
       }
       if (maxLines && lines.length >= maxLines) break
     }
     if (current && (!maxLines || lines.length < maxLines)) lines.push(current)
     return lines
+  }
+
+  const wrapMultilineText = (
+    text: string,
+    font: any,
+    size: number,
+    maxWidth?: number,
+    maxLines?: number
+  ) => {
+    const clean = sanitizeText(text)
+    if (!maxWidth) {
+      const rawLines = clean.split("\n").map((line) => line.trim()).filter(Boolean)
+      return rawLines.length ? rawLines : [clean]
+    }
+    const rawLines = clean.split("\n")
+    const lines: string[] = []
+    for (const raw of rawLines) {
+      const segment = raw.trim()
+      if (!segment) continue
+      const wrapped = wrapText(segment, font, size, maxWidth, maxLines ? maxLines - lines.length : undefined)
+      lines.push(...wrapped)
+      if (maxLines && lines.length >= maxLines) break
+    }
+    if (!lines.length && clean) {
+      return wrapText(clean, font, size, maxWidth, maxLines)
+    }
+    return lines
+  }
+
+  for (const [key, style] of Object.entries(params.fields)) {
+    const value = params.values[key]
+    if (style.box && value) {
+      const { width, height, borderRadius, borderWidth, borderColor, fillColor } = style.box
+      page.drawRectangle({
+        x: style.x - width / 2,
+        y: style.y - height / 2,
+        width,
+        height,
+        borderRadius: borderRadius ?? 0,
+        borderWidth: borderWidth ?? 1,
+        borderColor: borderColor ? rgb(borderColor.r, borderColor.g, borderColor.b) : undefined,
+        color: fillColor ? rgb(fillColor.r, fillColor.g, fillColor.b) : undefined,
+      })
+      if (style.renderText === false) {
+        continue
+      }
+    }
   }
 
   for (const [key, style] of Object.entries(params.fields)) {
@@ -77,25 +160,20 @@ export async function renderCertificatePdfBytes(params: {
     const maxLines = style.maxLines
     const lineHeight = style.lineHeight ?? Math.round(size * 1.2)
 
-    let lines = value.includes("\n")
-      ? value.split("\n").filter(Boolean)
-      : maxWidth
-        ? wrapText(value, font, size, maxWidth, maxLines)
-        : [value]
+    let lines = wrapMultilineText(value, font, size, maxWidth, maxLines)
 
     if (maxWidth && maxLines) {
       while (size > minSize) {
-        lines = value.includes("\n")
-          ? value.split("\n").filter(Boolean)
-          : wrapText(value, font, size, maxWidth, maxLines)
+        lines = wrapMultilineText(value, font, size, maxWidth, maxLines)
         if (lines.length <= maxLines) break
         size -= 1
       }
     } else if (maxWidth) {
-      while (size > minSize && font.widthOfTextAtSize(value, size) > maxWidth) {
+      const cleanValue = sanitizeText(value)
+      while (size > minSize && font.widthOfTextAtSize(cleanValue, size) > maxWidth) {
         size -= 1
       }
-      lines = [value]
+      lines = [cleanValue]
     }
 
     const color = style.color ?? { r: 0, g: 0, b: 0 }

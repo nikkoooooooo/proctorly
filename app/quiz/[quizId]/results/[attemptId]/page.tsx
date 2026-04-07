@@ -37,7 +37,7 @@ export default async function ResultPage(props: ResultPageProps) {
       <p className="text-lg text-red-500">Tab Switches: {result.tabSwitchCount}</p>
 
       <div className="mt-6 w-full max-w-md text-center">
-        <p className="mb-6">🎉 Congratulations on completing the quiz!</p>
+        <p className="mb-6">🎉 Congratulations on completing the Assessment!</p>
         <div className="flex flex-col items-center gap-3">
           {result.certificateEnabled ? (
             <DownloadCertificateButton

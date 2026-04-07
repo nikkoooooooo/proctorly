@@ -18,7 +18,8 @@ export async function createQuizAction(
   isPaidQuiz = false,
   paidQuizFee?: number | null,
   passingPercentage?: number | null,
-  certificateEnabled = false
+  certificateEnabled = false,
+  certificateShowScore = true
 ) {
   try {
     const [{ count: existingQuizCount }] = await db
@@ -62,7 +63,8 @@ export async function createQuizAction(
       isPaidQuiz,
       paidQuizFee ?? null,
       passingPercentage ?? null,
-      certificateEnabled
+      certificateEnabled,
+      certificateShowScore
     );
 
     return { success: true, quiz: createdQuiz };

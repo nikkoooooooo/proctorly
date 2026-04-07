@@ -62,13 +62,14 @@ export async function generateCertificateAction(attemptId: string, options?: { f
         certificateSignatureKey: quiz.certificateSignatureKey,
         certificateInstructorLabel: quiz.certificateInstructorLabel,
         certificateInstructorValue: quiz.certificateInstructorValue,
+        certificateShowScore: quiz.certificateShowScore,
       })
       .from(quiz)
       .where(eq(quiz.id, attemptRow.quizId))
       .execute()
 
     if (!quizRow) {
-      return { success: false, error: "Quiz not found." }
+      return { success: false, error: "Assessment not found." }
     }
 
     const [creator] = await db
@@ -90,7 +91,7 @@ export async function generateCertificateAction(attemptId: string, options?: { f
         .replace(/\s+/g, "-")
 
     const studentLabel = buildFilename(student?.name ?? "Student")
-    const quizLabel = buildFilename(quizRow.title ?? "Quiz")
+    const quizLabel = buildFilename(quizRow.title ?? "Assessment")
     const downloadName = `ProctorlyX-Certificate-${studentLabel}-${quizLabel}.pdf`
 
     const questions = await db
@@ -163,12 +164,24 @@ export async function generateCertificateAction(attemptId: string, options?: { f
     const instructorValue =
       quizRow.certificateInstructorValue?.trim() || (creator?.name ?? "Instructor")
 
+    const showScore = quizRow.certificateShowScore ?? true
+    const scorePercent =
+      totalPoints > 0 ? Math.round(((attemptRow.score ?? 0) / totalPoints) * 100) : 0
+    const issueDateText = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(issuedAt)
+
     const values = {
       student_name: student?.name ?? "Student",
       description,
       serial_number: serialNumber,
       instructor_label: instructorLabel,
       instructor_value: instructorValue,
+      mode_text: "Mode: Online",
+      score_text: showScore ? `With a rating of ${Math.max(0, Math.min(100, scorePercent))}%` : "",
+      date_text: `Issued on ${issueDateText}`,
     }
 
     const baseUrl =
@@ -179,6 +192,7 @@ export async function generateCertificateAction(attemptId: string, options?: { f
     const images: Record<string, { bytes: Uint8Array; type: "png" | "jpg" }> = {
       qr_code: { bytes: qrPng, type: "png" },
     }
+    const hasLogo = Boolean(quizRow.certificateLogoKey)
 
     if (quizRow.certificateLogoKey) {
       const logoBytes = await downloadObjectFromS3(quizRow.certificateLogoKey)
@@ -192,7 +206,10 @@ export async function generateCertificateAction(attemptId: string, options?: { f
 
     const pdfBytes = await renderCertificatePdfBytes({
       templatePdfBytes: templateBytes,
-      values,
+      values: {
+        ...values,
+        collaboration_label: hasLogo ? "In collaboration with:" : "",
+      },
       fields,
       images,
     })

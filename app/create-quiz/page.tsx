@@ -60,9 +60,11 @@ export default function CreateQuizPage() {
   const [certificateDescription, setCertificateDescription] = useState("")
   const [certificateInstructorLabel, setCertificateInstructorLabel] = useState("")
   const [certificateInstructorValue, setCertificateInstructorValue] = useState("")
+  const [certificateShowScore, setCertificateShowScore] = useState(true)
   const [certificateLogoFile, setCertificateLogoFile] = useState<File | null>(null)
   const [certificateSignatureFile, setCertificateSignatureFile] = useState<File | null>(null)
   const [pendingCertificateSave, setPendingCertificateSave] = useState(false)
+  const CERT_DESCRIPTION_MAX = 160
 
 
   useEffect(() => {
@@ -220,6 +222,7 @@ export default function CreateQuizPage() {
         isPaidQuiz ? Math.round(Number(paidQuizFee) * 100) : null,
         passingPercentage ? Number(passingPercentage) : null,
         certificateEnabled,
+        certificateShowScore,
       )
 
       if (!result.success || !result.quiz) {
@@ -238,6 +241,7 @@ export default function CreateQuizPage() {
         if (certificateDescription) {
           customizationData.set("certificateDescription", certificateDescription)
         }
+        customizationData.set("certificateShowScore", certificateShowScore ? "1" : "0")
         if (certificateInstructorLabel) {
           customizationData.set("certificateInstructorLabel", certificateInstructorLabel)
         }
@@ -402,6 +406,11 @@ export default function CreateQuizPage() {
             Uses the ProctorlyX default certificate template.
           </p>
           {certificateEnabled && (
+            <p className="text-xs text-muted-foreground">
+              Final score and issue date are included on every certificate.
+            </p>
+          )}
+          {certificateEnabled && (
             <div className="space-y-3">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Certificate Description (optional)</label>
@@ -410,8 +419,19 @@ export default function CreateQuizPage() {
                   onChange={(e) => setCertificateDescription(e.target.value)}
                   className="bg-background p-3 rounded-[var(--radius-button)]"
                   rows={2}
+                  maxLength={CERT_DESCRIPTION_MAX}
                   placeholder="Shown under the student name. Leave blank for the default description."
                 />
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>Max {CERT_DESCRIPTION_MAX} characters.</span>
+                  <span
+                    className={
+                      certificateDescription.length >= CERT_DESCRIPTION_MAX ? "text-red-400" : ""
+                    }
+                  >
+                    {certificateDescription.length}/{CERT_DESCRIPTION_MAX}
+                  </span>
+                </div>
               </div>
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Logo (optional)</label>
@@ -475,6 +495,7 @@ export default function CreateQuizPage() {
                     if (certificateDescription) {
                       customizationData.set("certificateDescription", certificateDescription)
                     }
+                    customizationData.set("certificateShowScore", certificateShowScore ? "1" : "0")
                     if (certificateInstructorLabel) {
                       customizationData.set("certificateInstructorLabel", certificateInstructorLabel)
                     }
