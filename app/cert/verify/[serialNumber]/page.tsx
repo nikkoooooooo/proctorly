@@ -76,7 +76,7 @@ export default function VerifyCertificatePage() {
                 <span className="font-semibold">Student:</span> {state.studentName}
               </p>
               <p>
-                <span className="font-semibold">Quiz:</span> {state.quizTitle}
+                <span className="font-semibold">Assessment:</span> {state.quizTitle}
               </p>
               <p>
                 <span className="font-semibold">Issued:</span>{" "}

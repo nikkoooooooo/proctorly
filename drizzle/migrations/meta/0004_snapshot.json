@@ -1,1804 +1,1818 @@
 {
-  "id": "f99b7a41-bdb1-4522-8e2e-ea99a745b99c",
-  "prevId": "07153613-940a-4586-9f31-9c3f82f820d9",
-  "version": "7",
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  },
   "dialect": "postgresql",
+  "enums": {},
+  "id": "f99b7a41-bdb1-4522-8e2e-ea99a745b99c",
+  "policies": {},
+  "prevId": "07153613-940a-4586-9f31-9c3f82f820d9",
+  "roles": {},
+  "schemas": {},
+  "sequences": {},
   "tables": {
     "public.account": {
-      "name": "account",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "account_id": {
-          "name": "account_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "provider_id": {
-          "name": "provider_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "access_token": {
           "name": "access_token",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
-        },
-        "refresh_token": {
-          "name": "refresh_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "id_token": {
-          "name": "id_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
         "access_token_expires_at": {
           "name": "access_token_expires_at",
-          "type": "timestamp",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "timestamp"
         },
-        "refresh_token_expires_at": {
-          "name": "refresh_token_expires_at",
-          "type": "timestamp",
+        "account_id": {
+          "name": "account_id",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
-        "scope": {
-          "name": "scope",
-          "type": "text",
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": false
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "id_token": {
+          "name": "id_token",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
         },
         "password": {
           "name": "password",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
+        "provider_id": {
+          "name": "provider_id",
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "text"
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "scope": {
+          "name": "scope",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "timestamp",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
+          "type": "timestamp"
+        },
+        "user_id": {
+          "name": "user_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         }
       },
-      "indexes": {
-        "account_userId_idx": {
-          "name": "account_userId_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "compositePrimaryKeys": {},
       "foreignKeys": {
         "account_user_id_user_id_fk": {
-          "name": "account_user_id_user_id_fk",
-          "tableFrom": "account",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "account_user_id_user_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "account",
+          "tableTo": "user"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "indexes": {
+        "account_userId_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "user_id",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "account_userId_idx",
+          "with": {}
+        }
+      },
+      "isRLSEnabled": false,
+      "name": "account",
       "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "schema": "",
+      "uniqueConstraints": {}
     },
     "public.attempt": {
-      "name": "attempt",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
+        "completed": {
+          "default": false,
+          "name": "completed",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "boolean"
+        },
         "id": {
           "name": "id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": true,
-          "notNull": true
-        },
-        "quiz_id": {
-          "name": "quiz_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "score": {
-          "name": "score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "completed": {
-          "name": "completed",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "tab_switch_count": {
-          "name": "tab_switch_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "started_at": {
-          "name": "started_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
-        },
-        "last_seen_at": {
-          "name": "last_seen_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
         "last_activity_at": {
           "name": "last_activity_at",
-          "type": "timestamp",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "timestamp"
+        },
+        "last_seen_at": {
+          "name": "last_seen_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "quiz_id": {
+          "name": "quiz_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "score": {
+          "name": "score",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "started_at": {
+          "default": "now()",
+          "name": "started_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
         },
         "submitted_at": {
           "name": "submitted_at",
-          "type": "timestamp",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "timestamp"
+        },
+        "tab_switch_count": {
+          "default": 0,
+          "name": "tab_switch_count",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "user_id": {
+          "name": "user_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         }
       },
-      "indexes": {},
+      "compositePrimaryKeys": {},
       "foreignKeys": {
         "attempt_quiz_id_quiz_id_fk": {
-          "name": "attempt_quiz_id_quiz_id_fk",
-          "tableFrom": "attempt",
-          "tableTo": "quiz",
           "columnsFrom": [
             "quiz_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "attempt_quiz_id_quiz_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "attempt",
+          "tableTo": "quiz"
         },
         "attempt_user_id_user_id_fk": {
-          "name": "attempt_user_id_user_id_fk",
-          "tableFrom": "attempt",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "attempt_user_id_user_id_fk",
           "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "attempt",
+          "tableTo": "user"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "attempt",
       "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "schema": "",
+      "uniqueConstraints": {}
     },
     "public.attempt_answer": {
-      "name": "attempt_answer",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
+        "answered_at": {
+          "default": "now()",
+          "name": "answered_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
         },
         "attempt_id": {
           "name": "attempt_id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
+          "type": "text"
         },
-        "question_id": {
-          "name": "question_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "option_id": {
-          "name": "option_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "text_answer": {
-          "name": "text_answer",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
         },
         "is_correct": {
           "name": "is_correct",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "answered_at": {
-          "name": "answered_at",
-          "type": "timestamp",
-          "primaryKey": false,
           "notNull": false,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "boolean"
+        },
+        "option_id": {
+          "name": "option_id",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "question_id": {
+          "name": "question_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "text_answer": {
+          "name": "text_answer",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
         }
       },
-      "indexes": {
-        "attempt_answer_unique_idx": {
-          "name": "attempt_answer_unique_idx",
-          "columns": [
-            {
-              "expression": "attempt_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "question_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "compositePrimaryKeys": {},
       "foreignKeys": {
         "attempt_answer_attempt_id_attempt_id_fk": {
-          "name": "attempt_answer_attempt_id_attempt_id_fk",
-          "tableFrom": "attempt_answer",
-          "tableTo": "attempt",
           "columnsFrom": [
             "attempt_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "attempt_answer_attempt_id_attempt_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "attempt_answer_question_id_question_id_fk": {
-          "name": "attempt_answer_question_id_question_id_fk",
+          "onUpdate": "no action",
           "tableFrom": "attempt_answer",
-          "tableTo": "question",
-          "columnsFrom": [
-            "question_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "tableTo": "attempt"
         },
         "attempt_answer_option_id_option_id_fk": {
-          "name": "attempt_answer_option_id_option_id_fk",
-          "tableFrom": "attempt_answer",
-          "tableTo": "option",
           "columnsFrom": [
             "option_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "attempt_answer_option_id_option_id_fk",
           "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.attempt_event": {
-      "name": "attempt_event",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
+          "onUpdate": "no action",
+          "tableFrom": "attempt_answer",
+          "tableTo": "option"
         },
-        "attempt_id": {
-          "name": "attempt_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payload": {
-          "name": "payload",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "attempt_event_attempt_idx": {
-          "name": "attempt_event_attempt_idx",
-          "columns": [
-            {
-              "expression": "attempt_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "attempt_event_created_idx": {
-          "name": "attempt_event_created_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "attempt_event_attempt_id_attempt_id_fk": {
-          "name": "attempt_event_attempt_id_attempt_id_fk",
-          "tableFrom": "attempt_event",
-          "tableTo": "attempt",
-          "columnsFrom": [
-            "attempt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.attempt_question_progress": {
-      "name": "attempt_question_progress",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "attempt_id": {
-          "name": "attempt_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "question_id": {
-          "name": "question_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "remaining_time": {
-          "name": "remaining_time",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "order_index": {
-          "name": "order_index",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_answered": {
-          "name": "is_answered",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "attempt_question_unique_idx": {
-          "name": "attempt_question_unique_idx",
-          "columns": [
-            {
-              "expression": "attempt_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "question_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "attempt_question_attempt_idx": {
-          "name": "attempt_question_attempt_idx",
-          "columns": [
-            {
-              "expression": "attempt_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "attempt_question_progress_attempt_id_attempt_id_fk": {
-          "name": "attempt_question_progress_attempt_id_attempt_id_fk",
-          "tableFrom": "attempt_question_progress",
-          "tableTo": "attempt",
-          "columnsFrom": [
-            "attempt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "attempt_question_progress_question_id_question_id_fk": {
-          "name": "attempt_question_progress_question_id_question_id_fk",
-          "tableFrom": "attempt_question_progress",
-          "tableTo": "question",
+        "attempt_answer_question_id_question_id_fk": {
           "columnsFrom": [
             "question_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "attempt_answer_question_id_question_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "attempt_answer",
+          "tableTo": "question"
+        }
+      },
+      "indexes": {
+        "attempt_answer_unique_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "attempt_id",
+              "isExpression": false,
+              "nulls": "last"
+            },
+            {
+              "asc": true,
+              "expression": "question_id",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": true,
+          "method": "btree",
+          "name": "attempt_answer_unique_idx",
+          "with": {}
+        }
+      },
+      "isRLSEnabled": false,
+      "name": "attempt_answer",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.attempt_event": {
+      "checkConstraints": {},
+      "columns": {
+        "attempt_id": {
+          "name": "attempt_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "payload": {
+          "name": "payload",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "jsonb"
+        },
+        "type": {
+          "name": "type",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.certificate": {
-      "name": "certificate",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "attempt_id": {
-          "name": "attempt_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "student_id": {
-          "name": "student_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quiz_id": {
-          "name": "quiz_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "serial_number": {
-          "name": "serial_number",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "s3_key": {
-          "name": "s3_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'PENDING'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
       "foreignKeys": {
-        "certificate_attempt_id_attempt_id_fk": {
-          "name": "certificate_attempt_id_attempt_id_fk",
-          "tableFrom": "certificate",
-          "tableTo": "attempt",
+        "attempt_event_attempt_id_attempt_id_fk": {
           "columnsFrom": [
             "attempt_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "attempt_event_attempt_id_attempt_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "attempt_event",
+          "tableTo": "attempt"
+        }
+      },
+      "indexes": {
+        "attempt_event_attempt_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "attempt_id",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "attempt_event_attempt_idx",
+          "with": {}
+        },
+        "attempt_event_created_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "created_at",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "attempt_event_created_idx",
+          "with": {}
+        }
+      },
+      "isRLSEnabled": false,
+      "name": "attempt_event",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.attempt_question_progress": {
+      "checkConstraints": {},
+      "columns": {
+        "attempt_id": {
+          "name": "attempt_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "is_answered": {
+          "default": false,
+          "name": "is_answered",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "boolean"
+        },
+        "order_index": {
+          "name": "order_index",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "question_id": {
+          "name": "question_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "remaining_time": {
+          "name": "remaining_time",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {
+        "attempt_question_progress_attempt_id_attempt_id_fk": {
+          "columnsFrom": [
+            "attempt_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "attempt_question_progress_attempt_id_attempt_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "attempt_question_progress",
+          "tableTo": "attempt"
+        },
+        "attempt_question_progress_question_id_question_id_fk": {
+          "columnsFrom": [
+            "question_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "attempt_question_progress_question_id_question_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "attempt_question_progress",
+          "tableTo": "question"
+        }
+      },
+      "indexes": {
+        "attempt_question_attempt_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "attempt_id",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "attempt_question_attempt_idx",
+          "with": {}
+        },
+        "attempt_question_unique_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "attempt_id",
+              "isExpression": false,
+              "nulls": "last"
+            },
+            {
+              "asc": true,
+              "expression": "question_id",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": true,
+          "method": "btree",
+          "name": "attempt_question_unique_idx",
+          "with": {}
+        }
+      },
+      "isRLSEnabled": false,
+      "name": "attempt_question_progress",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.certificate": {
+      "checkConstraints": {},
+      "columns": {
+        "attempt_id": {
+          "name": "attempt_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "quiz_id": {
+          "name": "quiz_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "s3_key": {
+          "name": "s3_key",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "serial_number": {
+          "name": "serial_number",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "status": {
+          "default": "'PENDING'",
+          "name": "status",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "student_id": {
+          "name": "student_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {
+        "certificate_attempt_id_attempt_id_fk": {
+          "columnsFrom": [
+            "attempt_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "certificate_attempt_id_attempt_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "certificate",
+          "tableTo": "attempt"
+        },
+        "certificate_quiz_id_quiz_id_fk": {
+          "columnsFrom": [
+            "quiz_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "certificate_quiz_id_quiz_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "certificate",
+          "tableTo": "quiz"
         },
         "certificate_student_id_user_id_fk": {
-          "name": "certificate_student_id_user_id_fk",
-          "tableFrom": "certificate",
-          "tableTo": "user",
           "columnsFrom": [
             "student_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "certificate_student_id_user_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "certificate_quiz_id_quiz_id_fk": {
-          "name": "certificate_quiz_id_quiz_id_fk",
+          "onUpdate": "no action",
           "tableFrom": "certificate",
-          "tableTo": "quiz",
-          "columnsFrom": [
-            "quiz_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.option": {
-      "name": "option",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "question_id": {
-          "name": "question_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_correct": {
-          "name": "is_correct",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": false
+          "tableTo": "user"
         }
       },
       "indexes": {},
+      "isRLSEnabled": false,
+      "name": "certificate",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.option": {
+      "checkConstraints": {},
+      "columns": {
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "is_correct": {
+          "name": "is_correct",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "boolean"
+        },
+        "question_id": {
+          "name": "question_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "text": {
+          "name": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        }
+      },
+      "compositePrimaryKeys": {},
       "foreignKeys": {
         "option_question_id_question_id_fk": {
-          "name": "option_question_id_question_id_fk",
-          "tableFrom": "option",
-          "tableTo": "question",
           "columnsFrom": [
             "question_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "option_question_id_question_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "option",
+          "tableTo": "question"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "option",
       "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "schema": "",
+      "uniqueConstraints": {}
     },
     "public.plan": {
-      "name": "plan",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
-        },
-        "price": {
-          "name": "price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
+          "type": "timestamp"
         },
         "currency": {
           "name": "currency",
-          "type": "text",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
-        },
-        "interval": {
-          "name": "interval",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "paymongo_plan_id": {
-          "name": "paymongo_plan_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
         "features": {
           "name": "features",
-          "type": "jsonb",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
+          "type": "jsonb"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "interval": {
+          "name": "interval",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         },
         "is_active": {
+          "default": true,
           "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
           "notNull": true,
-          "default": true
+          "primaryKey": false,
+          "type": "boolean"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
+        "name": {
+          "name": "name",
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "text"
+        },
+        "paymongo_plan_id": {
+          "name": "paymongo_plan_id",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "price": {
+          "name": "price",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
         },
         "updated_at": {
+          "default": "now()",
           "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "timestamp"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "foreignKeys": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "plan",
       "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "schema": "",
+      "uniqueConstraints": {}
     },
     "public.question": {
-      "name": "question",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": true,
-          "notNull": true
-        },
-        "quiz_id": {
-          "name": "quiz_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "position": {
-          "name": "position",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "time_limit": {
-          "name": "time_limit",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 30
-        },
-        "points": {
-          "name": "points",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
+          "type": "text"
         },
         "image_url": {
           "name": "image_url",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "text"
+        },
+        "points": {
+          "default": 1,
+          "name": "points",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "position": {
+          "name": "position",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "quiz_id": {
+          "name": "quiz_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "text": {
+          "name": "text",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "time_limit": {
+          "default": 30,
+          "name": "time_limit",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "type": {
+          "name": "type",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         }
       },
-      "indexes": {},
+      "compositePrimaryKeys": {},
       "foreignKeys": {
         "question_quiz_id_quiz_id_fk": {
-          "name": "question_quiz_id_quiz_id_fk",
-          "tableFrom": "question",
-          "tableTo": "quiz",
           "columnsFrom": [
             "quiz_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "question_quiz_id_quiz_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.quiz": {
-      "name": "quiz",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "title": {
-          "name": "title",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "join_code": {
-          "name": "join_code",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "creator_id": {
-          "name": "creator_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "blur_question": {
-          "name": "blur_question",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_paid_quiz": {
-          "name": "is_paid_quiz",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "paid_quiz_fee": {
-          "name": "paid_quiz_fee",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "passing_score": {
-          "name": "passing_score",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "certificate_enabled": {
-          "name": "certificate_enabled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "certificate_description": {
-          "name": "certificate_description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "certificate_logo_key": {
-          "name": "certificate_logo_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "certificate_signature_key": {
-          "name": "certificate_signature_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "certificate_signature_text": {
-          "name": "certificate_signature_text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
+          "onUpdate": "no action",
+          "tableFrom": "question",
+          "tableTo": "quiz"
         }
       },
       "indexes": {},
+      "isRLSEnabled": false,
+      "name": "question",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.quiz": {
+      "checkConstraints": {},
+      "columns": {
+        "blur_question": {
+          "default": false,
+          "name": "blur_question",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "boolean"
+        },
+        "certificate_description": {
+          "name": "certificate_description",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "certificate_enabled": {
+          "default": false,
+          "name": "certificate_enabled",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "boolean"
+        },
+        "certificate_instructor_label": {
+          "default": null,
+          "generated": null,
+          "identity": null,
+          "isArray": false,
+          "name": "certificate_instructor_label",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "certificate_instructor_value": {
+          "default": null,
+          "generated": null,
+          "identity": null,
+          "isArray": false,
+          "name": "certificate_instructor_value",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "certificate_logo_key": {
+          "name": "certificate_logo_key",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "certificate_signature_key": {
+          "name": "certificate_signature_key",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "creator_id": {
+          "name": "creator_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "description": {
+          "name": "description",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "is_paid_quiz": {
+          "default": false,
+          "name": "is_paid_quiz",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "boolean"
+        },
+        "join_code": {
+          "name": "join_code",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "paid_quiz_fee": {
+          "name": "paid_quiz_fee",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "passing_score": {
+          "name": "passing_score",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "title": {
+          "name": "title",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        }
+      },
+      "compositePrimaryKeys": {},
       "foreignKeys": {
         "quiz_creator_id_user_id_fk": {
-          "name": "quiz_creator_id_user_id_fk",
-          "tableFrom": "quiz",
-          "tableTo": "user",
           "columnsFrom": [
             "creator_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "quiz_creator_id_user_id_fk",
           "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "quiz",
+          "tableTo": "user"
         }
       },
-      "compositePrimaryKeys": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "quiz",
+      "policies": {},
+      "schema": "",
       "uniqueConstraints": {
         "quiz_join_code_unique": {
-          "name": "quiz_join_code_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "join_code"
-          ]
+          ],
+          "name": "quiz_join_code_unique",
+          "nullsNotDistinct": false
         }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      }
     },
     "public.quiz_enrollment": {
-      "name": "quiz_enrollment",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": true,
-          "notNull": true
+          "type": "text"
+        },
+        "joined_at": {
+          "default": "now()",
+          "name": "joined_at",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
         },
         "quiz_id": {
           "name": "quiz_id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
+          "type": "text"
         },
         "user_id": {
           "name": "user_id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
+          "type": "text"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {
+        "quiz_enrollment_quiz_id_quiz_id_fk": {
+          "columnsFrom": [
+            "quiz_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "quiz_enrollment_quiz_id_quiz_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "quiz_enrollment",
+          "tableTo": "quiz"
         },
-        "joined_at": {
-          "name": "joined_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "now()"
+        "quiz_enrollment_user_id_user_id_fk": {
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "quiz_enrollment_user_id_user_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "quiz_enrollment",
+          "tableTo": "user"
         }
       },
       "indexes": {
         "enrollment_user_quiz_idx": {
-          "name": "enrollment_user_quiz_idx",
           "columns": [
             {
+              "asc": true,
               "expression": "user_id",
               "isExpression": false,
-              "asc": true,
               "nulls": "last"
             },
             {
+              "asc": true,
               "expression": "quiz_id",
               "isExpression": false,
-              "asc": true,
               "nulls": "last"
             }
           ],
-          "isUnique": false,
           "concurrently": false,
+          "isUnique": false,
           "method": "btree",
+          "name": "enrollment_user_quiz_idx",
           "with": {}
         },
         "quiz_enrollment_unique_idx": {
-          "name": "quiz_enrollment_unique_idx",
           "columns": [
             {
+              "asc": true,
               "expression": "user_id",
               "isExpression": false,
-              "asc": true,
               "nulls": "last"
             },
             {
+              "asc": true,
               "expression": "quiz_id",
               "isExpression": false,
-              "asc": true,
               "nulls": "last"
             }
           ],
-          "isUnique": true,
           "concurrently": false,
+          "isUnique": true,
           "method": "btree",
+          "name": "quiz_enrollment_unique_idx",
           "with": {}
         }
       },
-      "foreignKeys": {
-        "quiz_enrollment_quiz_id_quiz_id_fk": {
-          "name": "quiz_enrollment_quiz_id_quiz_id_fk",
-          "tableFrom": "quiz_enrollment",
-          "tableTo": "quiz",
-          "columnsFrom": [
-            "quiz_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "quiz_enrollment_user_id_user_id_fk": {
-          "name": "quiz_enrollment_user_id_user_id_fk",
-          "tableFrom": "quiz_enrollment",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "isRLSEnabled": false,
+      "name": "quiz_enrollment",
       "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "schema": "",
+      "uniqueConstraints": {}
     },
     "public.quiz_payment": {
-      "name": "quiz_payment",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
         "id": {
           "name": "id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": true,
-          "notNull": true
-        },
-        "quiz_id": {
-          "name": "quiz_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "source": {
-          "name": "source",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "paymongo_link_id": {
-          "name": "paymongo_link_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "paymongo_link_reference": {
-          "name": "paymongo_link_reference",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
         "paid_at": {
           "name": "paid_at",
-          "type": "timestamp",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "timestamp"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
+        "paymongo_link_id": {
+          "name": "paymongo_link_id",
+          "notNull": false,
           "primaryKey": false,
+          "type": "text"
+        },
+        "paymongo_link_reference": {
+          "name": "paymongo_link_reference",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "quiz_id": {
+          "name": "quiz_id",
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "text"
+        },
+        "source": {
+          "name": "source",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "status": {
+          "name": "status",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         },
         "updated_at": {
+          "default": "now()",
           "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "user_id": {
+          "name": "user_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         }
       },
-      "indexes": {},
+      "compositePrimaryKeys": {},
       "foreignKeys": {
         "quiz_payment_quiz_id_quiz_id_fk": {
-          "name": "quiz_payment_quiz_id_quiz_id_fk",
-          "tableFrom": "quiz_payment",
-          "tableTo": "quiz",
           "columnsFrom": [
             "quiz_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "quiz_payment_quiz_id_quiz_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "quiz_payment",
+          "tableTo": "quiz"
         },
         "quiz_payment_user_id_user_id_fk": {
-          "name": "quiz_payment_user_id_user_id_fk",
-          "tableFrom": "quiz_payment",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "quiz_payment_user_id_user_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "tableFrom": "quiz_payment",
+          "tableTo": "user"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "quiz_payment",
       "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      "schema": "",
+      "uniqueConstraints": {}
     },
     "public.session": {
-      "name": "session",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
         },
         "expires_at": {
           "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token": {
-          "name": "token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
           "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
           "primaryKey": false,
-          "notNull": true
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
         },
         "ip_address": {
           "name": "ip_address",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "text"
+        },
+        "token": {
+          "name": "token",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
         },
         "user_agent": {
           "name": "user_agent",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
         "user_id": {
           "name": "user_id",
-          "type": "text",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
+          "type": "text"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {
+        "session_user_id_user_id_fk": {
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "session_user_id_user_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "session",
+          "tableTo": "user"
         }
       },
       "indexes": {
         "session_userId_idx": {
-          "name": "session_userId_idx",
           "columns": [
             {
+              "asc": true,
               "expression": "user_id",
               "isExpression": false,
-              "asc": true,
               "nulls": "last"
             }
           ],
-          "isUnique": false,
           "concurrently": false,
+          "isUnique": false,
           "method": "btree",
+          "name": "session_userId_idx",
           "with": {}
         }
       },
-      "foreignKeys": {
-        "session_user_id_user_id_fk": {
-          "name": "session_user_id_user_id_fk",
-          "tableFrom": "session",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
+      "isRLSEnabled": false,
+      "name": "session",
+      "policies": {},
+      "schema": "",
       "uniqueConstraints": {
         "session_token_unique": {
-          "name": "session_token_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ]
+          ],
+          "name": "session_token_unique",
+          "nullsNotDistinct": false
         }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
+      }
     },
     "public.subscription": {
-      "name": "subscription",
-      "schema": "",
+      "checkConstraints": {},
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
           "primaryKey": false,
-          "notNull": true
-        },
-        "plan_id": {
-          "name": "plan_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "current_period_start": {
-          "name": "current_period_start",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
+          "type": "timestamp"
         },
         "current_period_end": {
           "name": "current_period_end",
-          "type": "timestamp",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "timestamp"
+        },
+        "current_period_start": {
+          "name": "current_period_start",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
         },
         "paymongo_customer_id": {
           "name": "paymongo_customer_id",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
-        },
-        "paymongo_subscription_id": {
-          "name": "paymongo_subscription_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
         "paymongo_link_id": {
           "name": "paymongo_link_id",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
         "paymongo_link_reference": {
           "name": "paymongo_link_reference",
-          "type": "text",
+          "notNull": false,
           "primaryKey": false,
-          "notNull": false
+          "type": "text"
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
+        "paymongo_subscription_id": {
+          "name": "paymongo_subscription_id",
+          "notNull": false,
           "primaryKey": false,
+          "type": "text"
+        },
+        "plan_id": {
+          "name": "plan_id",
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "text"
+        },
+        "status": {
+          "name": "status",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         },
         "updated_at": {
+          "default": "now()",
           "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "user_id": {
+          "name": "user_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         }
       },
-      "indexes": {},
+      "compositePrimaryKeys": {},
       "foreignKeys": {
-        "subscription_user_id_user_id_fk": {
-          "name": "subscription_user_id_user_id_fk",
-          "tableFrom": "subscription",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "subscription_plan_id_plan_id_fk": {
-          "name": "subscription_plan_id_plan_id_fk",
-          "tableFrom": "subscription",
-          "tableTo": "plan",
           "columnsFrom": [
             "plan_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "subscription_plan_id_plan_id_fk",
           "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "subscription_user_id_unique": {
-          "name": "subscription_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.usage": {
-      "name": "usage",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
+          "onUpdate": "no action",
+          "tableFrom": "subscription",
+          "tableTo": "plan"
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "period_start": {
-          "name": "period_start",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "period_end": {
-          "name": "period_end",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "quizzes_created": {
-          "name": "quizzes_created",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "questions_created": {
-          "name": "questions_created",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "images_used": {
-          "name": "images_used",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "usage_user_period_idx": {
-          "name": "usage_user_period_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "period_start",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "period_end",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "usage_user_id_user_id_fk": {
-          "name": "usage_user_id_user_id_fk",
-          "tableFrom": "usage",
-          "tableTo": "user",
+        "subscription_user_id_user_id_fk": {
           "columnsFrom": [
             "user_id"
           ],
           "columnsTo": [
             "id"
           ],
+          "name": "subscription_user_id_user_id_fk",
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.user": {
-      "name": "user",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "email": {
-          "name": "email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "email_verified": {
-          "name": "email_verified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "image": {
-          "name": "image",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "student_no_encrypted": {
-          "name": "student_no_encrypted",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "section": {
-          "name": "section",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "plan_id": {
-          "name": "plan_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "default": "'free'"
-        },
-        "subscription_status": {
-          "name": "subscription_status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "onUpdate": "no action",
+          "tableFrom": "subscription",
+          "tableTo": "user"
         }
       },
       "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_email_unique": {
-          "name": "user_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
-        }
-      },
+      "isRLSEnabled": false,
+      "name": "subscription",
       "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.verification": {
-      "name": "verification",
       "schema": "",
+      "uniqueConstraints": {
+        "subscription_user_id_unique": {
+          "columns": [
+            "user_id"
+          ],
+          "name": "subscription_user_id_unique",
+          "nullsNotDistinct": false
+        }
+      }
+    },
+    "public.usage": {
+      "checkConstraints": {},
       "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
         "id": {
           "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "identifier": {
-          "name": "identifier",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "primaryKey": true,
+          "type": "text"
+        },
+        "images_used": {
+          "default": 0,
+          "name": "images_used",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "period_end": {
+          "name": "period_end",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "period_start": {
+          "name": "period_start",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "questions_created": {
+          "default": 0,
+          "name": "questions_created",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
+        },
+        "quizzes_created": {
+          "default": 0,
+          "name": "quizzes_created",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "integer"
         },
         "updated_at": {
+          "default": "now()",
           "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
           "notNull": true,
-          "default": "now()"
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "user_id": {
+          "name": "user_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
         }
       },
-      "indexes": {
-        "verification_identifier_idx": {
-          "name": "verification_identifier_idx",
-          "columns": [
-            {
-              "expression": "identifier",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.webhook_event": {
-      "name": "webhook_event",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "provider": {
-          "name": "provider",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "event_id": {
-          "name": "event_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "type": {
-          "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "payload": {
-          "name": "payload",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+      "foreignKeys": {
+        "usage_user_id_user_id_fk": {
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "name": "usage_user_id_user_id_fk",
+          "onDelete": "cascade",
+          "onUpdate": "no action",
+          "tableFrom": "usage",
+          "tableTo": "user"
         }
       },
       "indexes": {
-        "webhook_event_unique_idx": {
-          "name": "webhook_event_unique_idx",
+        "usage_user_period_idx": {
           "columns": [
             {
-              "expression": "provider",
-              "isExpression": false,
               "asc": true,
+              "expression": "user_id",
+              "isExpression": false,
               "nulls": "last"
             },
             {
-              "expression": "event_id",
-              "isExpression": false,
               "asc": true,
+              "expression": "period_start",
+              "isExpression": false,
+              "nulls": "last"
+            },
+            {
+              "asc": true,
+              "expression": "period_end",
+              "isExpression": false,
               "nulls": "last"
             }
           ],
-          "isUnique": true,
           "concurrently": false,
+          "isUnique": true,
           "method": "btree",
+          "name": "usage_user_period_idx",
           "with": {}
         }
       },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "isRLSEnabled": false,
+      "name": "usage",
       "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.user": {
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "email": {
+          "name": "email",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "email_verified": {
+          "default": false,
+          "name": "email_verified",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "boolean"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "image": {
+          "name": "image",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "name": {
+          "name": "name",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "plan_id": {
+          "default": "'free'",
+          "name": "plan_id",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "section": {
+          "name": "section",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "student_no_encrypted": {
+          "name": "student_no_encrypted",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "subscription_status": {
+          "name": "subscription_status",
+          "notNull": false,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {},
+      "isRLSEnabled": false,
+      "name": "user",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {
+        "user_email_unique": {
+          "columns": [
+            "email"
+          ],
+          "name": "user_email_unique",
+          "nullsNotDistinct": false
+        }
+      }
+    },
+    "public.verification": {
+      "checkConstraints": {},
+      "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "identifier": {
+          "name": "identifier",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "updated_at": {
+          "default": "now()",
+          "name": "updated_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "value": {
+          "name": "value",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {
+        "verification_identifier_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "identifier",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": false,
+          "method": "btree",
+          "name": "verification_identifier_idx",
+          "with": {}
+        }
+      },
+      "isRLSEnabled": false,
+      "name": "verification",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
+    },
+    "public.webhook_event": {
+      "checkConstraints": {},
+      "columns": {
+        "created_at": {
+          "default": "now()",
+          "name": "created_at",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "timestamp"
+        },
+        "event_id": {
+          "name": "event_id",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "id": {
+          "name": "id",
+          "notNull": true,
+          "primaryKey": true,
+          "type": "text"
+        },
+        "payload": {
+          "name": "payload",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "jsonb"
+        },
+        "provider": {
+          "name": "provider",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        },
+        "type": {
+          "name": "type",
+          "notNull": true,
+          "primaryKey": false,
+          "type": "text"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "foreignKeys": {},
+      "indexes": {
+        "webhook_event_unique_idx": {
+          "columns": [
+            {
+              "asc": true,
+              "expression": "provider",
+              "isExpression": false,
+              "nulls": "last"
+            },
+            {
+              "asc": true,
+              "expression": "event_id",
+              "isExpression": false,
+              "nulls": "last"
+            }
+          ],
+          "concurrently": false,
+          "isUnique": true,
+          "method": "btree",
+          "name": "webhook_event_unique_idx",
+          "with": {}
+        }
+      },
+      "isRLSEnabled": false,
+      "name": "webhook_event",
+      "policies": {},
+      "schema": "",
+      "uniqueConstraints": {}
     }
   },
-  "enums": {},
-  "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
-  "views": {},
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+  "version": "7",
+  "views": {}
 }

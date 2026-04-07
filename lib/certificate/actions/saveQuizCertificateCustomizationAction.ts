@@ -11,8 +11,14 @@ export async function saveQuizCertificateCustomizationAction(
   formData: FormData
 ) {
   try {
-    const description = (formData.get("certificateDescription") as string | null)?.trim() || null
-    const signatureText = (formData.get("certificateSignatureText") as string | null)?.trim() || null
+    const CERT_DESCRIPTION_MAX = 160
+    const descriptionRaw = (formData.get("certificateDescription") as string | null)?.trim() || null
+    const description = descriptionRaw ? descriptionRaw.slice(0, CERT_DESCRIPTION_MAX) : null
+    const instructorLabel = (formData.get("certificateInstructorLabel") as string | null)?.trim() || null
+    const instructorValue = (formData.get("certificateInstructorValue") as string | null)?.trim() || null
+    const showScoreRaw = (formData.get("certificateShowScore") as string | null)?.trim()
+    const certificateShowScore =
+      showScoreRaw === "0" ? false : showScoreRaw === "1" ? true : null
     const logoFile = formData.get("certificateLogo") as File | null
     const signatureFile = formData.get("certificateSignature") as File | null
 
@@ -33,7 +39,11 @@ export async function saveQuizCertificateCustomizationAction(
 
     const payload: Record<string, any> = {
       certificateDescription: description,
-      certificateSignatureText: signatureText,
+      certificateInstructorLabel: instructorLabel,
+      certificateInstructorValue: instructorValue,
+    }
+    if (certificateShowScore !== null) {
+      payload.certificateShowScore = certificateShowScore
     }
 
     if (logoKey) payload.certificateLogoKey = logoKey

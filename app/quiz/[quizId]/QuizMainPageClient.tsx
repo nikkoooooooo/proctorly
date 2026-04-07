@@ -110,8 +110,6 @@ export default function QuizMainPageClient({
     [handleNext], // refresh callback only when hook handler changes
   )
 
-  
-
 
 
   // -------------------- Timer Hook State --------------------
@@ -141,10 +139,7 @@ export default function QuizMainPageClient({
 
 
 
-
-
-
-
+  
 
   // -------------------- Fetch Quiz Setup Data --------------------
   useEffect(() => {
@@ -213,7 +208,7 @@ export default function QuizMainPageClient({
     if (!session || isPreparingStart) return // block start when no session or already preparing
     const isExpired = !!expiresAt && new Date(expiresAt).getTime() < Date.now()
     if (isExpired && !hasActiveAttempt) {
-      toast.error("Quiz is expired and can no longer be started.")
+      toast.error("Assessment is expired and can no longer be started.")
       return
     }
 
@@ -252,10 +247,10 @@ export default function QuizMainPageClient({
 
       hasStartedRef.current = true // prevent late raw fetch from overriding ordered questions
       setModal(false) // close pre-start modal
-      toast.success("Quiz started!") // notify successful start
+      toast.success("Assessment started!") // notify successful start
     } catch (error) {
-      console.error("Failed to start quiz:", error) // log unexpected start errors
-      toast.error("Failed to start quiz. Please try again.") // show generic start failure
+      console.error("Failed to start Assessment:", error) // log unexpected start errors
+      toast.error("Failed to start Assessment. Please try again.") // show generic start failure
     } finally {
       setIsPreparingStart(false) // always unlock start button
     }
@@ -267,12 +262,12 @@ export default function QuizMainPageClient({
     <div className="relative min-h-screen flex flex-col items-center p-4"> {/* page container */}
       {!!expiresAt && (
         <div className="mb-4 w-full max-w-xl text-center text-sm text-muted-foreground">
-          Quiz expires at {new Date(expiresAt).toLocaleString()}
+          Assessment expires at {new Date(expiresAt).toLocaleString()}
         </div>
       )}
       {blurScreen && ( // show warning overlay when user leaves tab (if enabled)
         <div className="absolute inset-0 bg-destructive/50 backdrop-blur-sm z-50 flex items-center justify-center"> {/* blocking overlay */}
-          <p className="text-primary-foreground text-xl font-semibold">You left the quiz 😡</p> {/* warning text */}
+          <p className="text-primary-foreground text-xl font-semibold">You left the Assessment 😡</p> {/* warning text */}
         </div>
       )}
 
@@ -281,7 +276,7 @@ export default function QuizMainPageClient({
           <div className="card mx-auto w-full max-w-xl p-6 space-y-4 text-left"> {/* modal card */}
             <h2 className="text-2xl font-semibold text-foreground">Before you start</h2> {/* modal title */}
             <ul className="space-y-2 text-muted-foreground"> {/* rule list */}
-              <li>• This quiz is monitored. Tab switches are counted.</li> {/* rule */}
+              <li>• This Assessment is monitored. Tab switches are counted.</li> {/* rule */}
               <li>• Questions cannot be skipped unless time runs out.</li> {/* rule */}
               <li>• If time runs out, the question is marked incorrect.</li> {/* rule */}
               <li>• Retakes are controlled by your instructor.</li> {/* rule */}
@@ -292,7 +287,7 @@ export default function QuizMainPageClient({
                 disabled={isPreparingStart || !questions.length || (isExpired && !hasActiveAttempt)} // disable while preparing, loading, or expired
                 className="bg-primary cursor-pointer hover:bg-primary/90 active:bg-primary/80 px-4 py-2 rounded-(--radius-button) text-primary-foreground font-semibold" // button style
               >
-                {isPreparingStart ? "Preparing..." : isExpired && !hasActiveAttempt ? "Quiz Expired" : "Start Quiz"} {/* button text by loading state */}
+                {isPreparingStart ? "Preparing..." : isExpired && !hasActiveAttempt ? "Assessment Expired" : "Start Assessment"} {/* button text by loading state */}
               </button>
             </div>
           </div>
@@ -301,7 +296,7 @@ export default function QuizMainPageClient({
         <div className="max-w-4xl w-full mt-10 space-y-6"> {/* quiz content wrapper */}
           <div className="card p-4"> {/* quiz metadata card */}
             <p className="text-sm text-muted-foreground">Now taking</p> {/* metadata label */}
-            <h3 className="text-xl font-semibold text-foreground">{quizTitle || "Quiz"}</h3> {/* quiz title */}
+            <h3 className="text-xl font-semibold text-foreground">{quizTitle || "Assessment"}</h3> {/* quiz title */}
             <p className="text-sm text-muted-foreground"> {/* instructor text */}
               Instructor: {instructorName || "Unknown"}
             </p>
@@ -328,7 +323,7 @@ export default function QuizMainPageClient({
             {isSubmittingAnswer
               ? "Submitting..." // loading text while answer request in flight
               : currentQuestion === questions.length - 1
-                ? "Finish Quiz" // final button text
+                ? "Finish Assessment" // final button text
                 : "Next Question"} {/* regular button text */}
           </button>
         </div>

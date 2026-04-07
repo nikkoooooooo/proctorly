@@ -41,7 +41,8 @@ export async function createQuiz(
   isPaidQuiz = false,
   paidQuizFee?: number | null,
   passingPercentage?: number | null,
-  certificateEnabled = false
+  certificateEnabled = false,
+  certificateShowScore = true
 ) {
   const quizId = uuid()
   const joinCode = generateJoinCode()
@@ -59,6 +60,7 @@ export async function createQuiz(
     paidQuizFee: isPaidQuiz ? paidQuizFee : null,
     passingPercentage: passingPercentage ?? null,
     certificateEnabled,
+    certificateShowScore,
   })
 
   // Loop through questions
@@ -101,6 +103,7 @@ export async function createQuiz(
     paidQuizFee: isPaidQuiz ? paidQuizFee : null,
     passingPercentage: passingPercentage ?? null,
     certificateEnabled,
+    certificateShowScore,
     questions: questionsData,
   }
 }
