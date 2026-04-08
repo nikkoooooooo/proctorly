@@ -2,17 +2,26 @@
 
 import { useEffect, useState } from "react"
 import QuestionImageUploader from "@/components/QuestionImageUploader"
+
+export type IdentificationConfig = {
+  correctAnswers: string[]
+  matchStrategy: "exact" | "contains" | "regex"
+  caseSensitive: boolean
+  trimWhitespace: boolean
+  normalize: boolean
+}
+
 interface Question {
   id: string
   text: string
   type: "mcq" | "true-false" | "identification"
   timerLimit: number
-  correctAnswer: "true" | "false"
   imageUrl?: string
   points: number
+  identification: IdentificationConfig
 }
 
-interface CreateQuestionTorFProps {
+interface CreateQuestionIdentificationProps {
   userId: string
   question: Question
   index: number
@@ -20,13 +29,13 @@ interface CreateQuestionTorFProps {
   onRemove: (id: string) => void
   onQuestionTextChange: (id: string, value: string) => void
   onTimerChange: (questionId: string, seconds: number) => void
-  onCorrectAnswerChange: (questionId: string, value: "true" | "false") => void
   onQuestionImageChange?: (id: string, value: string) => void
   onPointsChange: (questionId: string, points: number) => void
+  onIdentificationChange: (questionId: string, value: IdentificationConfig) => void
   showRemove?: boolean
 }
 
-export default function CreateQuestionTorF({
+export default function CreateQuestionIdentification({
   userId,
   question,
   index,
@@ -34,17 +43,24 @@ export default function CreateQuestionTorF({
   onRemove,
   onQuestionTextChange,
   onTimerChange,
-  onCorrectAnswerChange,
   onQuestionImageChange,
   onPointsChange,
+  onIdentificationChange,
   showRemove = true,
-}: CreateQuestionTorFProps) {
+}: CreateQuestionIdentificationProps) {
   const [pointsInput, setPointsInput] = useState<string>(String(question.points ?? ""))
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [answersInput, setAnswersInput] = useState<string>(
+    question.identification.correctAnswers.join(", "),
+  )
 
   useEffect(() => {
     setPointsInput(question.points === undefined ? "" : String(question.points))
   }, [question.points])
+
+  useEffect(() => {
+    setAnswersInput(question.identification.correctAnswers.join(", "))
+  }, [question.id])
 
   useEffect(() => {
     let cancelled = false
@@ -80,10 +96,10 @@ export default function CreateQuestionTorF({
       cancelled = true
     }
   }, [question.imageUrl])
+
   return (
     <div className="bg-background p-4 rounded-md space-y-3">
       <div className="flex justify-between items-center">
-        {/* <h3>Question {index + 1}</h3> */}
         {showRemove && (
           <button
             type="button"
@@ -156,18 +172,46 @@ export default function CreateQuestionTorF({
         />
       </div>
 
+      <div className="flex flex-col gap-2">
+        <label className="font-semibold">Acceptable Answers (comma-separated)</label>
+        <textarea
+          value={answersInput}
+          onChange={(e) => {
+            const nextValue = e.target.value
+            setAnswersInput(nextValue)
+            onIdentificationChange(question.id, {
+              ...question.identification,
+              correctAnswers: nextValue
+                .split(/[,\n]/)
+                .map((value) => value.trim())
+                .filter(Boolean),
+            })
+          }}
+          placeholder="e.g. yellow, blue"
+          className="w-full bg-secondary p-2 rounded-md"
+          rows={4}
+        />
+      </div>
+
       <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex flex-col w-40">
-          <label>Correct Answer:</label>
+        <div className="flex flex-col w-48">
+          <label>Match Strategy:</label>
           <select
             className="bg-secondary p-2 rounded-md"
-            value={question.correctAnswer}
-            onChange={(e) => onCorrectAnswerChange(question.id, e.target.value as "true" | "false")}
+            value={question.identification.matchStrategy}
+            onChange={(e) =>
+              onIdentificationChange(question.id, {
+                ...question.identification,
+                matchStrategy: e.target.value as IdentificationConfig["matchStrategy"],
+              })
+            }
           >
-            <option value="true">True</option>
-            <option value="false">False</option>
+            <option value="exact">Exact</option>
+            <option value="contains">Contains</option>
+            <option value="regex">Regex</option>
           </select>
         </div>
+
         <div className="flex flex-col w-40">
           <label>Points:</label>
           <input
@@ -186,6 +230,50 @@ export default function CreateQuestionTorF({
             className="w-full bg-secondary p-2 rounded-md"
           />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={question.identification.caseSensitive}
+            onChange={(e) =>
+              onIdentificationChange(question.id, {
+                ...question.identification,
+                caseSensitive: e.target.checked,
+              })
+            }
+          />
+          Case sensitive (caps must match)
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={question.identification.trimWhitespace}
+            onChange={(e) =>
+              onIdentificationChange(question.id, {
+                ...question.identification,
+                trimWhitespace: e.target.checked,
+              })
+            }
+          />
+          Trim whitespace (leading and trailing)
+        </label>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={question.identification.normalize}
+            onChange={(e) =>
+              onIdentificationChange(question.id, {
+                ...question.identification,
+                normalize: e.target.checked,
+              })
+            }
+          />
+          Normalize internal spacing
+        </label>
       </div>
     </div>
   )

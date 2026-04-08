@@ -5,6 +5,7 @@ import toast from "react-hot-toast" // toast notifications for user feedback
 import confetti from "canvas-confetti" // finish animation
 
 import QuizCardMCQ from "@/components/QuizCardMCQ" // presentational quiz card component
+import QuizCardIdentification from "@/components/QuizCardIdentification"
 import { authClient } from "@/client/auth-client" // auth session client
 import { getQuestionsByQuizIdAction } from "@/lib/quiz/actions/getQuestionsByQuizIdAction" // fetch quiz questions
 import { createAttemptAction } from "@/lib/attempt/actions/createAttemptAction" // create quiz attempt
@@ -26,9 +27,11 @@ interface Question { // quiz question shape
   id: string // question id
   quizId: string // parent quiz id
   text: string // question text
+  type: "mcq" | "true-false" | "identification"
   option: Option[] // available options
   timeLimit?: number // optional time limit in seconds
   imageUrl?: string | null
+  caseSensitive?: boolean
 
 }
 
@@ -51,6 +54,7 @@ export default function QuizMainPageClient({
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0) // current question index
   const [selectedChoice, setSelectedChoice] = useState<Option | null>(null) // selected option for current question
+  const [textAnswer, setTextAnswer] = useState("") // identification text answer
   const [attemptId, setAttemptId] = useState("") // active attempt id
   const remainingTimeByIdRef = useRef<Record<string, number>>({}) // in-memory timer cache per question id
   const hasStartedRef = useRef(false) // prevent late fetch from overwriting ordered questions after start
@@ -83,6 +87,7 @@ export default function QuizMainPageClient({
     questions, // ordered questions list used by answer flow
     currentQuestionIndex: currentQuestion, // active index used by answer flow
     selectedChoice, // selected answer for submission
+    textAnswer, // identification answer
     setCurrentQuestion, // index state setter used by answer flow
     answeredIds, // already answered ids for next-unanswered navigation
     setAnsweredIds, // update answered ids after submissions
@@ -182,6 +187,7 @@ export default function QuizMainPageClient({
   useEffect(() => {
     if (!questions.length) return // no reset needed when questions are not loaded
     setSelectedChoice(null) // clear selection when moving between questions
+    setTextAnswer("")
   }, [currentQuestion, questions]) // reset selection on index/order changes
 
   useEffect(() => {
@@ -258,6 +264,11 @@ export default function QuizMainPageClient({
 
   // -------------------- UI --------------------
   const isExpired = !!expiresAt && new Date(expiresAt).getTime() < Date.now()
+  const current = questions[currentQuestion]
+  const isAnswered =
+    current?.type === "identification"
+      ? textAnswer.trim().length > 0
+      : !!selectedChoice
   return (
     <div className="relative min-h-screen flex flex-col items-center p-4"> {/* page container */}
       {!!expiresAt && (
@@ -302,23 +313,35 @@ export default function QuizMainPageClient({
             </p>
           </div>
 
-          <QuizCardMCQ
-            question={questions[currentQuestion]?.text} // current question text
-            choices={questions[currentQuestion]?.option} // current question options
-            onSelect={setSelectedChoice} // option select handler
-            time={timeLeft} // live timer value
-            tabSwitch={tabSwitches} // tab switch count for display
-            imageUrl={questions[currentQuestion]?.imageUrl ?? undefined} // question image if present
-          />
+          {current?.type === "identification" ? (
+            <QuizCardIdentification
+              question={current?.text}
+              value={textAnswer}
+              onChange={setTextAnswer}
+              time={timeLeft}
+              tabSwitch={tabSwitches}
+              imageUrl={current?.imageUrl ?? undefined}
+              showCapsLockLabel={!!current?.caseSensitive}
+            />
+          ) : (
+            <QuizCardMCQ
+              question={current?.text} // current question text
+              choices={current?.option} // current question options
+              onSelect={setSelectedChoice} // option select handler
+              time={timeLeft} // live timer value
+              tabSwitch={tabSwitches} // tab switch count for display
+              imageUrl={current?.imageUrl ?? undefined} // question image if present
+            />
+          )}
 
           <button
-            disabled={!selectedChoice || isSubmittingAnswer} // block next until an option is selected and not submitting
+            disabled={!isAnswered || isSubmittingAnswer} // block next until an answer is selected and not submitting
             onClick={() => void runHandleNext()} // submit current and move next
             className={`mt-4 p-2 rounded-(--radius-button) font-semibold w-full ${
               currentQuestion === questions.length - 1
                 ? "bg-green-600 text-primary-foreground hover:bg-green-700 active:bg-green-300" // finish style on last question
                 : "bg-primary text-primary-foreground hover:bg-primary/90  active:bg-primary/80" // next style otherwise
-            } ${!selectedChoice || isSubmittingAnswer ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`} // disabled vs enabled cursor/opacity
+            } ${!isAnswered || isSubmittingAnswer ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`} // disabled vs enabled cursor/opacity
           >
             {isSubmittingAnswer
               ? "Submitting..." // loading text while answer request in flight

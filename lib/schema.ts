@@ -127,6 +127,12 @@ export const question = pgTable("question", { // TABLE QUESTION
   timerLimit: integer("time_limit").default(30).notNull(), // timer per question
   points: integer("points").default(1).notNull(), // points per question
   imageUrl: text("image_url"), // optional question image URL
+  // Identification grading configuration (only used for identification questions)
+  correctAnswers: jsonb("correct_answers"), // string[] of acceptable answers
+  matchStrategy: text("match_strategy").default("exact"),
+  caseSensitive: boolean("case_sensitive").default(false).notNull(),
+  trimWhitespace: boolean("trim_whitespace").default(true).notNull(),
+  normalize: boolean("normalize").default(false).notNull(),
 });
 
 

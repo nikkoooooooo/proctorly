@@ -17,6 +17,7 @@ export async function getQuestionsByQuizId(quizId: string) {
       type: question.type,
       imageUrl: question.imageUrl,
       timeLimit: question.timerLimit,  // <-- FIXED (correct field)
+      caseSensitive: question.caseSensitive,
     })
     .from(question)
     .where(eq(question.quizId, quizId))
@@ -35,8 +36,14 @@ export async function getQuestionsByQuizId(quizId: string) {
         .where(eq(option.questionId, q.id))
         .execute()
 
-      return {
+      const typedQuestion = {
         ...q,
+        type: (q.type as "mcq" | "true-false" | "identification") ?? "mcq",
+        caseSensitive: q.caseSensitive ?? false,
+      }
+
+      return {
+        ...typedQuestion,
         imageUrl:
           q.imageUrl && !isHttpUrl(q.imageUrl) ? await presignRead(q.imageUrl) : q.imageUrl,
         option: options.map((o) => ({

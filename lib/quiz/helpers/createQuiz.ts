@@ -26,6 +26,11 @@ export interface QuestionInput {
   points?: number
   imageUrl?: string
   options?: { text: string; isCorrect: boolean }[]
+  correctAnswers?: string[]
+  matchStrategy?: "exact" | "contains" | "regex"
+  caseSensitive?: boolean
+  trimWhitespace?: boolean
+  normalize?: boolean
 }
 
 /**
@@ -68,6 +73,7 @@ export async function createQuiz(
   // Loop through questions
   for (const q of questionsData) {
     const questionId = uuid()
+    const isIdentification = q.type === "identification"
 
     await db.insert(question).values({
       id: questionId,
@@ -77,6 +83,11 @@ export async function createQuiz(
       timerLimit: q.timerLimit ?? 30, // default 30 seconds
       points: q.points ?? 1,
       imageUrl: q.imageUrl ?? null,
+      correctAnswers: isIdentification ? (q.correctAnswers ?? []) : null,
+      matchStrategy: isIdentification ? (q.matchStrategy ?? "exact") : "exact",
+      caseSensitive: isIdentification ? (q.caseSensitive ?? false) : false,
+      trimWhitespace: isIdentification ? (q.trimWhitespace ?? true) : true,
+      normalize: isIdentification ? (q.normalize ?? false) : false,
     })
 
     // Insert options

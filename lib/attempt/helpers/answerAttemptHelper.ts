@@ -1,5 +1,5 @@
 import { db } from "@/lib/db"
-import { attemptAnswer, attemptQuestionProgress } from "@/lib/schema"
+import { attemptAnswer, attemptQuestionProgress, question } from "@/lib/schema"
 import { and, eq } from "drizzle-orm"
 import { v4 as uuid } from "uuid";          // generate unique IDs
 
@@ -22,6 +22,54 @@ export async function answerAttemptHelper({
   isCorrect,
   isAutoFail,
 }: AnswerAttemptProps) {
+  const normalizeAnswer = (
+    input: string,
+    cfg: { trimWhitespace: boolean; normalize: boolean; caseSensitive: boolean; skipCase?: boolean },
+  ) => {
+    let value = input
+    if (cfg.trimWhitespace) value = value.trim()
+    if (cfg.normalize) value = value.replace(/\s+/g, " ")
+    if (!cfg.caseSensitive && !cfg.skipCase) value = value.toLowerCase()
+    return value
+  }
+
+  const matchAnswer = (
+    student: string,
+    correct: string,
+    cfg: { matchStrategy: "exact" | "contains" | "regex"; caseSensitive: boolean; trimWhitespace: boolean; normalize: boolean },
+  ) => {
+    if (cfg.matchStrategy === "regex") {
+      const normalizedStudent = normalizeAnswer(student, {
+        trimWhitespace: cfg.trimWhitespace,
+        normalize: cfg.normalize,
+        caseSensitive: cfg.caseSensitive,
+        skipCase: true,
+      })
+      const flags = cfg.caseSensitive ? "" : "i"
+      try {
+        return new RegExp(correct, flags).test(normalizedStudent)
+      } catch {
+        return false
+      }
+    }
+
+    const normalizedStudent = normalizeAnswer(student, {
+      trimWhitespace: cfg.trimWhitespace,
+      normalize: cfg.normalize,
+      caseSensitive: cfg.caseSensitive,
+    })
+    const normalizedCorrect = normalizeAnswer(correct, {
+      trimWhitespace: cfg.trimWhitespace,
+      normalize: cfg.normalize,
+      caseSensitive: cfg.caseSensitive,
+    })
+
+    if (cfg.matchStrategy === "contains") {
+      return normalizedStudent.includes(normalizedCorrect)
+    }
+    return normalizedStudent === normalizedCorrect
+  }
+
   // Guard: prevent duplicate answers for the same (attempt, question)
   const existing = await db
     .select()
@@ -38,6 +86,36 @@ export async function answerAttemptHelper({
     return existing[0]
   }
 
+  let computedCorrect = isCorrect
+  if (!isAutoFail && !optionId && typeof textAnswer === "string") {
+    const [q] = await db
+      .select({
+        correctAnswers: question.correctAnswers,
+        matchStrategy: question.matchStrategy,
+        caseSensitive: question.caseSensitive,
+        trimWhitespace: question.trimWhitespace,
+        normalize: question.normalize,
+      })
+      .from(question)
+      .where(eq(question.id, questionId))
+      .limit(1)
+      .execute()
+
+    const correctAnswers = Array.isArray(q?.correctAnswers) ? (q?.correctAnswers as string[]) : []
+    const matchStrategyValue =
+      q?.matchStrategy === "contains" || q?.matchStrategy === "regex" ? q.matchStrategy : "exact"
+    const config = {
+      matchStrategy: matchStrategyValue as "exact" | "contains" | "regex",
+      caseSensitive: q?.caseSensitive ?? false,
+      trimWhitespace: q?.trimWhitespace ?? true,
+      normalize: q?.normalize ?? false,
+    }
+
+    const trimmed = textAnswer.trim()
+    computedCorrect =
+      trimmed.length > 0 && correctAnswers.some((answer) => matchAnswer(textAnswer, String(answer), config))
+  }
+
   // Save the student's answer first
   const result = await db.insert(attemptAnswer).values({
     id: uuid(),
@@ -46,7 +124,7 @@ export async function answerAttemptHelper({
     optionId: optionId || null,
     textAnswer: textAnswer || null,
     // Auto-fail sets correctness to false by definition
-    isCorrect: isAutoFail ? false : isCorrect,
+    isCorrect: isAutoFail ? false : computedCorrect,
     answeredAt: new Date(),
   }).returning()
 

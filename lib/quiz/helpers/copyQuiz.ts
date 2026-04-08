@@ -63,6 +63,11 @@ export async function copyQuiz(quizId: string, creatorId: string) {
       points: question.points,
       imageUrl: question.imageUrl,
       position: question.position,
+      correctAnswers: question.correctAnswers,
+      matchStrategy: question.matchStrategy,
+      caseSensitive: question.caseSensitive,
+      trimWhitespace: question.trimWhitespace,
+      normalize: question.normalize,
     })
     .from(question)
     .where(eq(question.quizId, quizId))
@@ -117,6 +122,11 @@ export async function copyQuiz(quizId: string, creatorId: string) {
       points: q.points ?? 1,
       imageUrl: q.imageUrl ?? null,
       position: q.position ?? null,
+      correctAnswers: q.correctAnswers ?? null,
+      matchStrategy: q.matchStrategy ?? null,
+      caseSensitive: q.caseSensitive ?? null,
+      trimWhitespace: q.trimWhitespace ?? null,
+      normalize: q.normalize ?? null,
     })
 
     const opts = optionsByQuestion.get(q.id) ?? []
