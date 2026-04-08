@@ -11,6 +11,7 @@ interface Option { // minimal option shape
 
 interface Question { // minimal question shape
   id: string // question id
+  type: "mcq" | "true-false" | "identification"
 }
 
 interface UseAnswerFlowProps { // input shape for the hook
@@ -18,6 +19,7 @@ interface UseAnswerFlowProps { // input shape for the hook
   questions: Question[] // list of questions
   currentQuestionIndex: number // current question index
   selectedChoice: Option | null // current selected choice
+  textAnswer: string // current text answer for identification
   setCurrentQuestion: (updater: (prev: number) => number) => void // setter for question index
   answeredIds: string[] // ids already answered
   setAnsweredIds: (updater: (prev: string[]) => string[]) => void // setter for answered ids
@@ -29,21 +31,31 @@ export function useAnswerFlow({ // custom hook signature
   questions, // questions list
   currentQuestionIndex, // current index
   selectedChoice, // selected choice
+  textAnswer,
   setCurrentQuestion, // setter for index
   answeredIds, // answered ids
   setAnsweredIds, // setter for answered ids
   onFinish, // finish callback
 }: UseAnswerFlowProps) { // explicit props type
-  const submitAnswer = async (questionId: string, choice?: Option) => { // submit answer helper
-    if (!attemptId || !choice) return // skip if missing data
-    await answerAttemptAction({ // save answer on server
-      attemptId, // pass attempt id
-      questionId, // pass question id
-      optionId: choice.id, // pass option id
-      isCorrect: choice.isCorrect, // pass correctness
-    })
+  const submitAnswer = async (q: Question) => { // submit answer helper
+    if (!attemptId) return // skip if missing data
+    if (q.type === "identification") {
+      await answerAttemptAction({
+        attemptId,
+        questionId: q.id,
+        textAnswer,
+      })
+    } else {
+      if (!selectedChoice) return
+      await answerAttemptAction({ // save answer on server
+        attemptId, // pass attempt id
+        questionId: q.id, // pass question id
+        optionId: selectedChoice.id, // pass option id
+        isCorrect: selectedChoice.isCorrect, // pass correctness
+      })
+    }
     void sendAttemptEvent(attemptId, "answered", {
-      questionId,
+      questionId: q.id,
       questionNo: currentQuestionIndex + 1,
     })
   }
@@ -82,9 +94,11 @@ export function useAnswerFlow({ // custom hook signature
   const handleNext = async (autoFailFlag = false) => { // next/finish flow
     const q = questions[currentQuestionIndex] // get current question
     if (!q) return // safety check
+    const hasAnswer =
+      q.type === "identification" ? textAnswer.trim().length > 0 : !!selectedChoice
 
     // Auto-fail when time runs out and no answer is selected
-    if (autoFailFlag && !selectedChoice) {
+    if (autoFailFlag && !hasAnswer) {
       // If this is the last question, auto-fail and finish immediately
       if (currentQuestionIndex >= questions.length - 1) {
         await autoFail(q.id) // mark as auto-fail
@@ -95,7 +109,7 @@ export function useAnswerFlow({ // custom hook signature
       await autoFail(q.id) // mark as auto-fail
       markAnswered(q.id) // mark answered locally
     } else {
-      await submitAnswer(q.id, selectedChoice ?? undefined) // save normal answer
+      await submitAnswer(q) // save normal answer
       markAnswered(q.id) // mark answered locally
     }
 

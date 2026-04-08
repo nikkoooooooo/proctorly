@@ -7,10 +7,11 @@ import toast from "react-hot-toast"
 import { authClient } from "@/client/auth-client"
 import CreateQuestionMCQ from "@/components/create-quiz/CreateQuestionMCQ"
 import CreateQuestionTorF from "@/components/create-quiz/CreateQuestionTorF"
+import CreateQuestionIdentification, { type IdentificationConfig } from "@/components/create-quiz/CreateQuestionIdentification"
 import { getQuizForEditAction } from "@/lib/quiz/actions/getQuizForEditAction"
 import { updateQuizAction } from "@/lib/quiz/actions/updateQuizAction"
 
-type QuestionType = "mcq" | "true-false"
+type QuestionType = "mcq" | "true-false" | "identification"
 
 interface Option {
   id: string
@@ -28,6 +29,7 @@ interface Question {
   points: number
   correctAnswer: "true" | "false"
   imageUrl?: string
+  identification: IdentificationConfig
 }
 
 type LoadedQuestion = {
@@ -37,6 +39,11 @@ type LoadedQuestion = {
   timerLimit?: number | null
   points?: number | null
   imageUrl?: string | null
+  correctAnswers?: unknown
+  matchStrategy?: string | null
+  caseSensitive?: boolean | null
+  trimWhitespace?: boolean | null
+  normalize?: boolean | null
   options?: Array<{ id: string; text: string; isCorrect: boolean | null }>
 }
 
@@ -76,6 +83,13 @@ export default function EditQuizPage({ params }: EditPageProps) {
       timerLimit: 30,
       points: 1,
       correctAnswer: "true",
+      identification: {
+        correctAnswers: [],
+        matchStrategy: "exact",
+        caseSensitive: false,
+        trimWhitespace: true,
+        normalize: false,
+      },
       options: [
         { id: uuid(), text: "", isCorrect: true },
         { id: uuid(), text: "", isCorrect: false },
@@ -115,12 +129,21 @@ export default function EditQuizPage({ params }: EditPageProps) {
 
         
         const mapped: Question[] = res.questions.map((q: LoadedQuestion) => {
-          const rawType = q.type === "true-false" ? "true-false" : "mcq"
+          const rawType: QuestionType =
+            q.type === "true-false" ? "true-false" : q.type === "identification" ? "identification" : "mcq"
           const options: Option[] = (q.options ?? []).map((o) => ({
             id: o.id,
             text: o.text,
             isCorrect: !!o.isCorrect,
           }))
+          const identification: IdentificationConfig = {
+            correctAnswers: Array.isArray(q.correctAnswers) ? (q.correctAnswers as string[]) : [],
+            matchStrategy:
+              q.matchStrategy === "contains" || q.matchStrategy === "regex" ? q.matchStrategy : "exact",
+            caseSensitive: q.caseSensitive ?? false,
+            trimWhitespace: q.trimWhitespace ?? true,
+            normalize: q.normalize ?? false,
+          }
           if (rawType === "true-false") {
             const trueOption = options.find((o) => o.text.toLowerCase() === "true")
             const falseOption = options.find((o) => o.text.toLowerCase() === "false")
@@ -135,6 +158,21 @@ export default function EditQuizPage({ params }: EditPageProps) {
               correctAnswer,
               options: [],
               imageUrl: q.imageUrl ?? undefined,
+              identification,
+            }
+          }
+          if (rawType === "identification") {
+            return {
+              id: q.id,
+              text: q.text,
+              description: "",
+              type: rawType,
+              timerLimit: q.timerLimit ?? 30,
+              points: q.points ?? 1,
+              correctAnswer: "true",
+              options: [],
+              imageUrl: q.imageUrl ?? undefined,
+              identification,
             }
           }
 
@@ -148,6 +186,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
             correctAnswer: "true",
             options,
             imageUrl: q.imageUrl ?? undefined,
+            identification,
           }
         })
 
@@ -193,6 +232,9 @@ export default function EditQuizPage({ params }: EditPageProps) {
       ),
     )
 
+  const updateIdentificationConfig = (questionId: string, value: IdentificationConfig) =>
+    setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, identification: value } : q)))
+
   const setQuestionType = (questionId: string, newType: QuestionType) =>
     setQuestions((prev) =>
       prev.map((q) => {
@@ -204,6 +246,20 @@ export default function EditQuizPage({ params }: EditPageProps) {
             type: newType,
             correctAnswer: "true",
             options: [],
+          }
+        }
+        if (newType === "identification") {
+          return {
+            ...q,
+            type: newType,
+            options: [],
+            identification: {
+              correctAnswers: [],
+              matchStrategy: "exact",
+              caseSensitive: false,
+              trimWhitespace: true,
+              normalize: false,
+            },
           }
         }
         return {
@@ -244,6 +300,10 @@ export default function EditQuizPage({ params }: EditPageProps) {
         })
       ) {
         toast.error("Each question must have text or an image")
+        return
+      }
+      if (questions.some((q) => q.type === "identification" && q.identification.correctAnswers.length === 0)) {
+        toast.error("Identification questions must have at least one acceptable answer")
         return
       }
     }
@@ -357,6 +417,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
                     >
                       <option value="mcq">MCQ</option>
                       <option value="true-false">True / False</option>
+                      <option value="identification">Identification</option>
                     </select>
                     {questions.length >= 2 && (
                       <button
@@ -386,6 +447,20 @@ export default function EditQuizPage({ params }: EditPageProps) {
                     onCorrectAnswerChange={setCorrectAnswerTorF}
                     onQuestionImageChange={setQuestionImage}
                     onPointsChange={setQuestionPoints}
+                  />
+                ) : question.type === "identification" ? (
+                  <CreateQuestionIdentification
+                    userId={userId ?? ""}
+                    question={question}
+                    index={index}
+                    isSubmitting={isSubmitting || isReadOnly}
+                    onRemove={removeQuestion}
+                    showRemove={false}
+                    onQuestionTextChange={updateQuestionText}
+                    onTimerChange={setQuestionTimer}
+                    onQuestionImageChange={setQuestionImage}
+                    onPointsChange={setQuestionPoints}
+                    onIdentificationChange={updateIdentificationConfig}
                   />
                 ) : (
                   <CreateQuestionMCQ

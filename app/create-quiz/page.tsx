@@ -10,10 +10,11 @@ import toast from "react-hot-toast"
 import { Copy } from "lucide-react"
 import CreateQuestionMCQ from "@/components/create-quiz/CreateQuestionMCQ"
 import CreateQuestionTorF from "@/components/create-quiz/CreateQuestionTorF"
+import CreateQuestionIdentification, { type IdentificationConfig } from "@/components/create-quiz/CreateQuestionIdentification"
 import { saveQuizCertificateCustomizationAction } from "@/lib/certificate/actions/saveQuizCertificateCustomizationAction"
 
 // Question type options
-type QuestionType = "mcq" | "true-false"
+type QuestionType = "mcq" | "true-false" | "identification"
 
 // Option structure
 interface Option {
@@ -33,6 +34,7 @@ interface Question {
   points: number
   correctAnswer: "true" | "false"
   imageUrl?: string
+  identification: IdentificationConfig
 }
 
 // Main Create Quiz Page
@@ -82,6 +84,13 @@ export default function CreateQuizPage() {
       timerLimit: 30, // default 30 seconds
       points: 1,
       correctAnswer: "true",
+      identification: {
+        correctAnswers: [],
+        matchStrategy: "exact",
+        caseSensitive: false,
+        trimWhitespace: true,
+        normalize: false,
+      },
       options: [
         { id: uuid(), text: "", isCorrect: true },
         { id: uuid(), text: "", isCorrect: false },
@@ -109,7 +118,10 @@ export default function CreateQuizPage() {
             },
       ),
     )
-    
+
+  const updateIdentificationConfig = (questionId: string, value: IdentificationConfig) =>
+    setQuestions(prev => prev.map(q => (q.id === questionId ? { ...q, identification: value } : q)))
+
   const setCorrectAnswer = (questionId: string, optionId: string) =>
     setQuestions(prev =>
       prev.map(q =>
@@ -132,6 +144,20 @@ export default function CreateQuizPage() {
             type: newType,
             correctAnswer: "true",
             options: [],
+          }
+        }
+        if (newType === "identification") {
+          return {
+            ...q,
+            type: newType,
+            options: [],
+            identification: {
+              correctAnswers: [],
+              matchStrategy: "exact",
+              caseSensitive: false,
+              trimWhitespace: true,
+              normalize: false,
+            },
           }
         }
         return {
@@ -170,6 +196,10 @@ export default function CreateQuizPage() {
       toast.error("Each question must have text or an image")
       return
     }
+    if (questions.some((q) => q.type === "identification" && q.identification.correctAnswers.length === 0)) {
+      toast.error("Identification questions must have at least one acceptable answer")
+      return
+    }
     const passingValue = passingPercentage ? Number(passingPercentage) : null
     if (passingValue === null) {
       toast.error("Passing percentage is required")
@@ -204,6 +234,21 @@ export default function CreateQuizPage() {
               { text: "True", isCorrect: q.correctAnswer === "true" },
               { text: "False", isCorrect: q.correctAnswer === "false" },
             ],
+          }
+        }
+        if (q.type === "identification") {
+          return {
+            text: q.text,
+            type: q.type,
+            timerLimit: q.timerLimit,
+            points: q.points ?? 1,
+            imageUrl: q.imageUrl,
+            correctAnswers: q.identification.correctAnswers,
+            matchStrategy: q.identification.matchStrategy,
+            caseSensitive: q.identification.caseSensitive,
+            trimWhitespace: q.identification.trimWhitespace,
+            normalize: q.identification.normalize,
+            options: [],
           }
         }
         return {
@@ -578,6 +623,7 @@ export default function CreateQuizPage() {
                   >
                     <option value="mcq">MCQ</option>
                     <option value="true-false">True / False</option>
+                    <option value="identification">Identification</option>
                   </select>
                   {questions.length >= 2 && (
                       <button
@@ -608,6 +654,20 @@ export default function CreateQuizPage() {
                   onCorrectAnswerChange={setCorrectAnswerTorF}
                   onQuestionImageChange={setQuestionImage}
                   onPointsChange={setQuestionPoints}
+                />
+              ) : question.type === "identification" ? (
+                <CreateQuestionIdentification
+                  userId={userId ?? ""}
+                  question={question}
+                  index={index}
+                  isSubmitting={isSubmittingQuiz}
+                  onRemove={removeQuestion}
+                  showRemove={false}
+                  onQuestionTextChange={updateQuestionText}
+                  onTimerChange={setQuestionTimer}
+                  onQuestionImageChange={setQuestionImage}
+                  onPointsChange={setQuestionPoints}
+                  onIdentificationChange={updateIdentificationConfig}
                 />
               ) : (
                 <CreateQuestionMCQ

@@ -11,7 +11,7 @@ interface Option {
 interface Question {
   id: string
   text: string
-  type: "mcq" | "true-false"
+  type: "mcq" | "true-false" | "identification"
   options: Option[]
   timerLimit: number
   imageUrl?: string

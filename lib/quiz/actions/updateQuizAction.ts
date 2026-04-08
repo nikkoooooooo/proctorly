@@ -5,7 +5,7 @@ import { attempt, option, question, quiz } from "@/lib/schema"
 import { eq, inArray } from "drizzle-orm"
 import { v4 as uuid } from "uuid"
 
-type QuestionType = "mcq" | "true-false"
+type QuestionType = "mcq" | "true-false" | "identification"
 
 interface UpdateQuizPayload {
   title: string
@@ -21,6 +21,18 @@ interface UpdateQuizPayload {
     points?: number
     imageUrl?: string | null
     correctAnswer?: "true" | "false"
+    correctAnswers?: string[]
+    matchStrategy?: "exact" | "contains" | "regex"
+    caseSensitive?: boolean
+    trimWhitespace?: boolean
+    normalize?: boolean
+    identification?: {
+      correctAnswers: string[]
+      matchStrategy: "exact" | "contains" | "regex"
+      caseSensitive: boolean
+      trimWhitespace: boolean
+      normalize: boolean
+    }
     options: Array<{ id: string; text: string; isCorrect: boolean }>
   }>
 }
@@ -73,12 +85,29 @@ export async function updateQuizAction(quizId: string, payload: UpdateQuizPayloa
     }
 
     for (const q of payload.questions) {
+      const isIdentification = q.type === "identification"
+      const identificationPayload = q.identification
       const questionPayload = {
         text: q.text,
         type: q.type,
         timerLimit: q.timerLimit ?? 30,
         points: q.points ?? 1,
         imageUrl: q.imageUrl ?? null,
+        correctAnswers: isIdentification
+          ? (identificationPayload?.correctAnswers ?? q.correctAnswers ?? [])
+          : null,
+        matchStrategy: isIdentification
+          ? (identificationPayload?.matchStrategy ?? q.matchStrategy ?? "exact")
+          : "exact",
+        caseSensitive: isIdentification
+          ? (identificationPayload?.caseSensitive ?? q.caseSensitive ?? false)
+          : false,
+        trimWhitespace: isIdentification
+          ? (identificationPayload?.trimWhitespace ?? q.trimWhitespace ?? true)
+          : true,
+        normalize: isIdentification
+          ? (identificationPayload?.normalize ?? q.normalize ?? false)
+          : false,
       }
 
       if (existingIds.includes(q.id)) {
@@ -118,7 +147,7 @@ export async function updateQuizAction(quizId: string, payload: UpdateQuizPayloa
             })
           }
         }
-      } else {
+      } else if (q.type === "true-false") {
         await db.delete(option).where(eq(option.questionId, q.id))
 
         const correct = q.correctAnswer ?? "true"
@@ -136,6 +165,8 @@ export async function updateQuizAction(quizId: string, payload: UpdateQuizPayloa
             isCorrect: correct === "false",
           },
         ])
+      } else {
+        await db.delete(option).where(eq(option.questionId, q.id))
       }
     }
 
