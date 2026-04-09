@@ -10,6 +10,7 @@ import CreateQuestionTorF from "@/components/create-quiz/CreateQuestionTorF"
 import CreateQuestionIdentification, { type IdentificationConfig } from "@/components/create-quiz/CreateQuestionIdentification"
 import { getQuizForEditAction } from "@/lib/quiz/actions/getQuizForEditAction"
 import { updateQuizAction } from "@/lib/quiz/actions/updateQuizAction"
+import { saveQuizCertificateCustomizationAction } from "@/lib/certificate/actions/saveQuizCertificateCustomizationAction"
 
 type QuestionType = "mcq" | "true-false" | "identification"
 
@@ -68,6 +69,18 @@ export default function EditQuizPage({ params }: EditPageProps) {
 
   const [blurQuestion, setBlurQuestion] = useState(false)
   const [expiresAt, setExpiresAt] = useState("")
+  const [passingPercentage, setPassingPercentage] = useState("")
+  const [retakeLimit, setRetakeLimit] = useState(0)
+  const [isPaidQuiz, setIsPaidQuiz] = useState(false)
+  const [paidQuizFee, setPaidQuizFee] = useState("")
+  const [certificateEnabled, setCertificateEnabled] = useState(false)
+  const [certificateDescription, setCertificateDescription] = useState("")
+  const [certificateInstructorLabel, setCertificateInstructorLabel] = useState("")
+  const [certificateInstructorValue, setCertificateInstructorValue] = useState("")
+  const [certificateShowScore, setCertificateShowScore] = useState(true)
+  const [certificateLogoFile, setCertificateLogoFile] = useState<File | null>(null)
+  const [certificateSignatureFile, setCertificateSignatureFile] = useState<File | null>(null)
+  const CERT_DESCRIPTION_MAX = 160
 
   useEffect(() => {
     if (!user) return
@@ -126,6 +139,19 @@ export default function EditQuizPage({ params }: EditPageProps) {
         setBlurQuestion(!!res.quiz.blurQuestion)
         setExpiresAt(toLocalDatetimeInputValue(res.quiz.expiresAt))
         setIsReadOnly(!!res.readOnly)
+        setPassingPercentage(
+          res.quiz.passingPercentage != null ? String(res.quiz.passingPercentage) : ""
+        )
+        setRetakeLimit(res.quiz.retakeLimit ?? 0)
+        setIsPaidQuiz(!!res.quiz.isPaidQuiz)
+        setPaidQuizFee(
+          res.quiz.paidQuizFee != null ? String(res.quiz.paidQuizFee / 100) : ""
+        )
+        setCertificateEnabled(!!res.quiz.certificateEnabled)
+        setCertificateDescription(res.quiz.certificateDescription ?? "")
+        setCertificateInstructorLabel(res.quiz.certificateInstructorLabel ?? "")
+        setCertificateInstructorValue(res.quiz.certificateInstructorValue ?? "")
+        setCertificateShowScore(res.quiz.certificateShowScore ?? true)
 
         
         const mapped: Question[] = res.questions.map((q: LoadedQuestion) => {
@@ -306,6 +332,25 @@ export default function EditQuizPage({ params }: EditPageProps) {
         toast.error("Identification questions must have at least one acceptable answer")
         return
       }
+      const passingValue = passingPercentage ? Number(passingPercentage) : null
+      if (passingValue === null) {
+        toast.error("Passing percentage is required")
+        return
+      }
+      if (Number.isNaN(passingValue) || passingValue <= 0 || passingValue > 100) {
+        toast.error("Passing percentage must be between 1 and 100")
+        return
+      }
+      if (Number.isNaN(retakeLimit) || retakeLimit < 0) {
+        toast.error("Retake limit must be 0 or higher")
+        return
+      }
+      if (isPaidQuiz) {
+        if (!paidQuizFee || Number(paidQuizFee) < 100) {
+          toast.error("Minimum quiz fee is 100")
+          return
+        }
+      }
     }
 
     setIsSubmitting(true)
@@ -316,6 +361,12 @@ export default function EditQuizPage({ params }: EditPageProps) {
         blurQuestion,
         expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
         expiryOnly: isReadOnly,
+        retakeLimit,
+        isPaidQuiz,
+        paidQuizFee: isPaidQuiz ? Math.round(Number(paidQuizFee) * 100) : null,
+        passingPercentage: passingPercentage ? Number(passingPercentage) : null,
+        certificateEnabled,
+        certificateShowScore,
         questions,
       }
       const res = await updateQuizAction(quizId, payload)
@@ -353,7 +404,8 @@ export default function EditQuizPage({ params }: EditPageProps) {
 
       {isReadOnly && (
         <div className="card p-4 text-sm text-muted-foreground">
-          This quiz already has attempts. Only the expiry can be edited.
+          This quiz already has attempts. You can still edit expiry, passing percentage,
+          retake limit, and certificate settings.
         </div>
       )}
 
@@ -381,6 +433,35 @@ export default function EditQuizPage({ params }: EditPageProps) {
               />
             </div>
           </fieldset>
+          <fieldset disabled={isSubmitting} className="space-y-4">
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold">Passing percentage</label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={passingPercentage}
+                onChange={(e) => setPassingPercentage(e.target.value)}
+                className="bg-background p-3 rounded-md"
+                placeholder="Set a passing percentage (1–100)"
+              />
+              <p className="text-sm text-muted-foreground">Leave blank if not required.</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold">Retake limit</label>
+              <input
+                type="number"
+                min="0"
+                value={retakeLimit}
+                onChange={(e) => setRetakeLimit(Number(e.target.value))}
+                className="bg-background p-3 rounded-md"
+                placeholder="0"
+              />
+              <p className="text-sm text-muted-foreground">
+                0 = no retake. 1 = allow one retake (2 total attempts).
+              </p>
+            </div>
+          </fieldset>
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Expiry (creator local time)</label>
             <input
@@ -392,6 +473,141 @@ export default function EditQuizPage({ params }: EditPageProps) {
             <p className="text-sm text-muted-foreground">Leave blank for no expiry.</p>
           </div>
         </div>
+
+        <fieldset disabled={isReadOnly || isSubmitting}>
+          <div className="card p-5 space-y-3">
+            <h2 className="text-2xl font-semibold">Certification</h2>
+            <p className="text-sm text-muted-foreground">
+              Enable certificates for students who complete this quiz.
+            </p>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={certificateEnabled}
+                onChange={(e) => setCertificateEnabled(e.target.checked)}
+              />
+              Enable Certificate
+            </label>
+            <p className="text-sm text-muted-foreground">
+              Uses the ProctorlyX default certificate template.
+            </p>
+            {certificateEnabled && (
+              <p className="text-xs text-muted-foreground">
+                Final score and issue date are included on every certificate.
+              </p>
+            )}
+            {certificateEnabled && (
+              <div className="space-y-3">
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Certificate Description (optional)</label>
+                  <textarea
+                    value={certificateDescription}
+                    onChange={(e) => setCertificateDescription(e.target.value)}
+                    className="bg-background p-3 rounded-[var(--radius-button)]"
+                    rows={2}
+                    maxLength={CERT_DESCRIPTION_MAX}
+                    placeholder="Shown under the student name. Leave blank for the default description."
+                  />
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>Max {CERT_DESCRIPTION_MAX} characters. Up to 3 lines.</span>
+                    <span
+                      className={
+                        certificateDescription.length >= CERT_DESCRIPTION_MAX ? "text-red-400" : ""
+                      }
+                    >
+                      {certificateDescription.length}/{CERT_DESCRIPTION_MAX}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Logo (optional)</label>
+                  <label className="flex items-center justify-between gap-3 border border-dashed border-muted-foreground/40 p-3 rounded-[var(--radius-button)] cursor-pointer hover:border-muted-foreground/70 transition-colors">
+                    <span className="text-sm text-muted-foreground">
+                      {certificateLogoFile?.name || "Click to upload logo (PNG/JPG)"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">Choose file</span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      className="hidden"
+                      onChange={(e) => setCertificateLogoFile(e.target.files?.[0] ?? null)}
+                    />
+                  </label>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Signature Image (optional)</label>
+                  <label className="flex items-center justify-between gap-3 border border-dashed border-muted-foreground/40 p-3 rounded-[var(--radius-button)] cursor-pointer hover:border-muted-foreground/70 transition-colors">
+                    <span className="text-sm text-muted-foreground">
+                      {certificateSignatureFile?.name || "Click to upload signature (PNG/JPG)"}
+                    </span>
+                    <span className="text-xs text-muted-foreground">Choose file</span>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg"
+                      className="hidden"
+                      onChange={(e) => setCertificateSignatureFile(e.target.files?.[0] ?? null)}
+                    />
+                  </label>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Instructor Label (optional)</label>
+                  <input
+                    value={certificateInstructorLabel}
+                    onChange={(e) => setCertificateInstructorLabel(e.target.value)}
+                    className="bg-background p-3 rounded-[var(--radius-button)]"
+                    placeholder="Default: AUTHORIZED INSTRUCTOR"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium">Instructor Name (optional)</label>
+                  <input
+                    value={certificateInstructorValue}
+                    onChange={(e) => setCertificateInstructorValue(e.target.value)}
+                    className="bg-background p-3 rounded-[var(--radius-button)]"
+                    placeholder="Default: quiz creator name"
+                  />
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded-[var(--radius-button)] bg-primary text-primary-foreground font-semibold disabled:opacity-60"
+                    disabled={isSubmitting}
+                    onClick={async () => {
+                      const customizationData = new FormData()
+                      if (certificateDescription) {
+                        customizationData.set("certificateDescription", certificateDescription)
+                      }
+                      customizationData.set("certificateShowScore", certificateShowScore ? "1" : "0")
+                      if (certificateInstructorLabel) {
+                        customizationData.set("certificateInstructorLabel", certificateInstructorLabel)
+                      }
+                      if (certificateInstructorValue) {
+                        customizationData.set("certificateInstructorValue", certificateInstructorValue)
+                      }
+                      if (certificateLogoFile) {
+                        customizationData.set("certificateLogo", certificateLogoFile)
+                      }
+                      if (certificateSignatureFile) {
+                        customizationData.set("certificateSignature", certificateSignatureFile)
+                      }
+                      const customizationResult = await saveQuizCertificateCustomizationAction(
+                        quizId,
+                        customizationData
+                      )
+                      if (!customizationResult.success) {
+                        toast.error(customizationResult.error || "Failed to save certificate settings.")
+                        return
+                      }
+                      toast.success("Certificate settings saved.")
+                    }}
+                  >
+                    Save Certificate Settings
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </fieldset>
 
         <fieldset disabled={isReadOnly || isSubmitting} className="space-y-6">
           <div className="card p-5 space-y-3">
@@ -491,6 +707,39 @@ export default function EditQuizPage({ params }: EditPageProps) {
             >
               + Add Question
             </button>
+          </div>
+        </fieldset>
+
+        <fieldset disabled={isReadOnly || isSubmitting}>
+          <div className="card p-5 space-y-3">
+            <h2 className="text-2xl font-semibold">Paid Quiz</h2>
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={isPaidQuiz}
+                onChange={(e) => setIsPaidQuiz(e.target.checked)}
+              />
+              Paid Quiz (Require payment before taking quiz)
+            </label>
+
+            {isPaidQuiz && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span>Quiz fee:</span>
+                  <div className="flex items-center">
+                    <span className="bg-background border border-border rounded-l-md px-2 py-2">₱</span>
+                    <input
+                      type="number"
+                      min="100"
+                      value={paidQuizFee}
+                      onChange={(e) => setPaidQuizFee(e.target.value)}
+                      className="bg-background p-2 rounded-r-md w-32 border border-border border-l-0"
+                    />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Minimum ₱100 (PayMongo)</span>
+                </div>
+              </div>
+            )}
           </div>
         </fieldset>
 

@@ -13,6 +13,12 @@ interface UpdateQuizPayload {
   blurQuestion: boolean
   expiresAt?: string | null
   expiryOnly?: boolean
+  retakeLimit: number
+  isPaidQuiz: boolean
+  paidQuizFee?: number | null
+  passingPercentage?: number | null
+  certificateEnabled: boolean
+  certificateShowScore: boolean
   questions: Array<{
     id: string
     text: string
@@ -47,16 +53,36 @@ export async function updateQuizAction(quizId: string, payload: UpdateQuizPayloa
       .execute()
 
     if (attempts.length > 0) {
-      if (!payload.expiryOnly) {
-        return { success: false, error: "Quiz already has attempts and only expiry can be edited." }
-      }
       await db
         .update(quiz)
         .set({
           expiresAt: payload.expiresAt ? new Date(payload.expiresAt) : null,
+          passingPercentage: payload.passingPercentage ?? null,
+          retakeLimit: payload.retakeLimit ?? 0,
+          certificateEnabled: payload.certificateEnabled,
+          certificateShowScore: payload.certificateShowScore,
         })
         .where(eq(quiz.id, quizId))
       return { success: true }
+    }
+
+    if (payload.passingPercentage === null || payload.passingPercentage === undefined) {
+      return { success: false, error: "Passing percentage is required." }
+    }
+    if (
+      Number.isNaN(payload.passingPercentage) ||
+      payload.passingPercentage <= 0 ||
+      payload.passingPercentage > 100
+    ) {
+      return { success: false, error: "Passing percentage must be between 1 and 100." }
+    }
+    if (payload.retakeLimit == null || Number.isNaN(payload.retakeLimit) || payload.retakeLimit < 0) {
+      return { success: false, error: "Retake limit must be 0 or higher." }
+    }
+    if (payload.isPaidQuiz) {
+      if (!payload.paidQuizFee || payload.paidQuizFee < 10000) {
+        return { success: false, error: "Minimum quiz fee is 100." }
+      }
     }
 
     await db
@@ -66,6 +92,12 @@ export async function updateQuizAction(quizId: string, payload: UpdateQuizPayloa
         description: payload.description,
         blurQuestion: payload.blurQuestion,
         expiresAt: payload.expiresAt ? new Date(payload.expiresAt) : null,
+        retakeLimit: payload.retakeLimit,
+        isPaidQuiz: payload.isPaidQuiz,
+        paidQuizFee: payload.isPaidQuiz ? payload.paidQuizFee ?? null : null,
+        passingPercentage: payload.passingPercentage ?? null,
+        certificateEnabled: payload.certificateEnabled,
+        certificateShowScore: payload.certificateShowScore,
       })
       .where(eq(quiz.id, quizId))
 

@@ -14,7 +14,7 @@ export const defaultTemplateFields = {
     font: "Helvetica",
     maxWidth: 540,
     minFontSize: 12,
-    maxLines: 2,
+    maxLines: 3,
     lineHeight: 20,
   },
   score_text: {
