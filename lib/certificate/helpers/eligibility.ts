@@ -12,7 +12,7 @@ export function getCertificateEligibility(input: EligibilityInput) {
   }
 
   const tabSwitches = input.tabSwitchCount ?? 0
-  if (tabSwitches >= 2) {
+  if (tabSwitches >= 5) {
     return { eligible: false, reason: "Too many tab switches." }
   }
 
