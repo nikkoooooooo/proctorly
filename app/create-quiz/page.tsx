@@ -489,7 +489,7 @@ export default function CreateQuizPage() {
                   placeholder="Shown under the student name. Leave blank for the default description."
                 />
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Max {CERT_DESCRIPTION_MAX} characters.</span>
+                  <span>Max {CERT_DESCRIPTION_MAX} characters. Up to 3 lines.</span>
                   <span
                     className={
                       certificateDescription.length >= CERT_DESCRIPTION_MAX ? "text-red-400" : ""

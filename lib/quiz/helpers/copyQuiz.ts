@@ -4,6 +4,22 @@ import { db } from "@/lib/db"
 import { quiz, question, option } from "@/lib/schema"
 import { eq, inArray } from "drizzle-orm"
 import { v4 as uuid } from "uuid"
+import { downloadObjectFromS3, uploadImageToS3 } from "@/lib/certificate/helpers/s3Objects"
+import { getCertificateLogoKey, getCertificateSignatureKey } from "@/lib/certificate/helpers/s3Keys"
+
+const detectImageType = (bytes: Uint8Array): "png" | "jpg" => {
+  if (bytes.length >= 4) {
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+      return "png"
+    }
+  }
+  if (bytes.length >= 3) {
+    if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+      return "jpg"
+    }
+  }
+  return "png"
+}
 
 function generateJoinCode(length = 6) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -40,7 +56,14 @@ export async function copyQuiz(quizId: string, creatorId: string) {
       isPaidQuiz: quiz.isPaidQuiz,
       paidQuizFee: quiz.paidQuizFee,
       passingPercentage: quiz.passingPercentage,
+      retakeLimit: quiz.retakeLimit,
       certificateEnabled: quiz.certificateEnabled,
+      certificateDescription: quiz.certificateDescription,
+      certificateLogoKey: quiz.certificateLogoKey,
+      certificateSignatureKey: quiz.certificateSignatureKey,
+      certificateInstructorLabel: quiz.certificateInstructorLabel,
+      certificateInstructorValue: quiz.certificateInstructorValue,
+      certificateShowScore: quiz.certificateShowScore,
       createdAt: quiz.createdAt,
     })
     .from(quiz)
@@ -96,6 +119,33 @@ export async function copyQuiz(quizId: string, creatorId: string) {
   const newJoinCode = await generateUniqueJoinCode()
   const newTitle = `${sourceQuiz.title} (Copy)`
 
+  let copiedLogoKey: string | null = null
+  let copiedSignatureKey: string | null = null
+
+  if (sourceQuiz.certificateLogoKey) {
+    try {
+      const logoBytes = await downloadObjectFromS3(sourceQuiz.certificateLogoKey)
+      copiedLogoKey = getCertificateLogoKey(newQuizId)
+      const logoType = detectImageType(logoBytes)
+      await uploadImageToS3(copiedLogoKey, logoBytes, logoType === "png" ? "image/png" : "image/jpeg")
+    } catch (error) {
+      console.warn("Failed to copy certificate logo:", error)
+      copiedLogoKey = null
+    }
+  }
+
+  if (sourceQuiz.certificateSignatureKey) {
+    try {
+      const sigBytes = await downloadObjectFromS3(sourceQuiz.certificateSignatureKey)
+      copiedSignatureKey = getCertificateSignatureKey(newQuizId)
+      const sigType = detectImageType(sigBytes)
+      await uploadImageToS3(copiedSignatureKey, sigBytes, sigType === "png" ? "image/png" : "image/jpeg")
+    } catch (error) {
+      console.warn("Failed to copy certificate signature:", error)
+      copiedSignatureKey = null
+    }
+  }
+
   await db.insert(quiz).values({
     id: newQuizId,
     title: newTitle,
@@ -107,7 +157,14 @@ export async function copyQuiz(quizId: string, creatorId: string) {
     isPaidQuiz: sourceQuiz.isPaidQuiz ?? false,
     paidQuizFee: sourceQuiz.isPaidQuiz ? sourceQuiz.paidQuizFee ?? null : null,
     passingPercentage: sourceQuiz.passingPercentage ?? null,
+    retakeLimit: sourceQuiz.retakeLimit ?? 0,
     certificateEnabled: sourceQuiz.certificateEnabled ?? false,
+    certificateDescription: sourceQuiz.certificateDescription ?? null,
+    certificateLogoKey: copiedLogoKey,
+    certificateSignatureKey: copiedSignatureKey,
+    certificateInstructorLabel: sourceQuiz.certificateInstructorLabel ?? null,
+    certificateInstructorValue: sourceQuiz.certificateInstructorValue ?? null,
+    certificateShowScore: sourceQuiz.certificateShowScore ?? true,
   })
 
   for (const q of sourceQuestions) {
