@@ -4,11 +4,6 @@ import { db } from "@/lib/db";
 import { quiz, attempt } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 
-
-
-// 
-
-
 export async function getUserQuiz(creatorId: string) {
   const result = await db
     .select({

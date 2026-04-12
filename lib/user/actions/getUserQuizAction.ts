@@ -1,7 +1,6 @@
 
 "use server";
 
-import { quiz } from "@/lib/schema";
 import { getUserQuiz } from "../helpers/getUserQuiz";
 
 export async function getUserQuizAction(creatorId: string) {
