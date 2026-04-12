@@ -35,7 +35,7 @@ export default function TermsPrivacyPage() {
 
           <div>
             <h2 className="text-xl font-semibold">2. Use of Service</h2>
-            <p className="text-muted-foreground">Proctorly provides an online quiz platform for educational purposes.</p>
+            <p className="text-muted-foreground">Proctorly provides an online assessment platform for educational purposes.</p>
             <p className="text-muted-foreground">You may use it only for lawful purposes.</p>
             <p className="text-muted-foreground">
               You are responsible for maintaining the confidentiality of your account and login details.
@@ -44,7 +44,7 @@ export default function TermsPrivacyPage() {
 
           <div>
             <h2 className="text-xl font-semibold">3. Content and Conduct</h2>
-            <p className="text-muted-foreground">You are responsible for the quizzes and content you create.</p>
+            <p className="text-muted-foreground">You are responsible for the assessments and content you create.</p>
             <p className="text-muted-foreground">
               Do not upload, share, or transmit anything illegal, offensive, or harmful.
             </p>
@@ -74,7 +74,7 @@ export default function TermsPrivacyPage() {
             </p>
             <p className="text-muted-foreground">Name</p>
             <p className="text-muted-foreground">Email address</p>
-            <p className="text-muted-foreground">Quiz answers and results</p>
+            <p className="text-muted-foreground">Assessment answers and results</p>
             <p className="text-muted-foreground">
               We use this data to deliver and improve our platform, send results, and communicate updates.
             </p>

@@ -96,12 +96,12 @@ function Pricing() {
               Best for trying ProctorlyX.
             </p>
             <div className="mt-6 space-y-2 text-sm text-muted-foreground">
-              <div>• Create up to 5 quizzes to try the platform</div>
-              <div>• Secure quiz environment (copy-paste restriction & tab monitoring)</div>
-              <div>• Students join using a quiz access code</div>
-              <div>• Built-in quiz timer for controlled assessments</div>
+              <div>• Create up to 5 assessments to try the platform</div>
+              <div>• Secure assessment environment (copy-paste restriction & tab monitoring)</div>
+              <div>• Students join using an assessment access code</div>
+              <div>• Built-in assessment timer for controlled assessments</div>
               <div>• Works on phones, tablets, and laptops</div>
-              <div>• Quiz attempt tracking after assessments</div>
+              <div>• Assessment attempt tracking after assessments</div>
             </div>
             <div className="mt-6">
               <button
@@ -128,10 +128,10 @@ function Pricing() {
               <span className="text-sm text-muted-foreground">/ month</span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              For teachers running quizzes regularly.
+              For teachers running assessments regularly.
             </p>
             <div className="mt-6 space-y-2 text-sm text-muted-foreground">
-              <div>• Unlimited quizzes for all your classes</div>
+              <div>• Unlimited assessments for all your classes</div>
               <div>• Priority teacher support</div>
               <div>• Access to continuous improvements and new features</div>
             </div>
@@ -161,12 +161,12 @@ function Pricing() {
               <span className="text-sm text-muted-foreground">/ 3 months</span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Best for teachers running quizzes throughout the semester.
+              Best for teachers running assessments throughout the semester.
             </p>
             <div className="mt-6 space-y-2 text-sm text-muted-foreground">
               <div>• Everything in Pro</div>
               <div>• Save ₱118 compared to monthly pricing</div>
-              <div>• 3 months uninterrupted access for multiple quiz periods</div>
+              <div>• 3 months uninterrupted access for multiple assessment periods</div>
             </div>
             <div className="mt-6">
               <button
@@ -197,7 +197,7 @@ function Pricing() {
               <div>• School admin dashboard (Coming Soon)</div>
               <div>• System-wide analytics (Coming Soon)</div>
               <div>• Centralized teacher management (Coming Soon)</div>
-              <div>• Advanced quiz monitoring (Coming Soon)</div>
+              <div>• Advanced assessment monitoring (Coming Soon)</div>
             </div>
             <div className="mt-6">
               <button

@@ -3,7 +3,7 @@ import Link from "next/link"
 
 export default async function OverviewTab({ quizId }: { quizId: string }) {
   const result = await getQuizForEditAction(quizId)
-  if (!result.success || !result.quiz) return <p>Quiz not found.</p>
+  if (!result.success || !result.quiz) return <p>Assessment not found.</p>
 
   const quiz = result.quiz
 
@@ -13,7 +13,7 @@ export default async function OverviewTab({ quizId }: { quizId: string }) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Quiz Overview
+              Assessment Overview
             </div>
             <h2 className="mt-2 text-3xl font-semibold text-foreground">
               {quiz.title}

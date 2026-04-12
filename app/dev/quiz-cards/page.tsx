@@ -24,9 +24,9 @@ export default function DevQuizCardsPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="card p-5 space-y-2">
-        <h1 className="text-2xl font-semibold">Quiz Cards (Dev)</h1>
+        <h1 className="text-2xl font-semibold">Assessment Cards (Dev)</h1>
         <p className="text-muted-foreground">
-          This page previews quiz-taking cards without touching the real quiz flow.
+          This page previews assessment-taking cards without touching the real assessment flow.
         </p>
       </div>
 
@@ -86,7 +86,6 @@ export default function DevQuizCardsPage() {
     </div>
   )
 }
-
 
 
 

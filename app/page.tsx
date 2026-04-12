@@ -38,17 +38,17 @@ export default function Home() {
                 <span className="ml-0.5 font-medium text-primary">X</span> keeps assessments focused, fair, and trusted.
               </h1>
               <p className="text-lg text-muted-foreground">
-                Create secure quizzes in minutes with real-time monitoring, tab-switch detection, and clear attempt tracking.
+                Create secure assessments in minutes with real-time monitoring, tab-switch detection, and clear attempt tracking.
               </p>
               <p className="text-sm text-muted-foreground">
-                300+ students · 4 courses · 10,000+ quiz attempts
+                300+ students · 4 courses · 10,000+ assessment attempts
               </p>
               <div className="flex flex-wrap gap-3">
                 <a
                   href="/login"
                   className="bg-primary text-primary-foreground px-5 py-2.5 rounded-(--radius-button) font-semibold hover:bg-primary/90"
                 >
-                  Create Your First Quiz
+                  Create Your First Assessment
                 </a>
                 <a
                   href="/pricing"
@@ -70,7 +70,7 @@ export default function Home() {
                 <span>Real-time proctoring</span>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-3">
-                <span className="text-foreground">Timed quizzes</span>
+                <span className="text-foreground">Timed assessments</span>
                 <span>Per-question control</span>
               </div>
               <div className="flex items-start justify-between gap-4">
@@ -85,7 +85,7 @@ export default function Home() {
       <section className="border-t border-border/60 bg-secondary/10">
         <div className="mx-auto w-full max-w-6xl px-4 py-12">
           <p className="text-center text-sm text-muted-foreground">
-            Used by classrooms running secure online quizzes
+            Used by classrooms running secure online assessments
           </p>
           <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
             <div className="border border-border/60 rounded-(--radius-button) px-4 py-5 bg-background/60">
@@ -98,7 +98,7 @@ export default function Home() {
             </div>
             <div className="border border-border/60 rounded-(--radius-button) px-4 py-5 bg-background/60">
               <p className="text-2xl font-semibold text-foreground">10,000+</p>
-              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Quiz Attempts</p>
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Assessment Attempts</p>
             </div>
           </div>
         </div>
@@ -112,7 +112,7 @@ export default function Home() {
             <span className="ml-0.5 font-medium text-primary">X</span> works
           </h2>
           <p className="mt-3 text-sm text-muted-foreground">
-            Watch a 5-minute demo of how teachers create and monitor secure quizzes.
+            Watch a 5-minute demo of how teachers create and monitor secure assessments.
           </p>
 
           <div className="mt-8 mx-auto max-w-4xl">
@@ -154,7 +154,7 @@ export default function Home() {
             <div className="space-y-4">
               <h2 className="text-3xl font-semibold text-foreground">Built for integrity and speed.</h2>
               <p className="text-sm text-muted-foreground">
-                Create secure quizzes fast, keep proctoring non-invasive, and review attempts with clear audit trails.
+                Create secure assessments fast, keep proctoring non-invasive, and review attempts with clear audit trails.
               </p>
               <div className="grid gap-3 text-sm text-muted-foreground">
                 <div className="flex items-start gap-3">
@@ -179,7 +179,7 @@ export default function Home() {
                 <span className="text-sm text-muted-foreground">per month</span>
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
-                Unlimited quizzes for regular classroom use.
+                Unlimited assessments for regular classroom use.
               </p>
             </div>
           </div>
@@ -200,12 +200,12 @@ export default function Home() {
                 Everything you need to deliver secure assessments.
               </h2>
               <p className="text-sm text-muted-foreground">
-                Build quizzes, monitor attempts, and review outcomes from a single, focused workspace.
+                Build assessments, monitor attempts, and review outcomes from a single, focused workspace.
               </p>
             </div>
             <div className="space-y-3 text-sm text-muted-foreground">
               <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-3">
-                <span className="text-foreground">Quiz Builder</span>
+                <span className="text-foreground">Assessment Builder</span>
                 <span>Templates, timers, randomization</span>
               </div>
               <div className="flex items-start justify-between gap-4 border-b border-border/60 pb-3">
@@ -241,7 +241,7 @@ export default function Home() {
               <span className="ml-0.5 font-medium text-primary">X</span>.
             </h2>
               <p className="text-sm text-muted-foreground">
-                We build trust in assessments. Our product keeps exams fair, transparent, and efficient for academic
+                We build trust in assessments. Our product keeps assessments fair, transparent, and efficient for academic
                 teams. Proctoring should support students and instructors without intruding on the learning experience.
               </p>
             </div>

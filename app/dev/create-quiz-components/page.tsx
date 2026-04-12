@@ -137,9 +137,9 @@ export default function DevCreateQuizComponentsPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="card p-5 space-y-2">
-        <h1 className="text-2xl font-semibold">Create Quiz Components (Dev)</h1>
+        <h1 className="text-2xl font-semibold">Create Assessment Components (Dev)</h1>
         <p className="text-muted-foreground">
-          This page is for previewing authoring components without touching the real create-quiz page.
+          This page is for previewing authoring components without touching the real assessment creation page.
         </p>
       </div>
 
@@ -249,5 +249,4 @@ export default function DevCreateQuizComponentsPage() {
     </div>
   )
 }
-
 

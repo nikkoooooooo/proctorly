@@ -47,7 +47,7 @@ export default async function ResultPage(props: ResultPageProps) {
             />
           ) : (
             <p className="text-sm text-muted-foreground">
-              Certificates are disabled for this quiz.
+              Certificates are disabled for this assessment.
             </p>
           )}
           <Link

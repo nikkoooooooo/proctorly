@@ -36,7 +36,7 @@ export default function TeacherPage() {
   // 1️⃣ Store attempts in state
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
-  const [quizTitle, setQuizTitle] = useState("Quiz")
+  const [quizTitle, setQuizTitle] = useState("Assessment")
   const [passingPercentage, setPassingPercentage] = useState<number | null>(null)
   const params = useParams<{ quizId: string }>()
   const quizId = params?.quizId ?? ""
@@ -176,7 +176,7 @@ export default function TeacherPage() {
       {loading ? (
         <p className="text-muted-foreground">Loading...</p>
       ) : attempts.length === 0 ? (
-        <p className="text-muted-foreground">No students have attempted this quiz yet.</p>
+        <p className="text-muted-foreground">No students have attempted this assessment yet.</p>
       ) : (
         <>
           {/* Action buttons */}
