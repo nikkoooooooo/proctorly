@@ -6,6 +6,7 @@ import Link from "next/link"
 import toast from "react-hot-toast"
 import { deleteQuizAction } from "@/lib/quiz/actions/deleteQuizAction"
 import { copyQuizAction } from "@/lib/quiz/actions/copyQuizAction"
+import { quiz } from "@/lib/schema"
 
 
 interface Quiz {
@@ -41,6 +42,9 @@ function Page() {
     const [userCreatedQuiz, setUserCreatedQuiz] = useState<Quiz[]>([])
     const [copyTarget, setCopyTarget] = useState<Quiz | null>(null)
     const [isCopying, setIsCopying] = useState(false)
+
+
+    
     
 
 
@@ -55,6 +59,7 @@ function Page() {
                   const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0
                   return bTime - aTime
                 })
+                console.log()
                 setUserCreatedQuiz(sortedQuizzes)
             } catch (error) {
                 console.error(error)

@@ -17,6 +17,7 @@ export async function getUserQuiz(creatorId: string) {
       description: quiz.description,
       joinCode: quiz.joinCode,
       createdAt: quiz.createdAt,
+      expiresAt: quiz.expiresAt,
       attemptCount: sql<number>`count(${attempt.id})`.as("attemptCount"),
     })
     .from(quiz)

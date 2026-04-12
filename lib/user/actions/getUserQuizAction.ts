@@ -1,6 +1,7 @@
 
 "use server";
 
+import { quiz } from "@/lib/schema";
 import { getUserQuiz } from "../helpers/getUserQuiz";
 
 export async function getUserQuizAction(creatorId: string) {
@@ -10,7 +11,6 @@ export async function getUserQuizAction(creatorId: string) {
     if (!result || result.length === 0) {
       return { success: true, quizzes: [], message: "No quizzes found for this user" };
     }
-
     return { success: true, quizzes: result };
   } catch (error) {
     console.error("Failed to fetch user quizzes:", error);
