@@ -184,7 +184,7 @@ export default function CreateQuizPage() {
   const submitQuiz = async () => {
     if (isSubmittingQuiz) return
     if (!userId) return alert("User not logged in")
-    if (!title) return alert("Quiz title cannot be empty")
+    if (!title) return alert("Assessment title cannot be empty")
     if (questions.length === 0) return alert("Add at least one question")
     if (
       questions.some((q) => {
@@ -215,7 +215,7 @@ export default function CreateQuizPage() {
     }
     if (isPaidQuiz) {
       if (!paidQuizFee || Number(paidQuizFee) < 100) {
-        toast.error("Minimum quiz fee is 100")
+        toast.error("Minimum assessment fee is 100")
         return
       }
     }
@@ -277,12 +277,12 @@ export default function CreateQuizPage() {
       )
 
       if (!result.success || !result.quiz) {
-        toast.error(result.error || "Failed to create quiz")
+        toast.error(result.error || "Failed to create assessment")
         return
       }
 
       // Show a friendly success toast instead of browser alert
-      toast.success("Quiz created successfully!")
+      toast.success("Assessment created successfully!")
       // Save join code for the on-page copy UI
       setCreatedQuizCode(result.quiz.joinCode)
       setCreatedQuizId(result.quiz.quizId)
@@ -328,7 +328,7 @@ export default function CreateQuizPage() {
     } catch (err) {
       console.error(err)
       // Use toast for errors to keep UX consistent
-      toast.error("Failed to create quiz")
+      toast.error("Failed to create assessment")
     } finally {
       setIsSubmittingQuiz(false)
     }
@@ -342,14 +342,14 @@ export default function CreateQuizPage() {
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); submitQuiz() }}>
         {/* Quiz Info */}
         <div className="card p-5 space-y-4">
-          <h2 className="text-2xl font-semibold">Quiz Information</h2>
+          <h2 className="text-2xl font-semibold">Assessment Information</h2>
           <div className="flex flex-col gap-2">
             <label className="font-semibold">Title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="bg-background p-3 rrounded-(--radius-button)"
-              placeholder="Quiz title"
+              placeholder="Assessment title"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -359,7 +359,7 @@ export default function CreateQuizPage() {
               onChange={(e) => setDescription(e.target.value)}
               className="bg-background p-3 rounded-(--radius-button)"
               rows={2}
-              placeholder="Quiz description"
+              placeholder="Assessment description"
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -407,7 +407,7 @@ export default function CreateQuizPage() {
             {/* Modal card */}
             <div className="card w-full max-w-md p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Quiz Created</h2>
+                <h2 className="text-2xl font-semibold">Assessment Created</h2>
                 {/* Close modal */}
                 <button
                   type="button"
@@ -444,8 +444,8 @@ export default function CreateQuizPage() {
                   }}
                   disabled={isCopyingCode}
                   className="bg-secondary text-secondary-foreground px-3 py-2 rounded-(--radius-button)hover:bg-secondary/80 disabled:opacity-60 disabled:cursor-not-allowed"
-                  aria-label="Copy quiz code"
-                  title="Copy quiz code"
+                  aria-label="Copy assessment code"
+                  title="Copy assessment code"
                 >
                   {isCopyingCode ? "Copying..." : <Copy size={16} />}
                 </button>
@@ -458,7 +458,7 @@ export default function CreateQuizPage() {
         <div className="card p-5 space-y-3">
           <h2 className="text-2xl font-semibold">Certification</h2>
           <p className="text-sm text-muted-foreground">
-            Enable certificates for students who complete this quiz.
+            Enable certificates for students who complete this assessment.
           </p>
           <label className="flex items-center gap-2">
             <input
@@ -544,7 +544,7 @@ export default function CreateQuizPage() {
                   value={certificateInstructorValue}
                   onChange={(e) => setCertificateInstructorValue(e.target.value)}
                   className="bg-background p-3 rounded-[var(--radius-button)]"
-                  placeholder="Default: quiz creator name"
+                  placeholder="Default: creator name"
                 />
               </div>
               <div className="flex items-center gap-3">
@@ -554,7 +554,7 @@ export default function CreateQuizPage() {
                   onClick={async () => {
                     if (!createdQuizId) {
                       setPendingCertificateSave(true)
-                      toast.success("Certificate settings queued. Create the quiz to apply them.")
+                      toast.success("Certificate settings queued. Create the assessment to apply them.")
                       return
                     }
                     const customizationData = new FormData()
@@ -589,7 +589,7 @@ export default function CreateQuizPage() {
                 </button>
                 {!createdQuizId && pendingCertificateSave && (
                   <span className="text-xs text-muted-foreground">
-                    Will save after quiz creation.
+                    Will save after assessment creation.
                   </span>
                 )}
               </div>
@@ -700,20 +700,20 @@ export default function CreateQuizPage() {
 
         {/* Paid Quiz */}
         <div className="card p-5 space-y-3">
-          <h2 className="text-2xl font-semibold">Paid Quiz</h2>
+          <h2 className="text-2xl font-semibold">Paid Assessment</h2>
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={isPaidQuiz}
               onChange={(e) => setIsPaidQuiz(e.target.checked)}
             />
-            Paid Quiz (Require payment before taking quiz)
+            Paid Assessment (Require payment before taking assessment)
           </label>
 
           {isPaidQuiz && (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span>Quiz fee:</span>
+                <span>Assessment fee:</span>
                 <div className="flex items-center">
                   <span className="bg-background border border-border rounded-l-md px-2 py-2">₱</span>
                   <input
@@ -735,7 +735,7 @@ export default function CreateQuizPage() {
           disabled={isSubmittingQuiz}
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/80 p-3 font-semibold rounded-(--radius-button) disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isSubmittingQuiz ? "Creating..." : "Create Quiz"}
+          {isSubmittingQuiz ? "Creating..." : "Create Assessment"}
         </button>
       </form>
     </div>

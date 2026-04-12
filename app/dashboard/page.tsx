@@ -229,8 +229,8 @@ export default function Dashboard() {
 
         {/* Stats */}
         {/* <div className="w-full flex justify-between flex-col lg:flex-row gap flex-wrap mt-6">
-          <QuizStatCard title="My Quizzes" value={totalQuizCreated} />
-          <QuizStatCard title="Joined Quizzes" value={totalQuizJoined} />
+          <QuizStatCard title="My Assessments" value={totalQuizCreated} />
+          <QuizStatCard title="Joined Assessments" value={totalQuizJoined} />
           <QuizStatCard title="Total" value={totalQuizzes} />
         </div> */}
 

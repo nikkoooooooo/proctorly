@@ -4,11 +4,6 @@ import { db } from "@/lib/db";
 import { quiz, attempt } from "@/lib/schema";
 import { eq, sql } from "drizzle-orm";
 
-
-
-// 
-
-
 export async function getUserQuiz(creatorId: string) {
   const result = await db
     .select({
@@ -17,6 +12,7 @@ export async function getUserQuiz(creatorId: string) {
       description: quiz.description,
       joinCode: quiz.joinCode,
       createdAt: quiz.createdAt,
+      expiresAt: quiz.expiresAt,
       attemptCount: sql<number>`count(${attempt.id})`.as("attemptCount"),
     })
     .from(quiz)

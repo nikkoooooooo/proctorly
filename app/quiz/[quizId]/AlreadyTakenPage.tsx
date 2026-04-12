@@ -17,7 +17,7 @@ export default async function AlreadyTakenPage({ quizId, attemptId }: AlreadyTak
     <div className="min-h-screen bg-background flex justify-center items-center p-4">
       <div className="card w-96 p-6 text-center shadow-md">
         <h2 className="text-xl font-bold text-red-600 mb-4">
-          You have already taken the quiz:
+          You have already taken this assessment:
         </h2>
         <h3 className="text-lg font-semibold mb-2">{quiz.quiz?.title}</h3>
         {quiz.quiz?.description && (
@@ -41,7 +41,7 @@ export default async function AlreadyTakenPage({ quizId, attemptId }: AlreadyTak
               />
             ) : (
               <p className="text-sm text-muted-foreground mb-4">
-                Certificates are disabled for this quiz.
+                Certificates are disabled for this assessment.
               </p>
             )}
           </>

@@ -128,7 +128,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
         setLoadError(null)
         const res = await getQuizForEditAction(quizId)
         if (!res.success || !res.quiz) {
-          const message = res.error ?? "Failed to load quiz"
+          const message = res.error ?? "Failed to load assessment"
           toast.error(message)
           setLoadError(message)
           return
@@ -219,7 +219,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
         setQuestions(mapped.length > 0 ? mapped : [createEmptyQuestion()])
       } catch (err) {
         console.error(err)
-        toast.error("Failed to load quiz")
+        toast.error("Failed to load assessment")
       } finally {
         setIsLoading(false)
       }
@@ -316,7 +316,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
   const submitQuiz = async () => {
     if (isSubmitting) return
     if (!isReadOnly) {
-      if (!title) return alert("Quiz title cannot be empty")
+      if (!title) return alert("Assessment title cannot be empty")
       if (questions.length === 0) return alert("Add at least one question")
       if (
         questions.some((q) => {
@@ -347,7 +347,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
       }
       if (isPaidQuiz) {
         if (!paidQuizFee || Number(paidQuizFee) < 100) {
-          toast.error("Minimum quiz fee is 100")
+          toast.error("Minimum assessment fee is 100")
           return
         }
       }
@@ -371,13 +371,13 @@ export default function EditQuizPage({ params }: EditPageProps) {
       }
       const res = await updateQuizAction(quizId, payload)
       if (!res.success) {
-        toast.error(res.error ?? "Failed to update quiz")
+        toast.error(res.error ?? "Failed to update assessment")
         return
       }
-      toast.success("Quiz updated successfully!")
+      toast.success("Assessment updated successfully!")
     } catch (err) {
       console.error(err)
-      toast.error("Failed to update quiz")
+      toast.error("Failed to update assessment")
     } finally {
       setIsSubmitting(false)
     }
@@ -404,14 +404,14 @@ export default function EditQuizPage({ params }: EditPageProps) {
 
       {isReadOnly && (
         <div className="card p-4 text-sm text-muted-foreground">
-          This quiz already has attempts. You can still edit expiry, passing percentage,
+          This assessment already has attempts. You can still edit expiry, passing percentage,
           retake limit, and certificate settings.
         </div>
       )}
 
       <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); submitQuiz() }}>
         <div className="card p-5 space-y-4">
-          <h2 className="text-2xl font-semibold">Quiz Information</h2>
+          <h2 className="text-2xl font-semibold">Assessment Information</h2>
           <fieldset disabled={isReadOnly || isSubmitting} className="space-y-4">
             <div className="flex flex-col gap-2">
               <label className="font-semibold">Title</label>
@@ -419,7 +419,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="bg-background p-3 rounded-md"
-                placeholder="Quiz title"
+                placeholder="Assessment title"
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -429,7 +429,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 className="bg-background p-3 rounded-md"
                 rows={2}
-                placeholder="Quiz description"
+                placeholder="Assessment description"
               />
             </div>
           </fieldset>
@@ -478,7 +478,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
           <div className="card p-5 space-y-3">
             <h2 className="text-2xl font-semibold">Certification</h2>
             <p className="text-sm text-muted-foreground">
-              Enable certificates for students who complete this quiz.
+              Enable certificates for students who complete this assessment.
             </p>
             <label className="flex items-center gap-2">
               <input
@@ -564,7 +564,7 @@ export default function EditQuizPage({ params }: EditPageProps) {
                     value={certificateInstructorValue}
                     onChange={(e) => setCertificateInstructorValue(e.target.value)}
                     className="bg-background p-3 rounded-[var(--radius-button)]"
-                    placeholder="Default: quiz creator name"
+                    placeholder="Default: creator name"
                   />
                 </div>
                 <div className="flex items-center gap-3">
@@ -712,20 +712,20 @@ export default function EditQuizPage({ params }: EditPageProps) {
 
         <fieldset disabled={isReadOnly || isSubmitting}>
           <div className="card p-5 space-y-3">
-            <h2 className="text-2xl font-semibold">Paid Quiz</h2>
+            <h2 className="text-2xl font-semibold">Paid Assessment</h2>
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={isPaidQuiz}
                 onChange={(e) => setIsPaidQuiz(e.target.checked)}
               />
-              Paid Quiz (Require payment before taking quiz)
+              Paid Assessment (Require payment before taking assessment)
             </label>
 
             {isPaidQuiz && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <span>Quiz fee:</span>
+                  <span>Assessment fee:</span>
                   <div className="flex items-center">
                     <span className="bg-background border border-border rounded-l-md px-2 py-2">₱</span>
                     <input

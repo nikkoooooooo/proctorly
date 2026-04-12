@@ -41,7 +41,7 @@ export default function TermsPage() {
           <div>
             <h2 className="text-xl font-semibold">2. Description of Service</h2>
             <p className="text-muted-foreground">
-              ProctorlyX provides an online quiz and monitoring platform for educational purposes.
+              ProctorlyX provides an online assessment and monitoring platform for educational purposes.
             </p>
             <p className="text-muted-foreground">
               We may update, modify, or improve features at any time. We do not guarantee uninterrupted or error-free
@@ -59,7 +59,7 @@ export default function TermsPage() {
 
           <div>
             <h2 className="text-xl font-semibold">4. User Content and Conduct</h2>
-            <p className="text-muted-foreground">You retain ownership of the quizzes and content you create.</p>
+            <p className="text-muted-foreground">You retain ownership of the assessments and content you create.</p>
             <p className="text-muted-foreground">
               You are solely responsible for ensuring your content complies with applicable laws.
             </p>

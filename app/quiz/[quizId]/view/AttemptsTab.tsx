@@ -30,7 +30,7 @@ export default function AttemptsTab() {
 
   const [attempts, setAttempts] = useState<Attempt[]>([])
   const [loading, setLoading] = useState(true)
-  const [quizTitle, setQuizTitle] = useState("Quiz")
+  const [quizTitle, setQuizTitle] = useState("Assessment")
   const [passingPercentage, setPassingPercentage] = useState<number | null>(null)
 
   const formatPHDateTime = (value?: string | Date | null) => {
@@ -169,7 +169,7 @@ export default function AttemptsTab() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <h2 className="text-2xl font-semibold text-foreground">Student Attempts</h2>
-          <p className="text-sm text-muted-foreground">Quiz: {quizTitle}</p>
+          <p className="text-sm text-muted-foreground">Assessment: {quizTitle}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Link
@@ -191,7 +191,7 @@ export default function AttemptsTab() {
       {loading ? (
         <p className="text-muted-foreground">Loading...</p>
       ) : attempts.length === 0 ? (
-        <p className="text-muted-foreground">No students have attempted this quiz yet.</p>
+        <p className="text-muted-foreground">No students have attempted this assessment yet.</p>
       ) : (
         <div className="card p-4">
           <div className="overflow-x-auto">

@@ -24,7 +24,7 @@ export default async function ViewQuizPage({
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <Link href="/created-quiz" className="text-xl font-semibold">← Back</Link>
-        <h1 className="text-2xl font-bold">View Quiz</h1>
+        <h1 className="text-2xl font-bold">View Assessment</h1>
       </div>
 
       <div className="flex gap-4">

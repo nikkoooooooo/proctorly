@@ -41,8 +41,6 @@ function Page() {
     const [userCreatedQuiz, setUserCreatedQuiz] = useState<Quiz[]>([])
     const [copyTarget, setCopyTarget] = useState<Quiz | null>(null)
     const [isCopying, setIsCopying] = useState(false)
-    
-
 
     useEffect(() => {
         if (!user?.id) return

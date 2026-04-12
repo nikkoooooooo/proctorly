@@ -28,7 +28,7 @@ export default function PrivacyPage() {
             </p>
             <p className="text-muted-foreground">Name</p>
             <p className="text-muted-foreground">Email address</p>
-            <p className="text-muted-foreground">Quiz answers and results</p>
+            <p className="text-muted-foreground">Assessment answers and results</p>
           </div>
 
           <div>

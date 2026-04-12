@@ -180,9 +180,9 @@ export default function LiveMonitorPage() {
       case "tab_blur":
         return `${name} switched tab`;
       case "tab_focus":
-        return `${name} returned to quiz`;
+        return `${name} returned to the assessment`;
       case "submit":
-        return `${name} submitted the quiz`;
+        return `${name} submitted the assessment`;
       case "disconnect":
         return `${name} disconnected`;
       default:
@@ -219,21 +219,21 @@ export default function LiveMonitorPage() {
         </div>
 
         <div className="mb-6">
-          <h1 className="text-3xl font-semibold text-foreground">Live Quiz Monitor</h1>
-          <p className="text-muted-foreground">Monitor student activity during the quiz</p>
+          <h1 className="text-3xl font-semibold text-foreground">Live Assessment Monitor</h1>
+          <p className="text-muted-foreground">Monitor student activity during the assessment</p>
         </div>
 
         <div className="grid gap-4">
           <div className="card p-4">
-            <p className="text-sm text-muted-foreground">{summary?.meta?.title ?? "Quiz"}</p>
+            <p className="text-sm text-muted-foreground">{summary?.meta?.title ?? "Assessment"}</p>
             <div className="mt-2 text-lg font-semibold text-foreground">
-              Quiz Code: <span className="text-primary">{summary?.meta?.joinCode ?? "—"}</span>
+              Assessment Code: <span className="text-primary">{summary?.meta?.joinCode ?? "—"}</span>
             </div>
             <div className="mt-3 text-sm text-muted-foreground">
               Students Joined: {summary?.meta?.joined ?? 0}
             </div>
             <div className="text-sm text-muted-foreground">
-              Quiz Started: {summary?.meta?.startedAtDisplay ?? formatPHDateTime(summary?.meta?.startedAt ?? null)}
+              Assessment Started: {summary?.meta?.startedAtDisplay ?? formatPHDateTime(summary?.meta?.startedAt ?? null)}
             </div>
           </div>
 
